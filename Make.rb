@@ -3,10 +3,7 @@
 require 'fileutils'
 
 BIN_DIR = 'bin'
-SRC_DIR = Dir.pwd
-
-C_FILES = %w{ mcc.c tokeniser.c }
-H_FILES = %w{ tokens.h mcc.h }
+TEMP_STDERR_FILE = 'stderr'
 
 CFLAGS = "-Wall -Wextra -Werror -g -ggdb3"
 
@@ -17,22 +14,39 @@ def c_to_o(file)
 end
 
 def run_command(cmd, failure_message)
-   result = `#{cmd}`
+   result = `#{cmd}  2>#{TEMP_STDERR_FILE}`
    if $?.exitstatus != 0
       STDERR.puts failure_message
-      STDERR.puts( IO.read('stderr'))
+      STDERR.puts( IO.read(TEMP_STDERR_FILE))
+      FileUtils.rm(TEMP_STDERR_FILE)
       exit($?.exitstatus)
    end
+   FileUtils.rm(TEMP_STDERR_FILE)
 end
 
-FileUtils.mkdir(BIN_DIR) unless FileTest.exist?(BIN_DIR)
-o_files = []
-C_FILES.each do |file|
-   o_file = c_to_o(file)
-   o_files << o_file
-   run_command("#{CC} #{CFLAGS} -c #{file} -o #{BIN_DIR}/#{o_file} 2>stderr", 
-               "Compilation of #{file} failed...")
+def clean()
+   FileUtils.rm_rf(BIN_DIR)
 end
-Dir.chdir(BIN_DIR) do
-   run_command("#{CC} #{o_files.join(' ')} -o mcc", "Linking mcc Failed...")
+
+if $0 == __FILE__ then
+
+   ARGV.each do |arg|
+      if arg =~ %r{--?c(?:l(?:e(?:a(?:n)?)?)?)?}ix
+         clean()
+         exit(0)
+      end
+   end
+
+   FileUtils.mkdir(BIN_DIR) unless FileTest.exist?(BIN_DIR)
+   o_files = []
+   Dir.glob("*.c").each do |file|
+      o_file = c_to_o(file)
+      o_files << o_file
+      run_command("#{CC} #{CFLAGS} -c #{file} -o #{BIN_DIR}/#{o_file}", 
+                  "Compilation of #{file} failed...")
+   end
+   Dir.chdir(BIN_DIR) do
+      run_command("#{CC} #{o_files.join(' ')} -o mcc", "Linking mcc Failed...")
+   end
+
 end
