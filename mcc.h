@@ -1,3 +1,5 @@
 #include <stdarg.h>
 
-void mcc_Error(const char *format, ...);
+#define mcc_Error(...) fprintf (stderr, __VA_ARGS__)
+
+void mcc_ParseFile(const char *filename);
