@@ -34,8 +34,9 @@ void mcc_ParseFile(const char *filename)
 
 			/* if we've found some white space, we've probably got a token in the buffer,
 			   figure out what it is and throw it in the list */
-			if (buffer[index] == '\t' || buffer[index] == ' ' ||
-				buffer[index] == '\v' || buffer[index] == '\n')
+			if (buffer[index] == '\t' || buffer[index] == '\v' ||
+				buffer[index] == '\r' || buffer[index] == '\n' ||
+				buffer[index] == '\v' || buffer[index] == ' ')
 			{
 				/* ignore contiguous whitespace */
 				if (current_token_index == 0)
