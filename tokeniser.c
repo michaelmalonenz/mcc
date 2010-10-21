@@ -3,10 +3,18 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include "tokens.h"
 #include "mcc.h"
 
 #define FILE_BUFFER_SIZE 32768
 #define MAX_SYMBOL_LENGTH 512
+
+static bool_t isWhiteSpace(char c)
+{
+	return (c == '\t' || c == '\v' ||
+			c == '\r' || c == '\n' ||
+			c == '\v' || c == ' ');
+}
 
 void mcc_ParseFile(const char *filename)
 {
@@ -34,9 +42,7 @@ void mcc_ParseFile(const char *filename)
 
 			/* if we've found some white space, we've probably got a token in the buffer,
 			   figure out what it is and throw it in the list */
-			if (buffer[index] == '\t' || buffer[index] == '\v' ||
-				buffer[index] == '\r' || buffer[index] == '\n' ||
-				buffer[index] == '\v' || buffer[index] == ' ')
+			if (isWhiteSpace(buffer[index]))
 			{
 				/* ignore contiguous whitespace */
 				if (current_token_index == 0)
