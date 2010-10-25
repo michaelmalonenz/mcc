@@ -28,7 +28,7 @@
 
 typedef _Bool bool_t;
 
-typedef struct {
+typedef struct token {
 	char *name;
 	int type;
 	bool_t isKeyword;
@@ -36,7 +36,8 @@ typedef struct {
 	bool_t isOperator;
 	unsigned short fileno;
 	int lineno;
-} mcc_Token;
+	struct token *next;
+} mcc_Token_t;
 
 
 const char *keywords[] = { "auto", "break", "case", "char", "const", "continue", "default", "do",
