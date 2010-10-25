@@ -1,5 +1,10 @@
 #include <stdlib.h>
-#include "token.h"
+#include <string.h>
+
+#include "tokens.h"
+#include "config.h"
+#include "mcc.h"
+
 
 static mcc_Token_t *firstToken = NULL;
 
@@ -8,11 +13,21 @@ static mcc_Token_t *currentToken = NULL;
 
 static mcc_Token_t *nextToken = NULL;
 
+#if MCC_DEBUG
+static int numberOfTokens = 0;
+#endif
+
 //Does this imply that I should really have an opaque type?
-mcc_Token_t *mcc_CreateToken()
+mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len, int type)
 {
-	mcc_Token_t *result = (mcc_Token_t *) malloc(sizeof(mcc_Token_t));
-	return result;
+	mcc_Token_t *token = (mcc_Token_t *) malloc(sizeof(mcc_Token_t));
+	token->name = (char *) malloc(sizeof(char) * (text_len + 1));
+	memcpy(token->name, text, text_len + 1);
+	token->name[text_len + 1] = '\0';
+	token->type = type;
+	token->isOperator = TRUE;
+
+	return token;
 }
 
 void mcc_DeleteToken(mcc_Token_t *token)
@@ -29,6 +44,9 @@ void mcc_AddToken(mcc_Token_t *token)
 	}
 	token->next = currentToken;
 	currentToken = token;
+#if MCC_DEBUG
+	numberOfTokens++;
+#endif
 }
 
 void mcc_FreeTokens()
@@ -41,7 +59,14 @@ void mcc_FreeTokens()
 	{
 		mcc_DeleteToken(currentToken);
 		currentToken = temp;
+#if MCC_DEBUG
+		numberOfTokens--;
 	}
+	MCC_ASSERT(numberOfTokens == 0);
+#else
+    }
+#endif
+
 }
 
 mcc_Token_t *mcc_GetNextToken()

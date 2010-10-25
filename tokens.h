@@ -25,8 +25,7 @@
      DEF(TOK_ASM2, "__asm")
      DEF(TOK_ASM3, "__asm__")
 */
-
-typedef _Bool bool_t;
+#include "mcc.h"
 
 typedef struct token {
 	char *name;

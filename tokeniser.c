@@ -2,14 +2,17 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "tokens.h"
 #include "mcc.h"
 
+#if MCC_USE_DYNAMIC_STRING_BUFFER_TOKENISER
+#include "stringBuffer.h"
+#endif
+
 #define FILE_BUFFER_SIZE 32768
 #define MAX_SYMBOL_LENGTH 512
-
-mcc_Token *tokens;
 
 static bool_t isWhiteSpace(char c)
 {
@@ -18,22 +21,17 @@ static bool_t isWhiteSpace(char c)
 			c == '\v' || c == ' ');
 }
 
-static void createToken(const char *text, size_t text_len)
-{
-	mcc_Token_t *token = (mcc_Token_t *) malloc(sizeof(mcc_Token_t));
-	token->name = (char *) malloc(sizeof(char) * (current_token_index + 1));
-	memcpy(next_token->name, current_token, current_token_index + 1);
-	next_token->name[current_token_index + 1] = '\0';
-	next_token->type = j;
-	next_token->isOperator = true;
-}
 
 void mcc_ParseFile(const char *filename)
 {
-	unsigned char buffer[FILE_BUFFER_SIZE];
+	signed char buffer[FILE_BUFFER_SIZE];
 	int file = open(filename, O_RDONLY);
-	unsigned char current_token[MAX_SYMBOL_LENGTH];
+#if MCC_USE_DYNAMIC_STRING_BUFFER_TOKENISER
+	mcc_StringBuffer_t *current_token = mcc_CreateStringBuffer();
+#else
+	signed char current_token[MAX_SYMBOL_LENGTH];
 	int current_token_index = 0;
+#endif
 	int index = 0;
 	int chars_read;
 	
@@ -69,13 +67,13 @@ void mcc_ParseFile(const char *filename)
 				int i,j;
 				for(i = 0; i < NUM_OPERATORS; i++)
 				{
-					if (strncmp(current_token, operators[i],
+					if (strncmp((const char *)current_token, operators[i],
 								current_token_index) == 0)
 					{
 						current_token[current_token_index] = buffer[index];
 						for(j = 0; j < NUM_OPERATORS; j++)
 						{
-							if (strncmp(current_token, operators[j], current_token_index + 1) == 0)
+							if (strncmp((const char *)current_token, operators[j], current_token_index + 1) == 0)
 							{
 							}
 						}								
