@@ -18,9 +18,6 @@
 #define MCC_ASSERT(x)
 #endif
 
-void mcc_PreprocessFile(const char *in_filename, const char *out_filename);
-void mcc_ParseFile(const char *filename);
-
 typedef _Bool bool_t;
 
 #ifndef TRUE
@@ -30,5 +27,12 @@ typedef _Bool bool_t;
 #ifndef FALSE
 #define FALSE ((bool_t) 0)
 #endif
+
+#ifndef UNUSED
+#define UNUSED(x) x __attribute__ ((unused))
+#endif
+
+void mcc_PreprocessFile(const int fd_in, const int fd_out);
+void mcc_TokeniseString(const char *string, const unsigned int length);
 
 #endif /* MCC_H */

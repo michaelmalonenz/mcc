@@ -38,11 +38,10 @@ typedef struct token {
 	struct token *next;
 } mcc_Token_t;
 
-
 const char *keywords[] = { "auto", "break", "case", "char", "const", "continue", "default", "do",
-							 "double", "else", "enum", "extern", "float", "for", "goto", "if",
-							 "int", "long", "register", "return", "short", "signed", "sizeof", "static",
-							 "struct", "switch", "typedef", "union", "unsigned", "void", "volatile", "while"};
+						   "double", "else", "enum", "extern", "float", "for", "goto", "if",
+						   "int", "long", "register", "return", "short", "signed", "sizeof", "static",
+						   "struct", "switch", "typedef", "union", "unsigned", "void", "volatile", "while"};
 
 enum key_index { KEY_AUTO, KEY_BREAK, KEY_CASE, KEY_CHAR, KEY_CONST, KEY_CONTINUE, KEY_DEFAULT, KEY_DO, KEY_DOUBLE,
 				 KEY_ELSE, KEY_ENUM, KEY_EXTERN, KEY_FLOAT, KEY_FOR, KEY_GOTO, KEY_IF, KEY_INT, KEY_LONG,
@@ -50,6 +49,7 @@ enum key_index { KEY_AUTO, KEY_BREAK, KEY_CASE, KEY_CHAR, KEY_CONST, KEY_CONTINU
 				 KEY_SWITCH, KEY_TYPEDEF, KEY_UNION, KEY_UNSIGNED, KEY_VOID, KEYVOLATILE, KEY_WHILE, NUM_KEYWORDS};
 
 const char *c99_keywords[] = { "_Bool", "_Complex", "_Imaginary", "inline", "restrict" };
+
 enum c99_key_index { C99_KEY_BOOL, C99_KEY_COMPLEX, C99_KEY_IMAGINARY, C99_KEY_INLINE, C99_KEY_RESTRICT, NUM_C99_KEYWORDS};
 
 char *operators[] = { "+", "-", "/", "*", "%", "--", "++",

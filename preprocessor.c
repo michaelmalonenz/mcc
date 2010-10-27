@@ -2,18 +2,25 @@
 #include <unistd.h>
 #include "mcc.h"
 
-void mcc_PreprocessFile(const char *in_filename, const char *out_filename)
+/* A good, meaty base-2 chunk of a file, so we don't start reading the thing
+ * from disk a character at a time
+ */
+#define FILE_BUFFER_SIZE 32768
+
+/* Should avoid allocating these on the stack - it could use up memory much too quickly
+ * (stacks are usually limited to around 8MB) Which, I suppose is big enough to hold a 
+ * decent amount, but don't I want to leave plenty of room for other stuff?
+ */
+typedef struct FileBuffer {
+	int fd;
+	char *filename;
+	unsigned int line_no;
+	unsigned int bufferIndex;
+	unsigned char buffer[FILE_BUFFER_SIZE];
+} mcc_FileBuffer_t;
+
+
+void mcc_PreprocessFile(const int UNUSED(fd_in), const int UNUSED(fd_out))
 {
-	int in_fd;
-	int out_fd;
-	in_fd  = open(in_filename, O_RDONLY);
-	if (in_fd == 0)
-	{
-		mcc_Error("Couldn't open %s", in_filename);
-	}
-	out_fd = open(out_filename, O_RDWR | O_CREAT);
-	if (out_fd == 0)
-	{
-		mcc_Error("CHECK THE ERRNO AND GIVE A DECENT ANSWER");
-	}
+	
 }
