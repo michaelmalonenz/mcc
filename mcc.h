@@ -32,7 +32,7 @@ typedef _Bool bool_t;
 #define UNUSED(x) x __attribute__ ((unused))
 #endif
 
-void mcc_PreprocessFile(const int fd_in, const int fd_out);
+void mcc_PreprocessFile(FILE *inFile, FILE *outFile);
 void mcc_TokeniseString(const char *string, const unsigned int length);
 
 #endif /* MCC_H */

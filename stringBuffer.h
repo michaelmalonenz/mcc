@@ -11,9 +11,12 @@ void mcc_DeleteStringBuffer(mcc_StringBuffer_t *buffer);
 
 void mcc_StringBufferAppendChar(mcc_StringBuffer_t *buffer, const unsigned char c);
 
-int mcc_StringBufferGetStringLength(mcc_StringBuffer_t *buffer);
+unsigned int mcc_GetStringBufferLength(mcc_StringBuffer_t *buffer);
+
+int mcc_StringBufferStrncmp(mcc_StringBuffer_t *buffer, const char *string, size_t length);
 
 #if MCC_DEBUG
+void mcc_PrintStringBuffer(mcc_StringBuffer_t *buffer);
 unsigned int mcc_StringBufferGetBufferSize(mcc_StringBuffer_t *buffer);
 #endif /* MCC_DEBUG */
 

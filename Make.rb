@@ -2,7 +2,7 @@
 
 require 'fileutils'
 
-BIN_DIR = 'bin'
+BIN_DIR = "#{Dir.pwd}/bin"
 TEST_BIN_DIR = "#{BIN_DIR}/test"
 
 SRC_DIR = Dir.pwd
