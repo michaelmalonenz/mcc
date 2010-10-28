@@ -1,5 +1,4 @@
-#include <fcntl.h>
-#include <unistd.h>
+#include <stdio.h>
 #include "mcc.h"
 
 /* A good, meaty base-2 chunk of a file, so we don't start reading the thing
@@ -19,8 +18,13 @@ typedef struct FileBuffer {
 	unsigned char buffer[FILE_BUFFER_SIZE];
 } mcc_FileBuffer_t;
 
+/* I need a better search structure than a list for the macros, but given that I don't
+ * have _any_ idea how many values I will end up having (and especially since re-sizing
+ * would be costly, am I going to have to settle for a b-tree?
+ */
 
-//Do I actually want the fd_out to be a FILE *out so that the std* vars just work */
+
+
 void mcc_PreprocessFile(FILE UNUSED(*inFile), FILE UNUSED(*outFile))
 {
 	//should probably make sure that the string to be pre-processed is NUL-terminated
