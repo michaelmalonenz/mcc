@@ -32,6 +32,10 @@ typedef _Bool bool_t;
 #define UNUSED(x) x __attribute__ ((unused))
 #endif
 
+/* If the two are equal, just return one or the other */
+#define max(a, b) ( ((a) > (b)) ? (a) : (b) )
+#define min(a, b) ( ((a) < (b)) ? (a) : (b) )
+
 void mcc_PreprocessFile(FILE *inFile, FILE *outFile);
 void mcc_TokeniseString(const char *string, const unsigned int length);
 

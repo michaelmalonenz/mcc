@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "mcc.h"
 
 /* A good, meaty base-2 chunk of a file, so we don't start reading the thing
@@ -15,7 +17,8 @@ typedef struct FileBuffer {
 	char *filename;
 	unsigned int line_no;
 	unsigned int bufferIndex;
-	unsigned char buffer[FILE_BUFFER_SIZE];
+	unsigned char buffer[FILE_BUFFER_SIZE + 1];
+	unsigned char chars_read;
 } mcc_FileBuffer_t;
 
 /* I need a better search structure than a list for the macros, but given that I don't
@@ -25,9 +28,17 @@ typedef struct FileBuffer {
 
 
 
-void mcc_PreprocessFile(FILE UNUSED(*inFile), FILE UNUSED(*outFile))
+void mcc_PreprocessFile(FILE *inFile, FILE UNUSED(*outFile))
 {
-	//should probably make sure that the string to be pre-processed is NUL-terminated
+	mcc_FileBuffer_t *fileBuffer = (mcc_FileBuffer_t *) malloc(sizeof(mcc_FileBuffer_t));
+	fileBuffer->file = inFile;
+	fileBuffer->line_no = 0;
+	fileBuffer->bufferIndex = 0;
+	fileBuffer->chars_read = fread(fileBuffer->buffer,
+								   sizeof(*(fileBuffer->buffer)),
+								   FILE_BUFFER_SIZE,
+								   fileBuffer->file);
+	fileBuffer->buffer[fileBuffer->chars_read + 1] = '\0'; //make life a little easier for ourselves
 	/* preprocessor directives:
 	 * #define
 	 * #undef

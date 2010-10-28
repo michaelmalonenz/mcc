@@ -39,7 +39,6 @@ typedef struct token {
 	struct token *next;
 } mcc_Token_t;
 
-
 /* The following enums need to be kept in sync with the corresponding char *[] */
 enum key_index { KEY_AUTO, KEY_BREAK, KEY_CASE, KEY_CHAR, KEY_CONST, KEY_CONTINUE, KEY_DEFAULT, KEY_DO, KEY_DOUBLE,
 				 KEY_ELSE, KEY_ENUM, KEY_EXTERN, KEY_FLOAT, KEY_FOR, KEY_GOTO, KEY_IF, KEY_INT, KEY_LONG,

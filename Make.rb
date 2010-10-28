@@ -10,7 +10,7 @@ TEST_SRC_DIR = "#{SRC_DIR}/test"
 
 TEMP_STDERR_FILE = 'stderr'
 
-CFLAGS = "-Wall -Wextra -Werror -g -ggdb3"
+CFLAGS = "-Wall -Wextra -Werror -g -ggdb3 -Os"
 
 CC = "/usr/bin/gcc"
 
