@@ -61,9 +61,20 @@ if $0 == __FILE__ then
    compile_a_directory(SRC_DIR, BIN_DIR)
    compile_a_directory(TEST_SRC_DIR, TEST_BIN_DIR)
 
+   bin_o_files = nil
    Dir.chdir(BIN_DIR) do
-      run_command("#{CC} #{Dir.glob('*.o').join(' ')} -o mcc", "Linking mcc Failed...")
+      bin_o_files = Dir.glob('*.o')
+      run_command("#{CC} #{bin_o_files.join(' ')} -o mcc", "Linking mcc Failed...")
    end
 
-   #link the test executables
+   # If anything necessary to link a unit test lives in here, it must be factored out
+   bin_o_files.delete('mcc.o')
+
+   Dir.chdir(TEST_BIN_DIR) do
+      Dir.glob("test_*.o").each do |test_exe_o|
+         test_exe = test_exe_o.gsub(/\.o$/, '')
+         run_command("#{CC} #{BIN_DIR}/#{bin_o_files.join(" #{BIN_DIR}/")} #{test_exe_o} -o #{test_exe}", 
+                     "Linking #{test_exe} Failed...")
+      end
+   end
 end
