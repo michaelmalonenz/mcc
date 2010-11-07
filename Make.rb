@@ -2,10 +2,10 @@
 
 require 'fileutils'
 
-BIN_DIR = "#{Dir.pwd}/bin"
+BIN_DIR = "#{File.expand_path(File.dirname($0))}/bin"
 TEST_BIN_DIR = "#{BIN_DIR}/test"
 
-SRC_DIR = Dir.pwd
+SRC_DIR = File.expand_path(File.dirname($0))
 TEST_SRC_DIR = "#{SRC_DIR}/test"
 
 TEMP_STDERR_FILE = 'stderr'

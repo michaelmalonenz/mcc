@@ -6,14 +6,15 @@
 
 static mcc_Macro_t *root = NULL;
 
-static mcc_Macro_t *create_macro(char *text, char UNUSED(*value), int UNUSED(type))
+static mcc_Macro_t *create_macro(char *text, char UNUSED(*value))
 {
 	mcc_Macro_t *result = (mcc_Macro_t *) malloc(sizeof(mcc_Macro_t));
 	result->text = (char *) malloc(sizeof(char) * strlen(text));
 	MCC_ASSERT(result != NULL);
 	MCC_ASSERT(result->text != NULL);
 	strncpy(result->text, text, strlen(text));
-	//store it as the type?
+	result->left = NULL;
+	result->right = NULL;
 	return result;
 }
 
@@ -25,9 +26,15 @@ static void delete_macro(mcc_Macro_t *macro)
 	free(macro);
 }
 
-void mcc_DefineMacro(char *text, char *value, int type)
+void mcc_DefineMacro(char *text, char *value)
 {
 	mcc_Macro_t *current = root;
+	if (root == NULL)
+	{
+		root = create_macro(text, value);
+		return;
+	}
+		
 	while (current != NULL)
 	{
 		switch(strncmp(text, current->text, 
@@ -35,7 +42,7 @@ void mcc_DefineMacro(char *text, char *value, int type)
 		{
 		case 1:
 			if (current->right == NULL)
-				current->right = create_macro(text, value, type);
+				current->right = create_macro(text, value);
 			else
 				current = current->right;
 			break;
@@ -44,7 +51,7 @@ void mcc_DefineMacro(char *text, char *value, int type)
 			break;
 		case -1:
 			if (current->left == NULL)
-				current->left = create_macro(text, value, type);
+				current->left = create_macro(text, value);
 			else
 				current = current->left;
 			break;
@@ -66,7 +73,7 @@ void mcc_UndefineMacro(char *text)
 		case 0:
 			//repair the b-tree
 			delete_macro(current);
-			break;
+			return;
 		case -1:
 			current = current->left;
 			break;

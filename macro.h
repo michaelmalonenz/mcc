@@ -3,17 +3,13 @@
 
 typedef struct macro {
 	char *text;
+	char *value;
 	//char *args; ??
-	int type; //float, int, unsigned long etc...
 	struct macro *left;
 	struct macro *right;
 }mcc_Macro_t;
 
-#define MCC_MACRO_VALUE_DEFINED "1"
-#define MCC_MACRO_VALUE_UNDEFINED "0"
-
-//hmmm need more thought putting into the type column
-void mcc_DefineMacro(char *text, char *value, int type);
+void mcc_DefineMacro(char *text, char *value);
 
 void mcc_UndefineMacro(char *text);
 
