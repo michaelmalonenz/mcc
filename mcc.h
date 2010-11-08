@@ -10,8 +10,10 @@
 
 #define MCC_MAX_INPUT_FILES USHRT_MAX
 
-#define mcc_Error(file, lineno, ...) fprintf("%s:%d\n", file, lineno);\
+#define mcc_PrettyError(file, lineno, ...) fprintf("%s:%d\n", file, lineno);\
 	fprintf(stderr, __VA_ARGS__)
+
+#define mcc_Error(...) fprintf(stderr, __VA_ARGS__)
 
 #if MCC_DEBUG
 #define MCC_ASSERT(x) assert(x)
@@ -38,9 +40,11 @@ typedef _Bool bool_t;
 #define min(a, b) ( ((a) < (b)) ? (a) : (b) )
 
 
-#define isWhiteSpace(c) (c == '\t' || c == '\v' || \
-						 c == '\r' || c == '\n' || \
-						 c == '\v' || c == ' ')
+#define isWhiteSpace(c) ((c) == '\t' || (c) == '\v' ||	\
+						 (c) == '\r' || (c) == '\n' ||	\
+						 (c) == '\v' || (c) == ' ')
+
+#define isNonBreakingWhiteSpace(c) ((c) == ' ' || (c) == '\t' || (c) == '\v')
 
 
 void mcc_PreprocessFile(FILE *inFile, FILE *outFile);

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "mcc.h"
 #include "stringBuffer.h"
@@ -20,24 +21,17 @@ typedef struct FileBuffer {
 	char *filename;
 	unsigned int line_no;
 	unsigned int bufferIndex;
-	unsigned char *currentLogicalLine;
 	unsigned char buffer[FILE_BUFFER_SIZE + 1];
 	unsigned char chars_read;
 } mcc_FileBuffer_t;
 
 /* The order here, is my guess at the relative frequency of each directive's use - so we can match
    earlier in the list, and hopefully speed up the pre-processing portion a little bit */
-static const char *preprocessor_directives[] = { "include", "define", "ifdef", "ifndef", "if",
-												 "endif", "else", "elif", "undef", "error", "pragma" };
-//#define(xxx) //function-ish macros; do I need to handle variadic macros separately?
-
 enum pp_directives { PP_INCLUDE, PP_DEFINE, PP_IFDEF, PP_IFNDEF, PP_IF, PP_ENDIF, PP_ELSE,
 					 PP_ELIF, PP_UNDEF, PP_ERROR, PP_PRAGMA, NUM_PREPROCESSOR_DIRECTIVES };
 
-static inline bool_t isNonBreakingWhitespace(char c)
-{
-	return (c == ' ' || c == '\t' || c == '\v');
-}
+static const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES] = { "include", "define", "ifdef", "ifndef", "if",
+																			"endif", "else", "elif", "undef", "error", "pragma" };
 
 static void readFileChunk(mcc_FileBuffer_t *fileBuffer)
 {
@@ -58,15 +52,13 @@ static unsigned char *getNextLogicalLine(mcc_FileBuffer_t *fileBuffer)
 	return mcc_DestroyBufferNotString(lineBuffer);
 }
 
-static void searchPreprocessorDirectives(mcc_FileBuffer_t UNUSED(*fileBuffer))
+static void searchPreprocessorDirectives(char *line)
 {
-	int i,whitespaceIndex = 0;
-	while(!isWhiteSpace(fileBuffer->buffer[whitespaceIndex]))
-	{
-		whitespaceIndex++;
-	}
+	int i;
 	for(i = 0; i < NUM_PREPROCESSOR_DIRECTIVES; i++)
 	{
+		if (strstr(line, preprocessor_directives[i]) != NULL)
+			return;
 	}
 }
 
@@ -82,5 +74,6 @@ void mcc_PreprocessFile(FILE *inFile, FILE UNUSED(*outFile))
 	while(fileBuffer->chars_read > 0)
 	{
 		logicalLine = getNextLogicalLine(fileBuffer);
+		searchPreprocessorDirectives((char *) logicalLine);
 	}
 }
