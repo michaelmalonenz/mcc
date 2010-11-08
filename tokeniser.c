@@ -11,15 +11,6 @@
 
 #define MAX_SYMBOL_LENGTH 512
 
-
-static bool_t isWhiteSpace(const char c)
-{
-	return (c == '\t' || c == '\v' ||
-			c == '\r' || c == '\n' ||
-			c == '\v' || c == ' ');
-}
-
-
 /* There are two distinct implementations of this function.  One which uses dynamic
  * and the other static strings.  If static strings aren't significantly faster,
  * I'll probably end up throwing that implementation away, but I need both to compare

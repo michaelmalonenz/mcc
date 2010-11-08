@@ -31,6 +31,14 @@ void mcc_DeleteStringBuffer(mcc_StringBuffer_t *buffer)
 	free(buffer);
 }
 
+unsigned char *mcc_DestroyBufferNotString(mcc_StringBuffer_t *buffer)
+{
+	unsigned char *string = (unsigned char *) realloc(buffer->string, buffer->stringLength);
+	MCC_ASSERT(buffer != NULL);
+	free(buffer);
+	return string;
+}
+
 void mcc_StringBufferAppendChar(mcc_StringBuffer_t *buffer, const unsigned char c)
 {
 	if (buffer->stringLength == buffer->bufferSize)

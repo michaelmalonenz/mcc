@@ -2,11 +2,14 @@
 #include <stdlib.h>
 
 #include "mcc.h"
+#include "stringBuffer.h"
 
 /* A good, meaty base-2 chunk of a file, so we don't start reading the thing
  * from disk a character at a time
  */
 #define FILE_BUFFER_SIZE 32768
+
+#define TAB_REPLACEMENT_SPACES "    "
 
 /* Should avoid allocating these on the stack - it could use up memory much too quickly
  * (stacks are usually limited to around 8MB) Which, I suppose is big enough to hold a 
@@ -17,40 +20,67 @@ typedef struct FileBuffer {
 	char *filename;
 	unsigned int line_no;
 	unsigned int bufferIndex;
+	unsigned char *currentLogicalLine;
 	unsigned char buffer[FILE_BUFFER_SIZE + 1];
 	unsigned char chars_read;
 } mcc_FileBuffer_t;
 
-/* I need a better search structure than a list for the macros, but given that I don't
- * have _any_ idea how many values I will end up having (and especially since re-sizing
- * would be costly, am I going to have to settle for a b-tree?
- */
+/* The order here, is my guess at the relative frequency of each directive's use - so we can match
+   earlier in the list, and hopefully speed up the pre-processing portion a little bit */
+static const char *preprocessor_directives[] = { "include", "define", "ifdef", "ifndef", "if",
+												 "endif", "else", "elif", "undef", "error", "pragma" };
+//#define(xxx) //function-ish macros; do I need to handle variadic macros separately?
 
+enum pp_directives { PP_INCLUDE, PP_DEFINE, PP_IFDEF, PP_IFNDEF, PP_IF, PP_ENDIF, PP_ELSE,
+					 PP_ELIF, PP_UNDEF, PP_ERROR, PP_PRAGMA, NUM_PREPROCESSOR_DIRECTIVES };
 
-
-void mcc_PreprocessFile(FILE *inFile, FILE UNUSED(*outFile))
+static inline bool_t isNonBreakingWhitespace(char c)
 {
-	mcc_FileBuffer_t *fileBuffer = (mcc_FileBuffer_t *) malloc(sizeof(mcc_FileBuffer_t));
-	fileBuffer->file = inFile;
-	fileBuffer->line_no = 0;
-	fileBuffer->bufferIndex = 0;
+	return (c == ' ' || c == '\t' || c == '\v');
+}
+
+static void readFileChunk(mcc_FileBuffer_t *fileBuffer)
+{
 	fileBuffer->chars_read = fread(fileBuffer->buffer,
 								   sizeof(*(fileBuffer->buffer)),
 								   FILE_BUFFER_SIZE,
 								   fileBuffer->file);
 	fileBuffer->buffer[fileBuffer->chars_read + 1] = '\0'; //make life a little easier for ourselves
-	/* preprocessor directives:
-	 * #define
-	 * #undef
-	 * #define(xxx) //function-ish macros; do I need to handle variadic macros separately?
-	 * #if
-	 * #ifdef
-	 * #ifndef
-	 * #elif
-	 * #else
-	 * #endif
-	 * #error
-	 * #pragma
-	 * #include
-	 */
+}
+
+static unsigned char *getNextLogicalLine(mcc_FileBuffer_t *fileBuffer)
+{
+	mcc_StringBuffer_t *lineBuffer = mcc_CreateStringBuffer();
+	while (fileBuffer->bufferIndex < fileBuffer->chars_read)
+	{
+	}
+	fileBuffer->line_no++;
+	return mcc_DestroyBufferNotString(lineBuffer);
+}
+
+static void searchPreprocessorDirectives(mcc_FileBuffer_t UNUSED(*fileBuffer))
+{
+	int i,whitespaceIndex = 0;
+	while(!isWhiteSpace(fileBuffer->buffer[whitespaceIndex]))
+	{
+		whitespaceIndex++;
+	}
+	for(i = 0; i < NUM_PREPROCESSOR_DIRECTIVES; i++)
+	{
+	}
+}
+
+void mcc_PreprocessFile(FILE *inFile, FILE UNUSED(*outFile))
+{
+	mcc_FileBuffer_t *fileBuffer = (mcc_FileBuffer_t *) malloc(sizeof(mcc_FileBuffer_t));
+	unsigned char *logicalLine = NULL;
+	fileBuffer->file = inFile;
+	fileBuffer->line_no = 0;
+	fileBuffer->bufferIndex = 0;
+	readFileChunk(fileBuffer);
+
+	while(fileBuffer->chars_read > 0)
+	{
+		logicalLine = getNextLogicalLine(fileBuffer);
+	}
 }

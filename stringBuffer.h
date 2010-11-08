@@ -9,6 +9,8 @@ mcc_StringBuffer_t *mcc_CreateStringBuffer(void);
 
 void mcc_DeleteStringBuffer(mcc_StringBuffer_t *buffer);
 
+unsigned char *mcc_DestroyBufferNotString(mcc_StringBuffer_t *buffer);
+
 void mcc_StringBufferAppendChar(mcc_StringBuffer_t *buffer, const unsigned char c);
 
 unsigned int mcc_GetStringBufferLength(mcc_StringBuffer_t *buffer);
