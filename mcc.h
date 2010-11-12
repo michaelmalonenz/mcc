@@ -13,7 +13,7 @@
 #define mcc_PrettyError(file, lineno, ...) fprintf("%s:%d\n", file, lineno);\
 	fprintf(stderr, __VA_ARGS__)
 
-#define mcc_Error(...) fprintf(stderr, __VA_ARGS__)
+#define mcc_Error(...) fprintf(stderr, __VA_ARGS__); exit(1)
 
 #if MCC_DEBUG
 #define MCC_ASSERT(x) assert(x)
@@ -47,7 +47,7 @@ typedef _Bool bool_t;
 #define isNonBreakingWhiteSpace(c) ((c) == ' ' || (c) == '\t' || (c) == '\v')
 
 
-void mcc_PreprocessFile(FILE *inFile, FILE *outFile);
+void mcc_PreprocessFile(const char *inFilename, FILE *outFile);
 void mcc_TokeniseString(const char *string, const unsigned int length);
 
 #endif /* MCC_H */

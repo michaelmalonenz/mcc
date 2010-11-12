@@ -1,6 +1,7 @@
 #ifndef MCC_STRING_BUFFER_H
 #define MCC_STRING_BUFFER_H
 
+#include <stdlib.h>
 #include "config.h"
 
 typedef struct StringBuffer mcc_StringBuffer_t;
@@ -12,6 +13,8 @@ void mcc_DeleteStringBuffer(mcc_StringBuffer_t *buffer);
 unsigned char *mcc_DestroyBufferNotString(mcc_StringBuffer_t *buffer);
 
 void mcc_StringBufferAppendChar(mcc_StringBuffer_t *buffer, const unsigned char c);
+
+void mcc_StringBufferUnappendChar(mcc_StringBuffer_t *buffer);
 
 unsigned int mcc_GetStringBufferLength(mcc_StringBuffer_t *buffer);
 

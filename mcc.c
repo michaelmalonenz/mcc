@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 
 	for(i = 1; i < argc; i++)
 	{
-		mcc_PreprocessFile(mcc_OpenFile(argv[i], "r"), stdout);
+		mcc_PreprocessFile(argv[i], stdout);
 	}
 
 	return 0;

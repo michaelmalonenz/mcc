@@ -17,7 +17,7 @@ mcc_StringBuffer_t *mcc_CreateStringBuffer()
 {
 	mcc_StringBuffer_t *result = (mcc_StringBuffer_t *) malloc(sizeof(mcc_StringBuffer_t));
 	MCC_ASSERT(result != NULL);
-	result->string = (unsigned char *) malloc(sizeof(unsigned char) *MCC_INITIAL_STRING_BUFFER_LENGTH);
+	result->string = (unsigned char *) calloc(sizeof(unsigned char), MCC_INITIAL_STRING_BUFFER_LENGTH);
 	MCC_ASSERT(result->string != NULL);
 	result->bufferSize = MCC_INITIAL_STRING_BUFFER_LENGTH;
 	result->stringLength = 0;
@@ -52,6 +52,12 @@ void mcc_StringBufferAppendChar(mcc_StringBuffer_t *buffer, const unsigned char 
 	buffer->string[buffer->stringLength] = c;
 	if (c != '\0')
 		buffer->stringLength++;
+}
+
+void mcc_StringBufferUnappendChar(mcc_StringBuffer_t *buffer)
+{
+	//Should I also clobber the last char?
+	buffer->stringLength--;
 }
 
 unsigned int mcc_GetStringBufferLength(mcc_StringBuffer_t *buffer)
