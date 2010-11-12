@@ -1,10 +1,10 @@
 Misc:
 unit test the file stuff??  - is it possible to write a test that does this?
-fix returning a logical line
 Add support for tri-graphs? (Does this need to happen before or after the preprocessing step?)
 add support for comments    (                         ---- " ----                            )
 
 Preprocessor:
+macro replacement
 tokenise directives - should this be passed off to the tokeniser?  The rules are slightly different...
 evaluate macros (like #if etc)
 support function macros

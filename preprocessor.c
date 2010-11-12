@@ -52,6 +52,7 @@ void mcc_PreprocessFile(const char *inFilename, FILE UNUSED(*outFile))
 //		printf("%s\n", logicalLine);
 		if (logicalLine != NULL)
 		{
+//			doMacroReplacement(logicalLine);
 			searchPreprocessorDirectives((char *) logicalLine);
 			free(logicalLine);
 		}
