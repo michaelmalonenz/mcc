@@ -21,7 +21,6 @@ static void searchPreprocessorDirectives(char *line)
 	{
 		if (strstr(line, preprocessor_directives[i]) != NULL)
 		{
-//			printf("%s\n", line);
 			return;
 		}
 	}
@@ -36,8 +35,11 @@ void mcc_PreprocessFile(const char *inFilename, FILE UNUSED(*outFile))
 	{
 		logicalLine = mcc_FileBufferGetNextLogicalLine(fileBuffer);
 		printf("%s\n", logicalLine);
-		searchPreprocessorDirectives((char *) logicalLine);
-		free(logicalLine);
+		if (logicalLine != NULL)
+		{
+			searchPreprocessorDirectives((char *) logicalLine);
+			free(logicalLine);
+		}
 	}
 
 	mcc_DeleteFileBuffer(fileBuffer);

@@ -20,7 +20,7 @@ struct FileBuffer {
 	unsigned int line_no;
 	unsigned int bufferIndex;
 	unsigned char buffer[FILE_BUFFER_SIZE + 1];
-	unsigned char chars_read;
+	size_t chars_read;
 };
 
 
@@ -53,9 +53,11 @@ static void readFileChunk(mcc_FileBuffer_t *fileBuffer)
 								   fileBuffer->file);
 	if (ferror(fileBuffer->file))
 	{
-		mcc_Error("Unexpected Error (%s) while reading %s\n", strerror(errno), fileBuffer->filename);
+		mcc_Error("Unexpected Error (%s) while reading %s\n",
+				  strerror(errno), fileBuffer->filename);
 	}
-	fileBuffer->buffer[fileBuffer->chars_read + 1] = '\0'; //make life a little easier for ourselves
+	//make life a little easier for ourselves
+	fileBuffer->buffer[fileBuffer->chars_read] = '\0';
 	fileBuffer->bufferIndex = 0;
 }
 
@@ -82,7 +84,8 @@ unsigned char *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer)
 		{
 			if (fileBuffer->buffer[fileBuffer->bufferIndex] != '\n')
 			{
-				mcc_StringBufferAppendChar(lineBuffer, fileBuffer->buffer[fileBuffer->bufferIndex++]);
+				mcc_StringBufferAppendChar(lineBuffer,
+										   fileBuffer->buffer[fileBuffer->bufferIndex++]);
 			}
 			else
 			{
