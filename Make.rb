@@ -77,4 +77,11 @@ if $0 == __FILE__ then
                      "Linking #{test_exe} Failed...")
       end
    end
+
+   Dir.new(TEST_BIN_DIR).each do |file|
+      if !FileTest.directory?(file) && FileTest.executable?(file)
+         run_command(file, "#{File.basename(file)} failed to run correctly!")
+      end
+   end
+
 end
