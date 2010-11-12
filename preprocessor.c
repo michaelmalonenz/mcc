@@ -17,11 +17,26 @@ static const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES] = { "inc
 static void searchPreprocessorDirectives(char *line)
 {
 	int i;
-	for(i = 0; i < NUM_PREPROCESSOR_DIRECTIVES; i++)
+	int lineLen = strlen(line);
+	for(i = 0; i < lineLen; i++)
 	{
-		if (strstr(line, preprocessor_directives[i]) != NULL)
+		if(!isNonBreakingWhiteSpace(line[i]))
 		{
-			return;
+			if (line[i] == '#')
+			{
+				for(i = 0; i < NUM_PREPROCESSOR_DIRECTIVES; i++)
+				{
+					if (strstr(line, preprocessor_directives[i]) != NULL)
+					{
+						printf("%s\n", line);
+						return;
+					}
+				}
+			}
+			else
+			{
+				return;
+			}
 		}
 	}
 }
@@ -34,7 +49,7 @@ void mcc_PreprocessFile(const char *inFilename, FILE UNUSED(*outFile))
 	while(!mcc_FileBufferEOFReached(fileBuffer))
 	{
 		logicalLine = mcc_FileBufferGetNextLogicalLine(fileBuffer);
-		printf("%s\n", logicalLine);
+//		printf("%s\n", logicalLine);
 		if (logicalLine != NULL)
 		{
 			searchPreprocessorDirectives((char *) logicalLine);

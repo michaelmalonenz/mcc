@@ -33,7 +33,7 @@ mcc_FileBuffer_t *mcc_CreateFileBuffer(const char *file)
 	mcc_FileBuffer_t *fileBuffer = (mcc_FileBuffer_t *) malloc(sizeof(mcc_FileBuffer_t));
 	fileBuffer->filename = file;
 	fileBuffer->file = fopen(file, "r");
-	fileBuffer->line_no = 0;
+	fileBuffer->line_no = 1;
 	fileBuffer->bufferIndex = 0;
 	fileBuffer->chars_read = 0;
 	return fileBuffer;
@@ -57,7 +57,7 @@ static void readFileChunk(mcc_FileBuffer_t *fileBuffer)
 				  strerror(errno), fileBuffer->filename);
 	}
 	//make life a little easier for ourselves
-	fileBuffer->buffer[fileBuffer->chars_read] = '\0';
+//	fileBuffer->buffer[fileBuffer->chars_read] = '\0';
 	fileBuffer->bufferIndex = 0;
 }
 
@@ -77,10 +77,10 @@ unsigned char *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer)
 			readFileChunk(fileBuffer);
 			if (mcc_FileBufferEOFReached(fileBuffer))
 			{
-				mcc_Error("Unexpected End of File reached in %s\n", fileBuffer->filename);
+				return NULL;
 			}
 		}
-		while (fileBuffer->bufferIndex < fileBuffer->chars_read && !lineIsRead)
+		while ((fileBuffer->bufferIndex < fileBuffer->chars_read) && !lineIsRead)
 		{
 			if (fileBuffer->buffer[fileBuffer->bufferIndex] != '\n')
 			{
@@ -116,5 +116,6 @@ void printFileBuffer(mcc_FileBuffer_t *buffer)
 {
 	printf("----- FileBuffer ----- \nfilename:\t%s\nline_no:\t%d\nbufferIndex:\t%d\nchars_read:\t%d\n",
 		   buffer->filename, buffer->line_no, buffer->bufferIndex, buffer->chars_read);
+	printf("Current Char:\t%d\n", buffer->buffer[buffer->bufferIndex]);
 }
 #endif
