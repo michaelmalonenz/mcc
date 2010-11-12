@@ -1,12 +1,10 @@
 Misc:
-Factor file stuff into its own file.
 unit test the file stuff??  - is it possible to write a test that does this?
-returning a logical line
+fix returning a logical line
 Add support for tri-graphs? (Does this need to happen before or after the preprocessing step?)
-
+add support for comments    (                         ---- " ----                            )
 
 Preprocessor:
-Discover which lines contain a directive
 tokenise directives - should this be passed off to the tokeniser?  The rules are slightly different...
 evaluate macros (like #if etc)
 support function macros
@@ -18,3 +16,4 @@ Parser:
 Assert that the input file conforms to the c(99) standard
 
 Assembler/linker - (Do I actually want to write this myself or should I attempt to write object files which are compatible with binutils' linker and use that?)
+Do I want to distribute a C library (like uClibc or Newlib etc) with this?
