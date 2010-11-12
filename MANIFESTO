@@ -1,0 +1,7 @@
+Mcc is a compiler that is not aimed to compete with gcc, but fill a gap that it fails to realise.
+
+Gcc is really good at producing highly optimised binaries in a standards-compliant manner.  However, development with it can often be unwieldy and (comparatively) slow.  Mcc will be faster to run (so that the compile/link/test cycle can be sped up), will give better error messages (where possible) and do as much as possible to help the developer, whilst remaining as compatible as possible with gcc.  Obviously not all switches will be implemented, but unrecognised options will not generate an error, unless we are asked to.  Errors will happen early and the compiler will exit at the first error - preventing an error cascade.  I reserve the right to change my mind about this in specific cases where the first error is not found to be useful for the developer.
+
+Essentially, the aim of this compiler is not to produce the best binaries it possibly can, but to aid the development of programs by being as helpful as possible, giving clear and useful error messages.  Mcc will be compatible with gcc in such a way that gcc can be used to compile the final program.
+
+Where the spec is vague or unspecified, we should default to the same behaviour as gcc with --std=c99.  This compiler should also make a break with tradition and be written in a clear manner.  Speed of execution is secondary to clear and concise code.
