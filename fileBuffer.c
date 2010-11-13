@@ -21,6 +21,7 @@ struct FileBuffer {
 	unsigned int bufferIndex;
 	unsigned char buffer[FILE_BUFFER_SIZE + 1];
 	size_t chars_read;
+    mcc_LogicalLine_t currentLine;
 };
 
 
@@ -67,10 +68,14 @@ bool_t mcc_FileBufferEOFReached(mcc_FileBuffer_t *buffer)
 	return (bool_t) (feof(buffer->file) && buffer->chars_read == 0);
 }
 
-unsigned char *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer)
+mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer)
 {
 	mcc_StringBuffer_t *lineBuffer = mcc_CreateStringBuffer();
 	bool_t lineIsRead = FALSE;
+    if (fileBuffer->currentLine.string != NULL)
+    {
+        free(fileBuffer->currentLine.string);
+    }
 	while(!lineIsRead)
 	{
 		if (fileBuffer->bufferIndex == fileBuffer->chars_read)
@@ -79,7 +84,10 @@ unsigned char *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer)
 			if (mcc_FileBufferEOFReached(fileBuffer))
 			{
 				mcc_DeleteStringBuffer(lineBuffer);
-				return NULL;
+				fileBuffer->currentLine.string = NULL;
+                fileBuffer->currentLine.index = 0;
+                fileBuffer->currentLine.length = 0;
+                return &fileBuffer->currentLine;
 			}
 		}
 		while ((fileBuffer->bufferIndex < fileBuffer->chars_read) && !lineIsRead)
@@ -109,7 +117,10 @@ unsigned char *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer)
 			}
 		}
 	}
-	return mcc_DestroyBufferNotString(lineBuffer);
+	fileBuffer->currentLine.string = mcc_DestroyBufferNotString(lineBuffer);
+    fileBuffer->currentLine.index = 0;
+    fileBuffer->currentLine.length = strlen((char *)fileBuffer->currentLine.string);
+    return &fileBuffer->currentLine;
 }
 
 

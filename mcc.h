@@ -46,6 +46,10 @@ typedef _Bool bool_t;
 
 #define isNonBreakingWhiteSpace(c) ((c) == ' ' || (c) == '\t' || (c) == '\v')
 
+#define isWordChar(c) ( ((c) >= 'A' && (c) <= 'Z') || \
+                        ((c) >= 'a' && (c) <= 'z') || \
+                        ((c) >= '0' && (c) <= '9') || \
+                        ((c) == '_') )
 
 void mcc_PreprocessFile(const char *inFilename, FILE *outFile);
 void mcc_TokeniseString(const char *string, const unsigned int length);

@@ -4,6 +4,8 @@
 
 #include "mcc.h"
 #include "fileBuffer.h"
+#include "stringBuffer.h"
+#include "macro.h"
 
 /* The order here, is my guess at the relative frequency of each directive's use - so we can match
    earlier in the list, and hopefully speed up the pre-processing portion a little bit */
@@ -13,30 +15,30 @@ enum pp_directives { PP_INCLUDE, PP_DEFINE, PP_IFDEF, PP_IFNDEF, PP_IF, PP_ENDIF
 static const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES] = { "include", "define", "ifdef", "ifndef", "if",
 																			"endif", "else", "elif", "undef", "error", "pragma" };
 
-typedef void (preprocessorDirectiveHandler_t)(char *line);
+typedef void (preprocessorDirectiveHandler_t)(mcc_LogicalLine_t *line);
 
-static void handleInclude(char *line);
-static void handleDefine(char *line);
+static void handleInclude(mcc_LogicalLine_t *line);
+static void handleDefine(mcc_LogicalLine_t *line);
 
 static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = { &handleInclude, &handleDefine};
 
 
-static void searchPreprocessorDirectives(char *line)
+static void searchPreprocessorDirectives(mcc_LogicalLine_t *line)
 {
-	int i, j;
-	int lineLen = strlen(line);
-	for(i = 0; i < lineLen; i++)
+	int j;
+	for(line->index = 0; line->index < line->length; line->index++)
 	{
-		if(!isNonBreakingWhiteSpace(line[i]))
-		{
-			if (line[i] == '#')
+		if(!isNonBreakingWhiteSpace(line->string[line->index]))
+        {
+			if (line->string[line->index] == '#')
 			{
 				for(j = 0; j < NUM_PREPROCESSOR_DIRECTIVES; j++)
 				{
-					if (strncmp(&line[i+1], preprocessor_directives[j],
-								strlen(preprocessor_directives[j])) == 0)
+					if (strncmp((char *)&line->string[line->index+1], preprocessor_directives[j],
+								(line->length - line->index)) == 0)
 					{
-						printf("%s\n", line);
+                        ppHandlers[j](line);
+						printf("%s\n", line->string);
 						return;
 					}
 				}
@@ -52,20 +54,42 @@ static void searchPreprocessorDirectives(char *line)
 void mcc_PreprocessFile(const char *inFilename, FILE UNUSED(*outFile))
 {
 	mcc_FileBuffer_t *fileBuffer = mcc_CreateFileBuffer(inFilename);
-	unsigned char *logicalLine = NULL;
+	mcc_LogicalLine_t *logicalLine = NULL;
 
 	while(!mcc_FileBufferEOFReached(fileBuffer))
 	{
 		logicalLine = mcc_FileBufferGetNextLogicalLine(fileBuffer);
 //		printf("%s\n", logicalLine);
-		if (logicalLine != NULL)
+		if (logicalLine->length > 0)
 		{
 //			doMacroReplacement(logicalLine);
-			searchPreprocessorDirectives((char *) logicalLine);
-			free(logicalLine);
+			searchPreprocessorDirectives(logicalLine);
 		}
 	}
 
 	mcc_DeleteFileBuffer(fileBuffer);
 }
 
+static inline void skipWhiteSpace(mcc_LogicalLine_t *line)
+{
+    while( (line->index < line->length) && (isNonBreakingWhiteSpace(line->string[line->index])) )
+        line->index++;
+}
+
+static void handleInclude(mcc_LogicalLine_t UNUSED(*line))
+{
+}
+
+static void handleDefine(mcc_LogicalLine_t *line)
+{
+    mcc_StringBuffer_t *idBuffer = mcc_CreateStringBuffer();
+    //find the start of the Macro identifier
+    skipWhiteSpace(line);
+    while( (line->index < line->length) && (isWordChar(line->string[line->index])) )
+    {
+        mcc_StringBufferAppendChar(idBuffer, line->string[line->index]);
+    }
+    skipWhiteSpace(line);
+    mcc_DefineMacro((char *)mcc_DestroyBufferNotString(idBuffer),
+                    (char *)&line->string[line->index]);
+}
