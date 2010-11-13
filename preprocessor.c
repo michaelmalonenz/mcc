@@ -22,33 +22,29 @@ static void handleDefine(mcc_LogicalLine_t *line);
 
 static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = { &handleInclude, &handleDefine};
 
+static inline void skipWhiteSpace(mcc_LogicalLine_t *line)
+{
+    while( (line->index < line->length) && (isNonBreakingWhiteSpace(line->string[line->index])) )
+        line->index++;
+}
 
 static void searchPreprocessorDirectives(mcc_LogicalLine_t *line)
 {
 	int j;
-	for(line->index = 0; line->index < line->length; line->index++)
-	{
-		if(!isNonBreakingWhiteSpace(line->string[line->index]))
+    skipWhiteSpace(line);
+    if (line->string[line->index] == '#')
+    {
+        for(j = 0; j < NUM_PREPROCESSOR_DIRECTIVES; j++)
         {
-			if (line->string[line->index] == '#')
-			{
-				for(j = 0; j < NUM_PREPROCESSOR_DIRECTIVES; j++)
-				{
-					if (strncmp((char *)&line->string[line->index+1], preprocessor_directives[j],
-								(line->length - line->index)) == 0)
-					{
-                        ppHandlers[j](line);
-						printf("%s\n", line->string);
-						return;
-					}
-				}
-			}
-			else
-			{
-				return;
-			}
-		}
-	}
+            if (strncmp((char *)&line->string[line->index+1], preprocessor_directives[j],
+                        (line->length - line->index)) == 0)
+            {
+                printf("%s\n", line->string);
+                ppHandlers[j](line);
+                return;
+            }
+        }
+    }
 }
 
 void mcc_PreprocessFile(const char *inFilename, FILE UNUSED(*outFile))
@@ -59,21 +55,15 @@ void mcc_PreprocessFile(const char *inFilename, FILE UNUSED(*outFile))
 	while(!mcc_FileBufferEOFReached(fileBuffer))
 	{
 		logicalLine = mcc_FileBufferGetNextLogicalLine(fileBuffer);
-//		printf("%s\n", logicalLine);
 		if (logicalLine->length > 0)
 		{
+            printf("%s\n", logicalLine->string);
 //			doMacroReplacement(logicalLine);
 			searchPreprocessorDirectives(logicalLine);
 		}
 	}
 
 	mcc_DeleteFileBuffer(fileBuffer);
-}
-
-static inline void skipWhiteSpace(mcc_LogicalLine_t *line)
-{
-    while( (line->index < line->length) && (isNonBreakingWhiteSpace(line->string[line->index])) )
-        line->index++;
 }
 
 static void handleInclude(mcc_LogicalLine_t UNUSED(*line))

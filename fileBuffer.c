@@ -37,6 +37,9 @@ mcc_FileBuffer_t *mcc_CreateFileBuffer(const char *file)
 	fileBuffer->line_no = 1;
 	fileBuffer->bufferIndex = 0;
 	fileBuffer->chars_read = 0;
+    fileBuffer->currentLine.string = NULL;
+    fileBuffer->currentLine.length = 0;
+    fileBuffer->currentLine.index = 0;
 	return fileBuffer;
 }
 
@@ -44,6 +47,10 @@ void mcc_DeleteFileBuffer(mcc_FileBuffer_t* buffer)
 {
 	MCC_ASSERT(buffer->file != NULL);
 	fclose(buffer->file);
+    if (buffer->currentLine.string != NULL)
+    {
+        free(buffer->currentLine.string);
+    }
 	MCC_ASSERT(buffer != NULL);
 	free(buffer);
 }
