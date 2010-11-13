@@ -41,6 +41,8 @@ mcc_FileBuffer_t *mcc_CreateFileBuffer(const char *file)
 
 void mcc_DeleteFileBuffer(mcc_FileBuffer_t* buffer)
 {
+	MCC_ASSERT(buffer->file != NULL);
+	fclose(buffer->file);
 	MCC_ASSERT(buffer != NULL);
 	free(buffer);
 }
@@ -57,7 +59,6 @@ static void readFileChunk(mcc_FileBuffer_t *fileBuffer)
 				  strerror(errno), fileBuffer->filename);
 	}
 	//make life a little easier for ourselves
-//	fileBuffer->buffer[fileBuffer->chars_read] = '\0';
 	fileBuffer->bufferIndex = 0;
 }
 
@@ -77,6 +78,7 @@ unsigned char *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer)
 			readFileChunk(fileBuffer);
 			if (mcc_FileBufferEOFReached(fileBuffer))
 			{
+				mcc_DeleteStringBuffer(lineBuffer);
 				return NULL;
 			}
 		}

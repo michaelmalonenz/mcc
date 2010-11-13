@@ -8,8 +8,8 @@
 
 struct StringBuffer {
 	unsigned char *string;
-	unsigned int stringLength;
-	unsigned int bufferSize;
+	unsigned long stringLength;
+	unsigned long bufferSize;
 };
 
 
@@ -33,10 +33,11 @@ void mcc_DeleteStringBuffer(mcc_StringBuffer_t *buffer)
 
 unsigned char *mcc_DestroyBufferNotString(mcc_StringBuffer_t *buffer)
 {
-	unsigned char *string = NULL;
-	if (buffer->stringLength > 0)
+	unsigned char *string = (unsigned char *) realloc(buffer->string,
+													  buffer->stringLength);
+	if (buffer->stringLength == 0)
 	{
-		string = (unsigned char *) realloc(buffer->string, buffer->stringLength);
+		string = NULL;
 	}
 	MCC_ASSERT(buffer != NULL);
 	free(buffer);
@@ -86,7 +87,7 @@ unsigned int mcc_StringBufferGetBufferSize(mcc_StringBuffer_t *buffer)
 
 void mcc_PrintStringBuffer(mcc_StringBuffer_t *buffer)
 {
-	printf("BufferSize:\t%d\nString Length:\t%d\nString:\t'%s'\n",
+	printf("BufferSize:\t%ld\nString Length:\t%ld\nString:\t'%s'\n",
 		   buffer->bufferSize, buffer->stringLength, buffer->string);
 }
 #endif /* MCC_DEBUG */

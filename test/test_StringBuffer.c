@@ -28,7 +28,7 @@ static void test_Append(void)
 	mcc_StringBufferAppendChar(buffer, '\0');
 	mcc_PrintStringBuffer(buffer);
 	MCC_ASSERT(mcc_StringBufferStrncmp(buffer, string, mcc_GetStringBufferLength(buffer)) == 0);
-	MCC_ASSERT(mcc_GetStringBufferLength(buffer) == strlen(string));
+	MCC_ASSERT(mcc_GetStringBufferLength(buffer) == (strlen(string)+1)); //buffer has an extra for '\0'
 	mcc_DeleteStringBuffer(buffer);
 }
 
@@ -48,7 +48,7 @@ static void test_AppendWithResize(void)
 	mcc_StringBufferAppendChar(buffer, '\0');
 	mcc_PrintStringBuffer(buffer);
 	MCC_ASSERT(mcc_StringBufferStrncmp(buffer, string, mcc_GetStringBufferLength(buffer)) == 0);
-	MCC_ASSERT(mcc_GetStringBufferLength(buffer) == strlen(string));
+	MCC_ASSERT(mcc_GetStringBufferLength(buffer) == (strlen(string)+1));
 	mcc_DeleteStringBuffer(buffer);
 }
 

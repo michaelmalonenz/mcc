@@ -13,10 +13,17 @@ enum pp_directives { PP_INCLUDE, PP_DEFINE, PP_IFDEF, PP_IFNDEF, PP_IF, PP_ENDIF
 static const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES] = { "include", "define", "ifdef", "ifndef", "if",
 																			"endif", "else", "elif", "undef", "error", "pragma" };
 
+typedef void (preprocessorDirectiveHandler_t)(char *line);
+
+static void handleInclude(char *line);
+static void handleDefine(char *line);
+
+static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = { &handleInclude, &handleDefine};
+
 
 static void searchPreprocessorDirectives(char *line)
 {
-	int i;
+	int i, j;
 	int lineLen = strlen(line);
 	for(i = 0; i < lineLen; i++)
 	{
@@ -24,9 +31,10 @@ static void searchPreprocessorDirectives(char *line)
 		{
 			if (line[i] == '#')
 			{
-				for(i = 0; i < NUM_PREPROCESSOR_DIRECTIVES; i++)
+				for(j = 0; j < NUM_PREPROCESSOR_DIRECTIVES; j++)
 				{
-					if (strstr(line, preprocessor_directives[i]) != NULL)
+					if (strncmp(&line[i+1], preprocessor_directives[j],
+								strlen(preprocessor_directives[j])) == 0)
 					{
 						printf("%s\n", line);
 						return;
@@ -60,3 +68,4 @@ void mcc_PreprocessFile(const char *inFilename, FILE UNUSED(*outFile))
 
 	mcc_DeleteFileBuffer(fileBuffer);
 }
+
