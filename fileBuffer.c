@@ -124,9 +124,9 @@ mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer
 			}
 		}
 	}
+    fileBuffer->currentLine.length = mcc_GetStringBufferLength(lineBuffer);
 	fileBuffer->currentLine.string = mcc_DestroyBufferNotString(lineBuffer);
     fileBuffer->currentLine.index = 0;
-    fileBuffer->currentLine.length = strlen((char *)fileBuffer->currentLine.string);
     return &fileBuffer->currentLine;
 }
 

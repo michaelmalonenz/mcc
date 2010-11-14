@@ -34,9 +34,10 @@ static void searchPreprocessorDirectives(mcc_LogicalLine_t *line)
     skipWhiteSpace(line);
     if (line->string[line->index] == '#')
     {
+        line->index++;
         for(j = 0; j < NUM_PREPROCESSOR_DIRECTIVES; j++)
         {
-            if (strncmp((char *)&line->string[line->index+1], preprocessor_directives[j],
+            if (strncmp((char *)&line->string[line->index], preprocessor_directives[j],
                         (line->length - line->index)) == 0)
             {
                 printf("%s\n", line->string);
@@ -57,7 +58,7 @@ void mcc_PreprocessFile(const char *inFilename, FILE UNUSED(*outFile))
 		logicalLine = mcc_FileBufferGetNextLogicalLine(fileBuffer);
 		if (logicalLine->length > 0)
 		{
-            printf("%s\n", logicalLine->string);
+//            printf("%s\n", logicalLine->string);
 //			doMacroReplacement(logicalLine);
 			searchPreprocessorDirectives(logicalLine);
 		}
