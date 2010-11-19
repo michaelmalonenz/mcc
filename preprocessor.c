@@ -24,8 +24,20 @@ typedef void (preprocessorDirectiveHandler_t)(mcc_LogicalLine_t *line, mcc_FileB
 
 static void handleInclude(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
 static void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+static void handleIfndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+static void handleIf(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+static void handleEndif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+static void handleElse(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+static void handleElif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+static void handleUndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+static void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+static void handlePragma(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
 
-static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = { &handleInclude, &handleDefine};
+static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = { &handleInclude, &handleDefine, &handleIfdef,
+																				   &handleIfndef, &handleIf, &handleEndif,
+																				   &handleElse, &handleElif, &handleUndef,
+																				   &handleError, &handlePragma };
 
 static FILE *outputFile;
 
@@ -139,3 +151,13 @@ static void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t UNUSED(*fileB
     mcc_DefineMacro((char *)mcc_DestroyBufferNotString(idBuffer),
                     (char *)&line->string[line->index]);
 }
+
+static void handleIfdef(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
+static void handleIfndef(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
+static void handleIf(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
+static void handleEndif(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
+static void handleElse(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
+static void handleElif(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
+static void handleUndef(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
+static void handleError(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
+static void handlePragma(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
