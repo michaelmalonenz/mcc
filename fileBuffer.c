@@ -29,6 +29,16 @@ struct FileBuffer {
 void printFileBuffer(mcc_FileBuffer_t *buffer);
 #endif
 
+const char *mcc_GetFileBufferFilename(mcc_FileBuffer_t *fileBuffer)
+{
+	return fileBuffer->filename;
+}
+
+unsigned int mcc_GetFileBufferCurrentLineNo(mcc_FileBuffer_t *fileBuffer)
+{
+	return fileBuffer->line_no;
+}
+
 mcc_FileBuffer_t *mcc_CreateFileBuffer(const char *file)
 {
 	mcc_FileBuffer_t *fileBuffer = (mcc_FileBuffer_t *) malloc(sizeof(mcc_FileBuffer_t));

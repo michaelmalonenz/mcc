@@ -18,6 +18,8 @@ void mcc_StringBufferUnappendChar(mcc_StringBuffer_t *buffer);
 
 unsigned int mcc_GetStringBufferLength(mcc_StringBuffer_t *buffer);
 
+const char *mcc_StringBufferGetString(mcc_StringBuffer_t *buffer);
+
 int mcc_StringBufferStrncmp(mcc_StringBuffer_t *buffer, const char *string, size_t length);
 
 #if MCC_DEBUG

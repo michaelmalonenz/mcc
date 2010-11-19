@@ -44,6 +44,11 @@ unsigned char *mcc_DestroyBufferNotString(mcc_StringBuffer_t *buffer)
 	return string;
 }
 
+const char *mcc_StringBufferGetString(mcc_StringBuffer_t *buffer)
+{
+	return (const char *) buffer->string;
+}
+
 void mcc_StringBufferAppendChar(mcc_StringBuffer_t *buffer, const unsigned char c)
 {
 	if (buffer->stringLength == buffer->bufferSize)

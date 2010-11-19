@@ -20,5 +20,8 @@ bool_t mcc_FileBufferEOFReached(mcc_FileBuffer_t *buffer);
 
 mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer);
 
+const char *mcc_GetFileBufferFilename(mcc_FileBuffer_t *fileBuffer);
+
+unsigned int mcc_GetFileBufferCurrentLineNo(mcc_FileBuffer_t *fileBuffer);
 
 #endif /* MCC_FILE_BUFFER_H */
