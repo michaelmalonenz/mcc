@@ -17,11 +17,20 @@ FILE *mcc_OpenFile(const char *filename, char *flags)
 	file = fopen(filename, flags);
 	if (file == NULL)
 	{
-		mcc_Error("Couldn't open %s", filename);
+		mcc_Error("Couldn't open %s\n", filename);
 	}
 	return file;
 }
 
+const char *mcc_FindLocalInclude(const char *filename)
+{
+	return filename;
+}
+
+const char *mcc_FindSystemInclude(const char *filename)
+{
+	return filename;
+}
 
 int main(int argc, char **argv)
 {

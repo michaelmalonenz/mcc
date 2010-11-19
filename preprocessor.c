@@ -7,6 +7,11 @@
 #include "stringBuffer.h"
 #include "macro.h"
 
+#define SYSTEM_INCLUDE_OPENER '<'
+#define SYSTEM_INCLUDE_TERMINATOR '>'
+#define LOCAL_INCLUDE_OPENER '"'
+#define LOCAL_INCLUDE_TERMINATOR '"'
+
 /* The order here, is my guess at the relative frequency of each directive's use - so we can match
    earlier in the list, and hopefully speed up the pre-processing portion a little bit */
 enum pp_directives { PP_INCLUDE, PP_DEFINE, PP_IFDEF, PP_IFNDEF, PP_IF, PP_ENDIF, PP_ELSE,
@@ -21,6 +26,8 @@ static void handleInclude(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 static void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
 
 static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = { &handleInclude, &handleDefine};
+
+static FILE *outputFile;
 
 static inline void skipWhiteSpace(mcc_LogicalLine_t *line)
 {
@@ -49,10 +56,12 @@ static void searchPreprocessorDirectives(mcc_LogicalLine_t *line, mcc_FileBuffer
     }
 }
 
-void mcc_PreprocessFile(const char *inFilename, FILE UNUSED(*outFile))
+void mcc_PreprocessFile(const char *inFilename, FILE *outFile)
 {
 	mcc_FileBuffer_t *fileBuffer = mcc_CreateFileBuffer(inFilename);
 	mcc_LogicalLine_t *logicalLine = NULL;
+
+	outputFile = outFile;
 
 	while(!mcc_FileBufferEOFReached(fileBuffer))
 	{
@@ -71,47 +80,48 @@ void mcc_PreprocessFile(const char *inFilename, FILE UNUSED(*outFile))
 static void handleInclude(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 {
 	mcc_StringBuffer_t *fileInclude = mcc_CreateStringBuffer();
+	char terminator;
 	skipWhiteSpace(line);
-	if (line->string[line->index] == '"')
+	if (line->string[line->index] == LOCAL_INCLUDE_OPENER)
 	{
-		while(line->string[++(line->index)] != '"')
-		{
-			if (line->index < line->length)
-			{
-				mcc_StringBufferAppendChar(fileInclude, line->string[line->index]);
-			}
-			else
-			{
-				mcc_Error("Expecting '\"' in %s:%d\n", 
-						  mcc_GetFileBufferFilename(fileBuffer),
-						  mcc_GetFileBufferCurrentLineNo(fileBuffer));
-			}
-		}
-		mcc_StringBufferAppendChar(fileInclude, '\0');
-//		mcc_PreprocessFile(mcc_OpenLocalInclude(mcc_DestroyBufferNotString(fileInclude)));
+		terminator = LOCAL_INCLUDE_TERMINATOR;
 	}
-	else if (line->string[line->index] == '<')
+	else if (line->string[line->index] == SYSTEM_INCLUDE_OPENER)
 	{
-		while(line->string[++(line->index)] != '>')
-		{
-			if (line->index < line->length)
-			{
-				mcc_StringBufferAppendChar(fileInclude, line->string[line->index]);
-			}
-			else
-			{
-				mcc_Error("Expecting '\"' in %s:%d\n", 
-						  mcc_GetFileBufferFilename(fileBuffer),
-						  mcc_GetFileBufferCurrentLineNo(fileBuffer));
-			}
-		}
-		mcc_StringBufferAppendChar(fileInclude, '\0');
-//		mcc_PreprocessFile(mcc_OpenSystemInclude(mcc_StringBufferGetString(fileInclude)));
+		terminator = SYSTEM_INCLUDE_TERMINATOR;
 	}
 	else
 	{
-		// need to figure out a way of giving a better error message than this.
-		mcc_Error("Unexpected token %c\n", line->string[line->index]);
+		mcc_Error("Expected '%c' or '%c' in %s:%d\n",
+				  LOCAL_INCLUDE_OPENER,
+				  SYSTEM_INCLUDE_OPENER,
+				  mcc_GetFileBufferFilename(fileBuffer),
+				  mcc_GetFileBufferCurrentLineNo(fileBuffer));
+	}
+	while(line->string[++(line->index)] != terminator)
+	{
+		if (line->index < line->length)
+		{
+			mcc_StringBufferAppendChar(fileInclude, line->string[line->index]);
+		}
+		else
+		{
+			mcc_Error("Expected '%c' in %s:%d\n", 
+					  terminator,
+					  mcc_GetFileBufferFilename(fileBuffer),
+					  mcc_GetFileBufferCurrentLineNo(fileBuffer));
+		}
+	}
+	mcc_StringBufferAppendChar(fileInclude, '\0');
+	if (terminator == LOCAL_INCLUDE_TERMINATOR)
+	{
+		mcc_PreprocessFile(mcc_FindLocalInclude((const char *)mcc_StringBufferGetString(fileInclude)),
+						   outputFile);
+	}
+	else
+	{
+//		mcc_PreprocessFile(mcc_FindSystemInclude((const char *)mcc_StringBufferGetString(fileInclude)),
+//						   outputFile);
 	}
 	mcc_DeleteStringBuffer(fileInclude);
 }

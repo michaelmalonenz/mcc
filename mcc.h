@@ -51,6 +51,11 @@ typedef _Bool bool_t;
                         ((c) >= '0' && (c) <= '9') || \
                         ((c) == '_') )
 
+FILE *mcc_OpenFile(const char *filename, char *flags);
+
+const char *mcc_FindLocalInclude(const char *filename);
+const char *mcc_FindSystemInclude(const char *filename);
+
 void mcc_PreprocessFile(const char *inFilename, FILE *outFile);
 void mcc_TokeniseString(const char *string, const unsigned int length);
 

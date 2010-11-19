@@ -70,18 +70,18 @@ if $0 == __FILE__ then
    # If anything necessary to link a unit test lives in here, it must be factored out
    bin_o_files.delete('mcc.o')
 
-   Dir.chdir(TEST_BIN_DIR) do
-      Dir.glob("test_*.o").each do |test_exe_o|
-         test_exe = test_exe_o.gsub(/\.o$/, '')
-         run_command("#{CC} #{BIN_DIR}/#{bin_o_files.join(" #{BIN_DIR}/")} #{test_exe_o} -o #{test_exe}", 
-                     "Linking #{test_exe} Failed...")
-      end
-   end
+#   Dir.chdir(TEST_BIN_DIR) do
+#      Dir.glob("test_*.o").each do |test_exe_o|
+#         test_exe = test_exe_o.gsub(/\.o$/, '')
+#         run_command("#{CC} #{BIN_DIR}/#{bin_o_files.join(" #{BIN_DIR}/")} #{test_exe_o} -o #{test_exe}", 
+#                     "Linking #{test_exe} Failed...")
+#      end
+#   end
 
-   Dir.new(TEST_BIN_DIR).each do |file|
-      if !FileTest.directory?(file) && FileTest.executable?(file)
-         run_command(file, "#{File.basename(file)} failed to run correctly!")
-      end
-   end
+#   Dir.new(TEST_BIN_DIR).each do |file|
+#      if !FileTest.directory?(file) && FileTest.executable?(file)
+#         run_command(file, "#{File.basename(file)} failed to run correctly!")
+#      end
+#   end
 
 end

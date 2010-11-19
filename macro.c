@@ -6,6 +6,19 @@
 
 static mcc_Macro_t *root = NULL;
 
+// This step should involve macro replacement, so we only have to
+// process each macro once - as a side-effect it will correct a bug
+// I would have introduced which would define the macro as the latest
+// version of it, which is not necessarily the intended one.
+// #define SOME_MACRO (3)
+// #define SOME_OTHER_MACRO SOME_MACRO (SOME_MACRO + 4)
+// #undef SOME_MACRO
+// #define SOME_MACRO (6)
+// #define YET_ANOTHER_MACRO (SOME_MACRO + 4)
+// If we delayed parsing SOME_OTHER_MACRO until we found each occurence, it 
+// would yield the same result as YET_ANOTHER_MACRO, which is bad!
+//
+// To make life better, I also need to evaluate constant expressions here
 static mcc_Macro_t *create_macro(char *text, char UNUSED(*value))
 {
 	mcc_Macro_t *result = (mcc_Macro_t *) malloc(sizeof(mcc_Macro_t));
