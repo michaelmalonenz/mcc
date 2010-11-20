@@ -50,19 +50,23 @@ void mcc_DefineMacro(char *text, char *value)
 		
 	while (current != NULL)
 	{
-		switch(strncmp(text, current->text, 
-					   max(strlen(current->text), strlen(text))))
+		int cmpResult = strncmp(text, current->text, 
+								max(strlen(current->text), strlen(text)));
+		if (cmpResult > 0)
 		{
-		case 1:
 			if (current->right == NULL)
 				current->right = create_macro(text, value);
 			else
 				current = current->right;
 			return;
-		case 0:
+		}
+		else if (cmpResult == 0)
+		{
 			mcc_Error("Macro '%s' is already defined\n", text);
 			return;
-		case -1:
+		}
+		else
+		{
 			if (current->left == NULL)
 				current->left = create_macro(text, value);
 			else
@@ -77,19 +81,21 @@ void mcc_UndefineMacro(char *text)
 	mcc_Macro_t *current = root;
 	while (current != NULL)
 	{
-		switch(strncmp(text, current->text, 
-					   max(strlen(current->text), strlen(text))))
+		int cmpResult = strncmp(text, current->text, 
+								max(strlen(current->text), strlen(text)));
+		if (cmpResult > 0)
 		{
-		case 1:
 			current = current->right;
-			break;
-		case 0:
+		}
+		else if (cmpResult == 0)
+		{
 			//still need to repair the b-tree
 			delete_macro(current);
 			return;
-		case -1:
+		}
+		else
+		{
 			current = current->left;
-			break;
 		}
 	}
 }

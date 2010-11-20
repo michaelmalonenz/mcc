@@ -161,7 +161,7 @@ static void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 	{
 		macro_value = (char *)&line->string[line->index];
 	}
-//    mcc_DefineMacro((char *)mcc_StringBufferGetString(idBuffer), macro_value);
+    mcc_DefineMacro((char *)mcc_StringBufferGetString(idBuffer), macro_value);
 	mcc_DeleteStringBuffer(idBuffer);
 }
 
