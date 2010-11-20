@@ -8,4 +8,3 @@
 #define MCC_C99_COMPATIBLE (1)
 
 #endif
-

@@ -21,7 +21,7 @@ struct FileBuffer {
 	const char *filename;
 	unsigned int line_no;
 	unsigned int bufferIndex;
-	unsigned char buffer[FILE_BUFFER_SIZE + 1];
+	char buffer[FILE_BUFFER_SIZE + 1];
 	size_t chars_read;
     mcc_LogicalLine_t currentLine;
 };

@@ -39,6 +39,17 @@ static void delete_macro(mcc_Macro_t *macro)
 	free(macro);
 }
 
+
+char *mcc_DoMacroReplacement(char UNUSED(*text))
+{
+	char *replacedText = NULL;
+	// search through the text, and any whole word is potentially
+	// a macro.  If it does turn out to be, replace it.
+	return replacedText;
+}
+
+// I should really refactor these next couple of functions
+// because they're somewhat similar
 void mcc_DefineMacro(char *text, char *value)
 {
 	mcc_Macro_t *current = root;
@@ -47,7 +58,7 @@ void mcc_DefineMacro(char *text, char *value)
 		root = create_macro(text, value);
 		return;
 	}
-		
+
 	while (current != NULL)
 	{
 		int cmpResult = strncmp(text, current->text, 
@@ -105,17 +116,19 @@ mcc_Macro_t *mcc_ResolveMacro(const char *text)
 	mcc_Macro_t *current = root;
 	while (current != NULL)
 	{
-		switch(strncmp(text, current->text, 
-					   max(strlen(current->text), strlen(text))))
+		int cmpResult = strncmp(text, current->text, 
+								max(strlen(current->text), strlen(text)));
+		if (cmpResult > 0)
 		{
-		case 1:
 			current = current->right;
-			break;
-		case 0:
+		}
+		else if (cmpResult == 0)
+		{
 			return current;
-		case -1:
+		}
+		else
+		{
 			current = current->left;
-			break;
 		}
 	}
 	return NULL;

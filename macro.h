@@ -15,4 +15,6 @@ void mcc_UndefineMacro(char *text);
 
 mcc_Macro_t *mcc_ResolveMacro(const char *text);
 
+char *mcc_DoMacroReplacement(char *text);
+
 #endif /* MCC_MACRO_H */
