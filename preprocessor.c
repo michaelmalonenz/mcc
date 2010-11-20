@@ -59,7 +59,7 @@ static void searchPreprocessorDirectives(mcc_LogicalLine_t *line, mcc_FileBuffer
             if (strncmp((char *)&line->string[line->index], preprocessor_directives[j],
                         strlen(preprocessor_directives[j])) == 0)
             {
-                printf("%s\n", line->string);
+				printf("%s -> %s\n", line->string, preprocessor_directives[j]);
 				line->index += strlen(preprocessor_directives[j]);
                 ppHandlers[j](line, fileBuffer);
                 return;
@@ -138,18 +138,31 @@ static void handleInclude(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 	mcc_DeleteStringBuffer(fileInclude);
 }
 
-static void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t UNUSED(*fileBuffer))
+static void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 {
     mcc_StringBuffer_t *idBuffer = mcc_CreateStringBuffer();
+	char *macro_value = NULL;
     //find the start of the Macro identifier
     skipWhiteSpace(line);
+	if (!isWordChar(line->string[line->index]))
+	{
+		mcc_Error("Illegal macro identifier at %s:%d\n",
+				  mcc_GetFileBufferFilename(fileBuffer),
+				  mcc_GetFileBufferCurrentLineNo(fileBuffer));
+	}
     while( (line->index < line->length) && (isWordChar(line->string[line->index])) )
     {
         mcc_StringBufferAppendChar(idBuffer, line->string[line->index]);
+		line->index++;
     }
+	mcc_StringBufferAppendChar(idBuffer, '\0');
     skipWhiteSpace(line);
-    mcc_DefineMacro((char *)mcc_DestroyBufferNotString(idBuffer),
-                    (char *)&line->string[line->index]);
+	if (line->index < line->length)
+	{
+		macro_value = (char *)&line->string[line->index];
+	}
+//    mcc_DefineMacro((char *)mcc_StringBufferGetString(idBuffer), macro_value);
+	mcc_DeleteStringBuffer(idBuffer);
 }
 
 static void handleIfdef(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}

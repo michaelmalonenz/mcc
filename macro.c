@@ -58,16 +58,16 @@ void mcc_DefineMacro(char *text, char *value)
 				current->right = create_macro(text, value);
 			else
 				current = current->right;
-			break;
+			return;
 		case 0:
 			mcc_Error("Macro '%s' is already defined\n", text);
-			break;
+			return;
 		case -1:
 			if (current->left == NULL)
 				current->left = create_macro(text, value);
 			else
 				current = current->left;
-			break;
+			return;
 		}
 	}
 }
@@ -84,7 +84,7 @@ void mcc_UndefineMacro(char *text)
 			current = current->right;
 			break;
 		case 0:
-			//repair the b-tree
+			//still need to repair the b-tree
 			delete_macro(current);
 			return;
 		case -1:
@@ -107,7 +107,6 @@ mcc_Macro_t *mcc_ResolveMacro(const char *text)
 			break;
 		case 0:
 			return current;
-			break;
 		case -1:
 			current = current->left;
 			break;
