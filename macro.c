@@ -19,7 +19,7 @@ static mcc_Macro_t *root = NULL;
 // would yield the same result as YET_ANOTHER_MACRO, which is bad!
 //
 // To make life better, I also need to evaluate constant expressions here
-static mcc_Macro_t *create_macro(char *text, char UNUSED(*value))
+static mcc_Macro_t *create_macro(const char *text, const char UNUSED(*value))
 {
 	mcc_Macro_t *result = (mcc_Macro_t *) malloc(sizeof(mcc_Macro_t));
 	result->text = (char *) malloc(sizeof(char) * strlen(text));
@@ -40,17 +40,16 @@ static void delete_macro(mcc_Macro_t *macro)
 }
 
 
-char *mcc_DoMacroReplacement(char UNUSED(*text))
+char *mcc_DoMacroReplacement(char *text)
 {
-	char *replacedText = NULL;
 	// search through the text, and any whole word is potentially
 	// a macro.  If it does turn out to be, replace it.
-	return replacedText;
+	return text;
 }
 
 // I should really refactor these next couple of functions
 // because they're somewhat similar
-void mcc_DefineMacro(char *text, char *value)
+void mcc_DefineMacro(const char *text, char *value)
 {
 	mcc_Macro_t *current = root;
 	if (root == NULL)
@@ -87,7 +86,7 @@ void mcc_DefineMacro(char *text, char *value)
 	}
 }
 
-void mcc_UndefineMacro(char *text)
+void mcc_UndefineMacro(const char *text)
 {
 	mcc_Macro_t *current = root;
 	while (current != NULL)

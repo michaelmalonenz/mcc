@@ -68,6 +68,25 @@ static void searchPreprocessorDirectives(mcc_LogicalLine_t *line, mcc_FileBuffer
     }
 }
 
+static mcc_StringBuffer_t *GetMacroIdentifier(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
+{
+	mcc_StringBuffer_t *idBuffer = mcc_CreateStringBuffer();
+    skipWhiteSpace(line);
+	if (!isWordChar(line->string[line->index]))
+	{
+		mcc_Error("Illegal macro identifier at %s:%d\n",
+				  mcc_GetFileBufferFilename(fileBuffer),
+				  mcc_GetFileBufferCurrentLineNo(fileBuffer));
+	}
+    while( (line->index < line->length) && (isWordChar(line->string[line->index])) )
+    {
+        mcc_StringBufferAppendChar(idBuffer, line->string[line->index]);
+		line->index++;
+    }
+	mcc_StringBufferAppendChar(idBuffer, '\0');
+	return idBuffer;
+}
+
 void mcc_PreprocessFile(const char *inFilename, FILE *outFile)
 {
 	mcc_FileBuffer_t *fileBuffer = mcc_CreateFileBuffer(inFilename);
@@ -138,32 +157,34 @@ static void handleInclude(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 	mcc_DeleteStringBuffer(fileInclude);
 }
 
+//currently doesn't handle function-like macros
 static void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 {
-    mcc_StringBuffer_t *idBuffer = mcc_CreateStringBuffer();
+    mcc_StringBuffer_t *idBuffer = GetMacroIdentifier(line, fileBuffer);
 	char *macro_value = NULL;
-    //find the start of the Macro identifier
-    skipWhiteSpace(line);
-	if (!isWordChar(line->string[line->index]))
-	{
-		mcc_Error("Illegal macro identifier at %s:%d\n",
-				  mcc_GetFileBufferFilename(fileBuffer),
-				  mcc_GetFileBufferCurrentLineNo(fileBuffer));
-	}
-    while( (line->index < line->length) && (isWordChar(line->string[line->index])) )
-    {
-        mcc_StringBufferAppendChar(idBuffer, line->string[line->index]);
-		line->index++;
-    }
-	mcc_StringBufferAppendChar(idBuffer, '\0');
     skipWhiteSpace(line);
 	if (line->index < line->length)
 	{
-		macro_value = (char *)&line->string[line->index];
+		macro_value = &line->string[line->index];
 	}
-    mcc_DefineMacro((char *)mcc_StringBufferGetString(idBuffer), macro_value);
+    mcc_DefineMacro(mcc_StringBufferGetString(idBuffer), macro_value);
 	mcc_DeleteStringBuffer(idBuffer);
 }
+
+static void handleUndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
+{
+    mcc_StringBuffer_t *idBuffer = GetMacroIdentifier(line, fileBuffer);
+	mcc_UndefineMacro(mcc_StringBufferGetString(idBuffer));
+	mcc_DeleteStringBuffer(idBuffer);
+}
+
+static void handleError(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer))
+{
+	mcc_Error("Error: %s \nat %s:%d\n", &line->string[line->index],
+			  mcc_GetFileBufferFilename(fileBuffer),
+			  mcc_GetFileBufferCurrentLineNo(fileBuffer));
+}
+
 
 static void handleIfdef(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
 static void handleIfndef(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
@@ -171,6 +192,6 @@ static void handleIf(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*f
 static void handleEndif(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
 static void handleElse(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
 static void handleElif(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
-static void handleUndef(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
-static void handleError(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
+
+//What shall I do with #pragmas???
 static void handlePragma(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}

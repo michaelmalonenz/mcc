@@ -9,9 +9,9 @@ typedef struct macro {
 	struct macro *right;
 }mcc_Macro_t;
 
-void mcc_DefineMacro(char *text, char *value);
+void mcc_DefineMacro(const char *text, char *value);
 
-void mcc_UndefineMacro(char *text);
+void mcc_UndefineMacro(const char *text);
 
 mcc_Macro_t *mcc_ResolveMacro(const char *text);
 
