@@ -41,7 +41,7 @@ static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] =
 
 static FILE *outputFile;
 
-static inline void skipWhiteSpace(mcc_LogicalLine_t *line)
+static inline void SkipWhiteSpace(mcc_LogicalLine_t *line)
 {
     while( (line->index < line->length) && (isNonBreakingWhiteSpace(line->string[line->index])) )
         line->index++;
@@ -50,7 +50,7 @@ static inline void skipWhiteSpace(mcc_LogicalLine_t *line)
 static void searchPreprocessorDirectives(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 {
 	int j;
-    skipWhiteSpace(line);
+    SkipWhiteSpace(line);
     if (line->string[line->index] == '#')
     {
         line->index++;
@@ -71,7 +71,7 @@ static void searchPreprocessorDirectives(mcc_LogicalLine_t *line, mcc_FileBuffer
 static mcc_StringBuffer_t *GetMacroIdentifier(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 {
 	mcc_StringBuffer_t *idBuffer = mcc_CreateStringBuffer();
-    skipWhiteSpace(line);
+    SkipWhiteSpace(line);
 	if (!isWordChar(line->string[line->index]))
 	{
 		mcc_Error("Illegal macro identifier at %s:%d\n",
@@ -112,7 +112,7 @@ static void handleInclude(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 {
 	mcc_StringBuffer_t *fileInclude = mcc_CreateStringBuffer();
 	char terminator;
-	skipWhiteSpace(line);
+	SkipWhiteSpace(line);
 	if (line->string[line->index] == LOCAL_INCLUDE_OPENER)
 	{
 		terminator = LOCAL_INCLUDE_TERMINATOR;
@@ -162,7 +162,7 @@ static void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 {
     mcc_StringBuffer_t *idBuffer = GetMacroIdentifier(line, fileBuffer);
 	char *macro_value = NULL;
-    skipWhiteSpace(line);
+    SkipWhiteSpace(line);
 	if (line->index < line->length)
 	{
 		macro_value = &line->string[line->index];
@@ -178,8 +178,9 @@ static void handleUndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 	mcc_DeleteStringBuffer(idBuffer);
 }
 
-static void handleError(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer))
+static void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 {
+	SkipWhiteSpace(line);
 	mcc_Error("Error: %s \nat %s:%d\n", &line->string[line->index],
 			  mcc_GetFileBufferFilename(fileBuffer),
 			  mcc_GetFileBufferCurrentLineNo(fileBuffer));
