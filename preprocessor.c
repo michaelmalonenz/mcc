@@ -87,6 +87,36 @@ static mcc_StringBuffer_t *GetMacroIdentifier(mcc_LogicalLine_t *line, mcc_FileB
 	return idBuffer;
 }
 
+
+// only handles c++ style comments just now - like this one!
+static void DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t UNUSED(*fileBuffer))
+{
+	unsigned int i;
+	mcc_StringBuffer_t *whitespaceBuffer = NULL;
+	SkipWhiteSpace(line);
+	if (line->string[line->index] == '/')
+	{
+		if (line->string[line->index+1] == '/')
+		{
+			whitespaceBuffer = mcc_CreateStringBuffer();
+			for(i = line->index; i < line->length; i++)
+			{
+				mcc_StringBufferAppendChar(whitespaceBuffer, ' ');
+			}
+			mcc_StringBufferAppendChar(whitespaceBuffer, '\0');
+			fprintf(outputFile, "%s\n", mcc_StringBufferGetString(whitespaceBuffer));
+			mcc_DeleteStringBuffer(whitespaceBuffer);
+		}
+		else if (line->string[line->index+1] == '*')
+		{
+			whitespaceBuffer = mcc_CreateStringBuffer();
+			// go through until we reach either the end the comment,
+			// or line (in which case we get another one) or file?
+			mcc_DeleteStringBuffer(whitespaceBuffer);
+		}
+	}
+}
+
 void mcc_PreprocessFile(const char *inFilename, FILE *outFile)
 {
 	mcc_FileBuffer_t *fileBuffer = mcc_CreateFileBuffer(inFilename);
@@ -101,6 +131,7 @@ void mcc_PreprocessFile(const char *inFilename, FILE *outFile)
 		{
 //            printf("%s\n", logicalLine->string);
 //			doMacroReplacement(logicalLine);
+			DealWithComments(logicalLine, fileBuffer);
 			searchPreprocessorDirectives(logicalLine, fileBuffer);
 		}
 	}
