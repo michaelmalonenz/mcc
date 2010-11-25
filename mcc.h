@@ -51,6 +51,8 @@ typedef _Bool bool_t;
                         ((c) >= '0' && (c) <= '9') || \
                         ((c) == '_') )
 
+#define isNumber(d) ( ((d) >= '0') && ((d) <= '9') )
+
 FILE *mcc_OpenFile(const char *filename, char *flags);
 
 const char *mcc_FindLocalInclude(const char *filename);

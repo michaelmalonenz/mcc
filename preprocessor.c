@@ -40,6 +40,8 @@ static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] =
 																				   &handleError, &handlePragma };
 
 static FILE *outputFile;
+static bool_t insideConditional;
+static bool_t conditionalIsTrue;
 
 static inline void SkipWhiteSpace(mcc_LogicalLine_t *line)
 {
@@ -218,7 +220,40 @@ static void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 }
 
 
-static void handleIfdef(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
+static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
+{
+	mcc_StringBuffer_t *idBuffer = mcc_CreateStringBuffer();
+	SkipWhiteSpace(line);
+	if (!isWordChar(line->string[line->index]) || 
+		isNumber(line->string[line->index]))
+	{
+		mcc_Error("Invalid character in ifdef conditional at %s:%d\n",
+				  mcc_GetFileBufferFilename(fileBuffer),
+				  mcc_GetFileBufferCurrentLineNo(fileBuffer));
+	}
+	while( (line->index < line->length) &&
+		   isWordChar(line->string[line->index]) )
+	{
+		mcc_StringBufferAppendChar(idBuffer, line->string[line->index++]);
+	}
+	SkipWhiteSpace(line);
+	if (line->index != line-> length)
+	{
+		mcc_Error("Extra characters after Macro in ifdef conditional at %s:%d\n",
+				  mcc_GetFileBufferFilename(fileBuffer),
+				  mcc_GetFileBufferCurrentLineNo(fileBuffer));
+	}
+	insideConditional = TRUE;
+	if (mcc_ResolveMacro(mcc_StringBufferGetString(idBuffer)))
+	{
+		conditionalIsTrue = TRUE;
+	}
+	else
+	{
+		conditionalIsTrue = FALSE;
+	}
+}
+
 static void handleIfndef(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
 static void handleIf(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
 static void handleEndif(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
