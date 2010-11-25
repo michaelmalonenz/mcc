@@ -222,24 +222,11 @@ static void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 
 static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 {
-	mcc_StringBuffer_t *idBuffer = mcc_CreateStringBuffer();
-	SkipWhiteSpace(line);
-	if (!isWordChar(line->string[line->index]) || 
-		isNumber(line->string[line->index]))
-	{
-		mcc_Error("Invalid character in ifdef conditional at %s:%d\n",
-				  mcc_GetFileBufferFilename(fileBuffer),
-				  mcc_GetFileBufferCurrentLineNo(fileBuffer));
-	}
-	while( (line->index < line->length) &&
-		   isWordChar(line->string[line->index]) )
-	{
-		mcc_StringBufferAppendChar(idBuffer, line->string[line->index++]);
-	}
-	SkipWhiteSpace(line);
+	mcc_StringBuffer_t *idBuffer = GetMacroIdentifier(line, fileBuffer);
+    SkipWhiteSpace(line);
 	if (line->index != line-> length)
 	{
-		mcc_Error("Extra characters after Macro in ifdef conditional at %s:%d\n",
+		mcc_Error("Extra characters after Macro after ifdef conditional at %s:%d\n",
 				  mcc_GetFileBufferFilename(fileBuffer),
 				  mcc_GetFileBufferCurrentLineNo(fileBuffer));
 	}
@@ -252,12 +239,48 @@ static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 	{
 		conditionalIsTrue = FALSE;
 	}
+	mcc_DeleteStringBuffer(idBuffer);
 }
 
 static void handleIfndef(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
 static void handleIf(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
-static void handleEndif(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
-static void handleElse(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
+
+static void handleEndif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
+{
+	SkipWhiteSpace(line);
+	if (line->index != line->length)
+	{
+		mcc_Error("Extra characters after Macro after endif at %s:%d\n",
+				  mcc_GetFileBufferFilename(fileBuffer),
+				  mcc_GetFileBufferCurrentLineNo(fileBuffer));
+	}
+	if (insideConditional)
+	{
+		insideConditional = FALSE;
+	}
+}
+
+static void handleElse(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
+{
+	SkipWhiteSpace(line);
+	if (line->index != line->length)
+	{
+		mcc_Error("Extra Characters after else at %s:%d\n",
+				  mcc_GetFileBufferFilename(fileBuffer),
+				  mcc_GetFileBufferCurrentLineNo(fileBuffer));
+	}
+	if (insideConditional)
+	{
+		conditionalIsTrue = !conditionalIsTrue;
+	}
+	else
+	{
+		mcc_Error("Else without If at %s:%d\n",
+				  mcc_GetFileBufferFilename(fileBuffer),
+				  mcc_GetFileBufferCurrentLineNo(fileBuffer));
+	}
+}
+
 static void handleElif(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
 
 //What shall I do with #pragmas???
