@@ -20,19 +20,19 @@ enum pp_directives { PP_INCLUDE, PP_DEFINE, PP_IFDEF, PP_IFNDEF, PP_IF, PP_ENDIF
 static const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES] = { "include", "define", "ifdef", "ifndef", "if",
 																			"endif", "else", "elif", "undef", "error", "pragma" };
 
-typedef void (preprocessorDirectiveHandler_t)(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+typedef void (preprocessorDirectiveHandler_t)(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly);
 
-static void handleInclude(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static void handleIfndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static void handleIf(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static void handleEndif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static void handleElse(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static void handleElif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static void handleUndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static void handlePragma(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+static void handleInclude(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly);
+static void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly);
+static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly);
+static void handleIfndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly);
+static void handleIf(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly);
+static void handleEndif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly);
+static void handleElse(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly);
+static void handleElif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly);
+static void handleUndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly);
+static void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly);
+static void handlePragma(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly);
 
 static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = { &handleInclude, &handleDefine, &handleIfdef,
 																				   &handleIfndef, &handleIf, &handleEndif,
@@ -63,7 +63,7 @@ static void searchPreprocessorDirectives(mcc_LogicalLine_t *line, mcc_FileBuffer
             {
 				printf("%s -> %s\n", line->string, preprocessor_directives[j]);
 				line->index += strlen(preprocessor_directives[j]);
-                ppHandlers[j](line, fileBuffer);
+                ppHandlers[j](line, fileBuffer, FALSE);
                 return;
             }
         }
@@ -141,10 +141,13 @@ void mcc_PreprocessFile(const char *inFilename, FILE *outFile)
 	mcc_DeleteFileBuffer(fileBuffer);
 }
 
-static void handleInclude(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
+static void handleInclude(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly)
 {
 	mcc_StringBuffer_t *fileInclude = mcc_CreateStringBuffer();
 	char terminator;
+	if (parseOnly)
+		return;
+
 	SkipWhiteSpace(line);
 	if (line->string[line->index] == LOCAL_INCLUDE_OPENER)
 	{
@@ -191,10 +194,12 @@ static void handleInclude(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 }
 
 //currently doesn't handle function-like macros
-static void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
+static void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly)
 {
     mcc_StringBuffer_t *idBuffer = GetMacroIdentifier(line, fileBuffer);
 	char *macro_value = NULL;
+	if (parseOnly)
+		return;
     SkipWhiteSpace(line);
 	if (line->index < line->length)
 	{
@@ -204,15 +209,20 @@ static void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 	mcc_DeleteStringBuffer(idBuffer);
 }
 
-static void handleUndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
+static void handleUndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly)
 {
-    mcc_StringBuffer_t *idBuffer = GetMacroIdentifier(line, fileBuffer);
+	mcc_StringBuffer_t *idBuffer;
+	if (parseOnly)
+		return;
+	idBuffer = GetMacroIdentifier(line, fileBuffer);
 	mcc_UndefineMacro(mcc_StringBufferGetString(idBuffer));
 	mcc_DeleteStringBuffer(idBuffer);
 }
 
-static void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
+static void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly)
 {
+	if (parseOnly)
+		return;
 	SkipWhiteSpace(line);
 	mcc_Error("Error: %s \nat %s:%d\n", &line->string[line->index],
 			  mcc_GetFileBufferFilename(fileBuffer),
@@ -220,10 +230,11 @@ static void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 }
 
 
-static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
+static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t UNUSED(parseOnly))
 {
-	mcc_StringBuffer_t *idBuffer = GetMacroIdentifier(line, fileBuffer);
-    SkipWhiteSpace(line);
+	mcc_StringBuffer_t *idBuffer;
+	idBuffer = GetMacroIdentifier(line, fileBuffer);
+	SkipWhiteSpace(line);
 	if (line->index != line-> length)
 	{
 		mcc_Error("Extra characters after Macro after ifdef conditional at %s:%d\n",
@@ -242,10 +253,10 @@ static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 	mcc_DeleteStringBuffer(idBuffer);
 }
 
-static void handleIfndef(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
-static void handleIf(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
+static void handleIfndef(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer), bool_t UNUSED(parseOnly)) {}
+static void handleIf(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer), bool_t UNUSED(parseOnly)) {}
 
-static void handleEndif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
+static void handleEndif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t UNUSED(parseOnly))
 {
 	SkipWhiteSpace(line);
 	if (line->index != line->length)
@@ -260,7 +271,7 @@ static void handleEndif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 	}
 }
 
-static void handleElse(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
+static void handleElse(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t UNUSED(parseOnly))
 {
 	SkipWhiteSpace(line);
 	if (line->index != line->length)
@@ -281,7 +292,7 @@ static void handleElse(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 	}
 }
 
-static void handleElif(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
+static void handleElif(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer), bool_t UNUSED(parseOnly)) {}
 
 //What shall I do with #pragmas???
-static void handlePragma(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer)) {}
+static void handlePragma(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer), bool_t UNUSED(parseOnly)) {}
