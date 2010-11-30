@@ -46,7 +46,7 @@ mcc_FileBuffer_t *mcc_CreateFileBuffer(const char *file)
 	mcc_FileBuffer_t *fileBuffer = (mcc_FileBuffer_t *) malloc(sizeof(mcc_FileBuffer_t));
 	fileBuffer->filename = file;
 	fileBuffer->file = mcc_OpenFile(file, "r");
-	fileBuffer->line_no = 1;
+	fileBuffer->line_no = 0;
 	fileBuffer->bufferIndex = 0;
 	fileBuffer->chars_read = 0;
     fileBuffer->currentLine.string = NULL;
