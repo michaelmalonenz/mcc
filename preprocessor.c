@@ -49,7 +49,7 @@ static inline void SkipWhiteSpace(mcc_LogicalLine_t *line)
         line->index++;
 }
 
-static void searchPreprocessorDirectives(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
+static void SearchPreprocessorDirectives(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly)
 {
 	int j;
     SkipWhiteSpace(line);
@@ -63,7 +63,7 @@ static void searchPreprocessorDirectives(mcc_LogicalLine_t *line, mcc_FileBuffer
             {
 				printf("%s -> %s\n", line->string, preprocessor_directives[j]);
 				line->index += strlen(preprocessor_directives[j]);
-                ppHandlers[j](line, fileBuffer, FALSE);
+                ppHandlers[j](line, fileBuffer, parseOnly);
                 return;
             }
         }
@@ -134,7 +134,7 @@ void mcc_PreprocessFile(const char *inFilename, FILE *outFile)
 //            printf("%s\n", logicalLine->string);
 //			doMacroReplacement(logicalLine);
 			DealWithComments(logicalLine, fileBuffer);
-			searchPreprocessorDirectives(logicalLine, fileBuffer);
+			SearchPreprocessorDirectives(logicalLine, fileBuffer, FALSE);
 		}
 	}
 
@@ -233,6 +233,7 @@ static void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, b
 static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t UNUSED(parseOnly))
 {
 	mcc_StringBuffer_t *idBuffer;
+	bool_t finished = FALSE;
 	idBuffer = GetMacroIdentifier(line, fileBuffer);
 	SkipWhiteSpace(line);
 	if (line->index != line-> length)
@@ -251,6 +252,19 @@ static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, b
 		conditionalIsTrue = FALSE;
 	}
 	mcc_DeleteStringBuffer(idBuffer);
+	line = mcc_FileBufferGetNextLogicalLine(fileBuffer);
+	while (!mcc_FileBufferEOFReached(fileBuffer) && !finished)
+	{
+		SkipWhiteSpace(line);
+		if (line->string[line->index] == '#')
+		{
+			//look for else, elif and endif
+		}
+		else
+		{
+			SearchPreprocessorDirectives(line, fileBuffer, parseOnly);
+		}
+	}
 }
 
 static void handleIfndef(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer), bool_t UNUSED(parseOnly)) {}
