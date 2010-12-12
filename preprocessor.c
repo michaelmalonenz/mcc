@@ -34,6 +34,10 @@ static void handleUndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, b
 static void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly);
 static void handlePragma(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly);
 
+static void SearchPreprocessorDirectives(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly);
+static mcc_StringBuffer_t *GetMacroIdentifier(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+static void DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t *fileBuffer);
+
 static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = { &handleInclude, &handleDefine, &handleIfdef,
 																				   &handleIfndef, &handleIf, &handleEndif,
 																				   &handleElse, &handleElif, &handleUndef,
@@ -42,12 +46,6 @@ static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] =
 static FILE *outputFile;
 static bool_t insideConditional;
 static bool_t conditionalIsTrue;
-
-static inline void SkipWhiteSpace(mcc_LogicalLine_t *line)
-{
-    while( (line->index < line->length) && (isNonBreakingWhiteSpace(line->string[line->index])) )
-        line->index++;
-}
 
 static void SearchPreprocessorDirectives(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly)
 {
@@ -112,6 +110,7 @@ static void DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t UNUSED(*f
 		else if (line->string[line->index+1] == '*')
 		{
 			whitespaceBuffer = mcc_CreateStringBuffer();
+			
 			// go through until we reach either the end the comment,
 			// or line (in which case we get another one) or file?
 			mcc_DeleteStringBuffer(whitespaceBuffer);
@@ -255,15 +254,7 @@ static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, b
 	line = mcc_FileBufferGetNextLogicalLine(fileBuffer);
 	while (!mcc_FileBufferEOFReached(fileBuffer) && !finished)
 	{
-		SkipWhiteSpace(line);
-		if (line->string[line->index] == '#')
-		{
-			//look for else, elif and endif
-		}
-		else
-		{
-			SearchPreprocessorDirectives(line, fileBuffer, parseOnly);
-		}
+		SearchPreprocessorDirectives(line, fileBuffer, !conditionalIsTrue);
 	}
 }
 

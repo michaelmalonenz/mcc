@@ -11,7 +11,7 @@ static mcc_Macro_t *root = NULL;
 // I would have introduced which would define the macro as the latest
 // version of it, which is not necessarily the intended one.
 // #define SOME_MACRO (3)
-// #define SOME_OTHER_MACRO SOME_MACRO (SOME_MACRO + 4)
+// #define SOME_OTHER_MACRO (SOME_MACRO + 4)
 // #undef SOME_MACRO
 // #define SOME_MACRO (6)
 // #define YET_ANOTHER_MACRO (SOME_MACRO + 4)

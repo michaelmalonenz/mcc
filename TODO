@@ -3,6 +3,12 @@ unit test the file stuff??  - is it possible to write a test that does this?
 Add support for tri-graphs? (Does this need to happen before or after the preprocessing step?)
 add support for comments    (                         ---- " ----                            )
 options
+Make the builder more betterer
+Fix unit test linkage
+run the unit tests automagically
+run the unit tests under valgrind
+Use stopper for the unit tests??
+As soon as possible, start eating my own dog food -> alongside gcc?
 
 Preprocessor:
 macro replacement

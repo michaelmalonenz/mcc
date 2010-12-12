@@ -142,6 +142,11 @@ mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer
     return &fileBuffer->currentLine;
 }
 
+inline void SkipWhiteSpace(mcc_LogicalLine_t *line)
+{
+    while( (line->index < line->length) && (isNonBreakingWhiteSpace(line->string[line->index])) )
+        line->index++;
+}
 
 #if MCC_DEBUG
 void printFileBuffer(mcc_FileBuffer_t *buffer)
