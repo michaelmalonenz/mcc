@@ -36,7 +36,7 @@ static void handlePragma(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, 
 
 static void SearchPreprocessorDirectives(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly);
 static mcc_StringBuffer_t *GetMacroIdentifier(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static void DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t *fileBuffer);
+static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t *fileBuffer);
 
 static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = { &handleInclude, &handleDefine, &handleIfdef,
 																				   &handleIfndef, &handleIf, &handleEndif,
@@ -89,7 +89,7 @@ static mcc_StringBuffer_t *GetMacroIdentifier(mcc_LogicalLine_t *line, mcc_FileB
 
 
 // only handles c++ style comments just now - like this one!
-static void DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t UNUSED(*fileBuffer))
+static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t *fileBuffer)
 {
 	unsigned int i;
 	mcc_StringBuffer_t *whitespaceBuffer = NULL;
@@ -99,6 +99,7 @@ static void DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t UNUSED(*f
 		if (line->string[line->index+1] == '/')
 		{
 			whitespaceBuffer = mcc_CreateStringBuffer();
+			mcc_StringBufferAppendChar(whitespaceBuffer, ' ');
 			for(i = line->index; i < line->length; i++)
 			{
 				mcc_StringBufferAppendChar(whitespaceBuffer, ' ');
@@ -110,12 +111,42 @@ static void DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t UNUSED(*f
 		else if (line->string[line->index+1] == '*')
 		{
 			whitespaceBuffer = mcc_CreateStringBuffer();
-			
-			// go through until we reach either the end the comment,
-			// or line (in which case we get another one) or file?
-			mcc_DeleteStringBuffer(whitespaceBuffer);
+			mcc_StringBufferAppendChar(whitespaceBuffer, ' ');
+			while(!mcc_FileBufferEOFReached(fileBuffer))
+			{
+				for(i = line->index; i < line->length; i++)
+				{
+					if(line->string[line->index] == '*' &&
+					   line->string[line->index+1] == '/')
+					{
+						//Append two spaces for the */
+						mcc_StringBufferAppendChar(whitespaceBuffer, ' ');
+						mcc_StringBufferAppendChar(whitespaceBuffer, ' ');
+						line->index++;
+						mcc_StringBufferAppendChar(whitespaceBuffer, '\0');
+						fprintf(outputFile, "%s\n", mcc_StringBufferGetString(whitespaceBuffer));
+						mcc_DeleteStringBuffer(whitespaceBuffer);
+						SkipWhiteSpace(line);
+						if (line->index == line->length)
+						{
+							line = mcc_FileBufferGetNextLogicalLine(fileBuffer);
+							line = DealWithComments(line, fileBuffer);
+						}
+						return line;
+					}
+					mcc_StringBufferAppendChar(whitespaceBuffer, ' ');
+				}
+				line = mcc_FileBufferGetNextLogicalLine(fileBuffer);
+			}
 		}
 	}
+	SkipWhiteSpace(line);
+	if (line->index == line->length)
+	{
+		line = mcc_FileBufferGetNextLogicalLine(fileBuffer);
+		line = DealWithComments(line, fileBuffer);
+	}
+	return line;
 }
 
 void mcc_PreprocessFile(const char *inFilename, FILE *outFile)
@@ -132,7 +163,7 @@ void mcc_PreprocessFile(const char *inFilename, FILE *outFile)
 		{
 //            printf("%s\n", logicalLine->string);
 //			doMacroReplacement(logicalLine);
-			DealWithComments(logicalLine, fileBuffer);
+			logicalLine = DealWithComments(logicalLine, fileBuffer);
 			SearchPreprocessorDirectives(logicalLine, fileBuffer, FALSE);
 		}
 	}
@@ -229,10 +260,9 @@ static void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, b
 }
 
 
-static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t UNUSED(parseOnly))
+static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t parseOnly)
 {
 	mcc_StringBuffer_t *idBuffer;
-	bool_t finished = FALSE;
 	idBuffer = GetMacroIdentifier(line, fileBuffer);
 	SkipWhiteSpace(line);
 	if (line->index != line-> length)
@@ -250,16 +280,38 @@ static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, b
 	{
 		conditionalIsTrue = FALSE;
 	}
-	mcc_DeleteStringBuffer(idBuffer);
 	line = mcc_FileBufferGetNextLogicalLine(fileBuffer);
-	while (!mcc_FileBufferEOFReached(fileBuffer) && !finished)
+	while (!mcc_FileBufferEOFReached(fileBuffer))
 	{
-		SearchPreprocessorDirectives(line, fileBuffer, !conditionalIsTrue);
+		SkipWhiteSpace(line);
+		if (line->string[line->index] == '#')
+		{
+			if (strncmp((char *)&line->string[line->index+1],
+						preprocessor_directives[PP_ENDIF],
+						strlen(preprocessor_directives[PP_ENDIF])) == 0)
+            {
+				line->index += strlen(preprocessor_directives[PP_ENDIF]);
+                ppHandlers[PP_ENDIF](line, fileBuffer, parseOnly);
+ 				mcc_DeleteStringBuffer(idBuffer);
+				return;
+			}
+			else
+			{
+				SearchPreprocessorDirectives(line, fileBuffer, !conditionalIsTrue);
+			}
+		}
+		line = mcc_FileBufferGetNextLogicalLine(fileBuffer);
+		line = DealWithComments(line, fileBuffer);
 	}
+	mcc_Error("Unexpected End Of File while searching for '#endif' to match '#ifdef %s'",
+			  mcc_StringBufferGetString(idBuffer));
 }
 
 static void handleIfndef(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer), bool_t UNUSED(parseOnly)) {}
-static void handleIf(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer), bool_t UNUSED(parseOnly)) {}
+static void handleIf(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer), bool_t UNUSED(parseOnly))
+{
+	insideConditional = TRUE;
+}
 
 static void handleEndif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t UNUSED(parseOnly))
 {
