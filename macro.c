@@ -40,11 +40,10 @@ static void delete_macro(mcc_Macro_t *macro)
 }
 
 
-char *mcc_DoMacroReplacement(char *text)
+void mcc_DoMacroReplacement(mcc_LogicalLine_t UNUSED(*line))
 {
 	// search through the text, and any whole word is potentially
 	// a macro.  If it does turn out to be, replace it.
-	return text;
 }
 
 // I should really refactor these next couple of functions

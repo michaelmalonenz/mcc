@@ -159,7 +159,6 @@ void mcc_PreprocessFile(const char *inFilename, FILE *outFile)
 		logicalLine = mcc_FileBufferGetNextLogicalLine(fileBuffer);
 		if (logicalLine->length > 0)
 		{
-//            printf("%s\n", logicalLine->string);
 //			doMacroReplacement(logicalLine);
 			logicalLine = DealWithComments(logicalLine, fileBuffer);
 			if (logicalLine->index == logicalLine->length)
@@ -283,6 +282,7 @@ static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, b
 	line = mcc_FileBufferGetNextLogicalLine(fileBuffer);
 	while (!mcc_FileBufferEOFReached(fileBuffer))
 	{
+		line = DealWithComments(line, fileBuffer);
 		SkipWhiteSpace(line);
 		if (line->string[line->index] == '#')
 		{
@@ -301,7 +301,6 @@ static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, b
 			}
 		}
 		line = mcc_FileBufferGetNextLogicalLine(fileBuffer);
-		line = DealWithComments(line, fileBuffer);
 	}
 	mcc_Error("Unexpected End Of File while searching for '#endif' to match '#ifdef %s'",
 			  mcc_StringBufferGetString(idBuffer));
