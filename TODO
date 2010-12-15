@@ -1,7 +1,8 @@
 Misc:
+Should I be tokenising before I get to the preprocessor?
 unit test the file stuff??  - is it possible to write a test that does this?
-Add support for tri-graphs? (Does this need to happen before or after the preprocessing step?)
-add support for comments    (                         ---- " ----                            )
+write a ruby script to replace all tri-graphs in c code
+convert building to use a Makefile?
 options
 Make the builder more betterer
 Fix unit test linkage

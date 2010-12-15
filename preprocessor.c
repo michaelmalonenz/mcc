@@ -94,6 +94,9 @@ static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuff
 	unsigned int i;
 	mcc_StringBuffer_t *whitespaceBuffer = NULL;
 	SkipWhiteSpace(line);
+	if (line->length == line->index)
+		return line;
+
 	if (line->string[line->index] == '/')
 	{
 		if (line->string[line->index+1] == '/')
@@ -127,11 +130,6 @@ static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuff
 						fprintf(outputFile, "%s\n", mcc_StringBufferGetString(whitespaceBuffer));
 						mcc_DeleteStringBuffer(whitespaceBuffer);
 						SkipWhiteSpace(line);
-						if (line->index == line->length)
-						{
-							line = mcc_FileBufferGetNextLogicalLine(fileBuffer);
-							line = DealWithComments(line, fileBuffer);
-						}
 						return line;
 					}
 					mcc_StringBufferAppendChar(whitespaceBuffer, ' ');
@@ -164,6 +162,8 @@ void mcc_PreprocessFile(const char *inFilename, FILE *outFile)
 //            printf("%s\n", logicalLine->string);
 //			doMacroReplacement(logicalLine);
 			logicalLine = DealWithComments(logicalLine, fileBuffer);
+			if (logicalLine->index == logicalLine->length)
+				continue;
 			SearchPreprocessorDirectives(logicalLine, fileBuffer, FALSE);
 		}
 	}
