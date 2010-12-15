@@ -12,6 +12,7 @@ Use stopper for the unit tests??
 As soon as possible, start eating my own dog food -> alongside gcc?
 
 Preprocessor:
+push the contents of ifdef to its own function called "defined" and start using it for ifdef and ifndef and later on, the defined() inbuilt function macro
 macro replacement
 tokenise directives - should this be passed off to the tokeniser?  The rules are slightly different...
 evaluate macros (like #if etc)
