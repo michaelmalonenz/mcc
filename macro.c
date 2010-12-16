@@ -4,6 +4,12 @@
 #include "macro.h"
 #include "mcc.h"
 
+/* Do I actually want to turn my binary tree into a hash table?
+ * it could be faster, but I don't really know how many macros I'm
+ * likely to define in the average case.  TCC uses a hash table
+ * for both its macro and symbol table lookup, with a size of 8192
+ * (I would actually use a prime number, but you know)
+ */
 static mcc_Macro_t *root = NULL;
 
 // This step should involve macro replacement, so we only have to
