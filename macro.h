@@ -4,11 +4,11 @@
 #include "fileBuffer.h"
 
 typedef struct macro {
-	char *text;
-	char *value;
-	//char *args; ??
-	struct macro *left;
-	struct macro *right;
+   char *text;
+   char *value;
+   //char *args; ??
+   struct macro *left;
+   struct macro *right;
 }mcc_Macro_t;
 
 void mcc_DefineMacro(const char *text, char *value);

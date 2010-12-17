@@ -12,31 +12,31 @@
 
 static void test_Define(void)
 {
-	printf("Testing Define...");
-	mcc_DefineMacro(MACRO_NAME, "(1)");
-	printf("ok\n");
+   printf("Testing Define...");
+   mcc_DefineMacro(MACRO_NAME, "(1)");
+   printf("ok\n");
 }
 
 
 static void test_Find(void)
 {	
-	printf("Testing Find...");
-	mcc_Macro_t *result = mcc_ResolveMacro(MACRO_NAME);
-	assert(result != NULL);
-	printf("ok\n");
+   printf("Testing Find...");
+   mcc_Macro_t *result = mcc_ResolveMacro(MACRO_NAME);
+   assert(result != NULL);
+   printf("ok\n");
 }
 
 static void test_Undefine(void)
 {
-	printf("Testing undefine...");
-	mcc_UndefineMacro(MACRO_NAME);
-	printf("ok\n");
+   printf("Testing undefine...");
+   mcc_UndefineMacro(MACRO_NAME);
+   printf("ok\n");
 }
 
 int main(void)
 {
-	test_Define();
-	test_Find();
-	test_Undefine();
-	return 0;
+   test_Define();
+   test_Find();
+   test_Undefine();
+   return 0;
 }

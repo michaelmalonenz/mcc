@@ -20,72 +20,71 @@ static int numberOfTokens = 0;
 //Does this imply that I should really have an opaque type?
 mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len, int type)
 {
-	mcc_Token_t *token = (mcc_Token_t *) malloc(sizeof(mcc_Token_t));
-	token->name = (char *) malloc(sizeof(char) * (text_len + 1));
-	memcpy(token->name, text, text_len + 1);
-	token->name[text_len + 1] = '\0';
-	token->type = type;
-	token->isOperator = TRUE;
-
-	return token;
+   mcc_Token_t *token = (mcc_Token_t *) malloc(sizeof(mcc_Token_t));
+   token->name = (char *) malloc(sizeof(char) * (text_len + 1));
+   memcpy(token->name, text, text_len + 1);
+   token->name[text_len + 1] = '\0';
+   token->type = type;
+   token->isOperator = TRUE;
+   
+   return token;
 }
 
 void mcc_DeleteToken(mcc_Token_t *token)
 {
-	//This isn't complete, need to worry about the name as well
-	free(token);
+   //This isn't complete, need to worry about the name as well
+   free(token);
 }
 
 void mcc_AddToken(mcc_Token_t *token)
 {
-	if (firstToken == NULL)
-	{
-		firstToken = token;
-	}
-	token->next = currentToken;
-	currentToken = token;
+   if (firstToken == NULL)
+   {
+      firstToken = token;
+   }
+   token->next = currentToken;
+   currentToken = token;
 #if MCC_DEBUG
-	numberOfTokens++;
+   numberOfTokens++;
 #endif
 }
 
 void mcc_FreeTokens()
 {
-	mcc_Token_t *temp = NULL;
-	if(currentToken == NULL)
-		return;
-	temp = currentToken->next;
-	while(currentToken != NULL)
-	{
-		mcc_DeleteToken(currentToken);
-		currentToken = temp;
+   mcc_Token_t *temp = NULL;
+   if(currentToken == NULL)
+      return;
+   temp = currentToken->next;
+   while(currentToken != NULL)
+   {
+      mcc_DeleteToken(currentToken);
+      currentToken = temp;
 #if MCC_DEBUG
-		numberOfTokens--;
-	}
-	MCC_ASSERT(numberOfTokens == 0);
+      numberOfTokens--;
+   }
+   MCC_ASSERT(numberOfTokens == 0);
 #else
-    }
+   }
 #endif
-
 }
 
 mcc_Token_t *mcc_GetNextToken()
 {
-	mcc_Token_t *result;
-	if (nextToken == NULL)
-	{
-		nextToken = firstToken;
-	}
-	if (nextToken == NULL)
-	{
-		result = NULL;
-	}
-	else
-	{
-		result = nextToken;
-		nextToken = nextToken->next;
-	}
-	return result;
+   mcc_Token_t *result;
+   if (nextToken == NULL)
+   {
+      nextToken = firstToken;
+   }
+   if (nextToken == NULL)
+   {
+      result = NULL;
+   }
+   else
+   {
+      result = nextToken;
+      nextToken = nextToken->next;
+   }
+   return result;
 }
 
 

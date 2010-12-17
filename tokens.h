@@ -29,40 +29,40 @@
 #include "config.h"
 
 typedef struct token {
-	char *name;
-	int type;
-	bool_t isKeyword; /* won't make the distinction for c99 keywords, because by the time
-						 we are parsing the grammar tree, we don't care */
-	bool_t isSymbol;
-	bool_t isOperator;
-	unsigned short fileno;
-	int lineno;
-	struct token *next;
+   char *name;
+   int type;
+   bool_t isKeyword; /* won't make the distinction for c99 keywords, because by the time
+                        we are parsing the grammar tree, we don't care */
+   bool_t isSymbol;
+   bool_t isOperator;
+   unsigned short fileno;
+   int lineno;
+   struct token *next;
 } mcc_Token_t;
 
 /* The following enums need to be kept in sync with the corresponding char *[] */
 enum key_index { KEY_AUTO, KEY_BREAK, KEY_CASE, KEY_CHAR, KEY_CONST, KEY_CONTINUE, KEY_DEFAULT, KEY_DO, KEY_DOUBLE,
-				 KEY_ELSE, KEY_ENUM, KEY_EXTERN, KEY_FLOAT, KEY_FOR, KEY_GOTO, KEY_IF, KEY_INT, KEY_LONG,
-				 KEY_REGISTER, KEY_RETURN, KEY_SHORT, KEY_SIGNED, KEY_SIZEOF, KEY_STATIC, KEY_STRUCT,
-				 KEY_SWITCH, KEY_TYPEDEF, KEY_UNION, KEY_UNSIGNED, KEY_VOID, KEYVOLATILE, KEY_WHILE,
+                 KEY_ELSE, KEY_ENUM, KEY_EXTERN, KEY_FLOAT, KEY_FOR, KEY_GOTO, KEY_IF, KEY_INT, KEY_LONG,
+                 KEY_REGISTER, KEY_RETURN, KEY_SHORT, KEY_SIGNED, KEY_SIZEOF, KEY_STATIC, KEY_STRUCT,
+                 KEY_SWITCH, KEY_TYPEDEF, KEY_UNION, KEY_UNSIGNED, KEY_VOID, KEYVOLATILE, KEY_WHILE,
 #if MCC_C99_COMPATIBLE
-				 KEY_BOOL, KEY_COMPLEX, KEY_IMAGINARY, KEY_INLINE, KEY_RESTRICT, 
+                 KEY_BOOL, KEY_COMPLEX, KEY_IMAGINARY, KEY_INLINE, KEY_RESTRICT, 
 #endif
-				 NUM_KEYWORDS};
+                 NUM_KEYWORDS};
 extern const char *keywords[NUM_KEYWORDS];
 
 enum operator_index {OP_ADD, OP_MINUS, OP_DIVIDE, OP_MULTIPLY, OP_MODULO, OP_DECREMENT, OP_INCREMENT,
-					 OP_EQUALS_ASSIGN, OP_TIMES_EQUALS, OP_DIVIDE_EQUALS, OP_MOD_EQUALS, OP_PLUS_EQUALS,
-					 OP_MINUS_EQUALS, OP_L_SHIFT_EQUALS, OP_R_SHIFT_EQUALS, OP_BITWISE_AND_EQUALS,
-					 OP_BITWISE_EXCL_OR_EQUALS, OP_BITWISE_INCL_OR_EQUALS, OP_COMPARE_TO, OP_NOT_EQUAL,
-					 OP_GREATER_THAN, OP_LESS_THAN, OP_GREATER_EQUAL, OP_LESS_EQUAL, OP_LOGICAL_AND,
-					 OP_LOGICAL_EXCL_OR, OP_LOGICAL_INCL_OR, OP_NOT, OP_BITWISE_AND, OP_BITWISE_INCL_OR,
-					 OP_BITWISE_EXCL_OR, OP_L_SHIFT, OP_R_SHIFT, OP_NEGATE, OP_SIZEOF, OP_ADDRESS_OF, OP_TERNARY_IF,
-					 OP_TERNARY_ELSE, OP_COMMA, NUM_OPERATORS};
+                     OP_EQUALS_ASSIGN, OP_TIMES_EQUALS, OP_DIVIDE_EQUALS, OP_MOD_EQUALS, OP_PLUS_EQUALS,
+                     OP_MINUS_EQUALS, OP_L_SHIFT_EQUALS, OP_R_SHIFT_EQUALS, OP_BITWISE_AND_EQUALS,
+                     OP_BITWISE_EXCL_OR_EQUALS, OP_BITWISE_INCL_OR_EQUALS, OP_COMPARE_TO, OP_NOT_EQUAL,
+                     OP_GREATER_THAN, OP_LESS_THAN, OP_GREATER_EQUAL, OP_LESS_EQUAL, OP_LOGICAL_AND,
+                     OP_LOGICAL_EXCL_OR, OP_LOGICAL_INCL_OR, OP_NOT, OP_BITWISE_AND, OP_BITWISE_INCL_OR,
+                     OP_BITWISE_EXCL_OR, OP_L_SHIFT, OP_R_SHIFT, OP_NEGATE, OP_SIZEOF, OP_ADDRESS_OF, OP_TERNARY_IF,
+                     OP_TERNARY_ELSE, OP_COMMA, NUM_OPERATORS};
 extern char *operators[NUM_OPERATORS];
 
 enum symbol_index {SYM_OPEN_BRACE, SYM_CLOSE_BRACE, SYM_OPEN_BRACKET, SYM_CLOSE_BRACKET, SYM_SEMI_COLON, 
-				   SYM_OPEN_PAREN, SYM_CLOSE_PAREN, SYM_DOUBLE_QUOTE, SYM_SINGLE_QUOTE, SYM_ESCAPE, NUM_SYMBOLS};
+                   SYM_OPEN_PAREN, SYM_CLOSE_PAREN, SYM_DOUBLE_QUOTE, SYM_SINGLE_QUOTE, SYM_ESCAPE, NUM_SYMBOLS};
 extern char *symbols[NUM_SYMBOLS];
 
 

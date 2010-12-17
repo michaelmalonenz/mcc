@@ -7,9 +7,9 @@
 typedef struct FileBuffer mcc_FileBuffer_t;
 
 typedef struct LogicalLine {
-    char *string;
-    unsigned int index;
-    unsigned int length;
+   char *string;
+   unsigned int index;
+   unsigned int length;
 } mcc_LogicalLine_t;
 
 mcc_FileBuffer_t *mcc_CreateFileBuffer(const char *file);

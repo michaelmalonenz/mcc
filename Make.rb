@@ -46,7 +46,11 @@ def compile_a_directory(input_dir, out_dir)
    end
 end
 
-if $0 == __FILE__ then
+def find_dependencies(main_o_file)
+   
+end
+
+$0 == __FILE__ then
 
    ARGV.each do |arg|
       if arg =~ %r{--?c(?:l(?:e(?:a(?:n)?)?)?)?}ix
