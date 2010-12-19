@@ -25,7 +25,7 @@ class Linker
 
    # For every file in the directory which ends in .o
    # find which symbols they define and add them to the class's hash
-   def discover_defined_symbols(dir)
+   def add_bin_dir(dir)
       files = nil
       dir = File.expand_path(dir)
       Dir.chdir(dir) do
@@ -116,7 +116,7 @@ if $0 == __FILE__ then
    compile_a_directory(TEST_SRC_DIR, TEST_BIN_DIR)
 
    linker = Linker.new()
-   linker.discover_defined_symbols(BIN_DIR)
+   linker.add_bin_dir(BIN_DIR)
 
    Dir.chdir(BIN_DIR) do
       dependencies = linker.discover_required_files('mcc.o')
