@@ -28,10 +28,10 @@ static mcc_Macro_t *root = NULL;
 static mcc_Macro_t *create_macro(const char *text, const char UNUSED(*value))
 {
    mcc_Macro_t *result = (mcc_Macro_t *) malloc(sizeof(mcc_Macro_t));
-   result->text = (char *) malloc(sizeof(char) * strlen(text));
+   result->text = (char *) malloc(sizeof(char) * (strlen(text) + 1));
    MCC_ASSERT(result != NULL);
    MCC_ASSERT(result->text != NULL);
-   strncpy(result->text, text, strlen(text));
+   strncpy(result->text, text, strlen(text) + 1);
    result->left = NULL;
    result->right = NULL;
    return result;

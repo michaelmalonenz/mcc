@@ -33,8 +33,9 @@ void mcc_DeleteStringBuffer(mcc_StringBuffer_t *buffer)
 
 char *mcc_DestroyBufferNotString(mcc_StringBuffer_t *buffer)
 {
+   //+1 leaves space for the NUL
    char *string = (char *) realloc(buffer->string,
-                                   buffer->stringLength);
+                                   buffer->stringLength+1);
    if (buffer->stringLength == 0)
    {
       string = NULL;
@@ -53,8 +54,8 @@ void mcc_StringBufferAppendChar(mcc_StringBuffer_t *buffer, const char c)
 {
    if (buffer->stringLength == buffer->bufferSize)
    {
-      buffer->string = (char *) realloc(buffer->string, buffer->bufferSize * 2);
       buffer->bufferSize *= 2;
+      buffer->string = (char *) realloc(buffer->string, buffer->bufferSize);
       /* Is an assert here good enough, or should I error? */
       /* or should I wrap the mem functions with a function that errors clearly when we run out of memory? */
       MCC_ASSERT(buffer->string != NULL);
@@ -66,7 +67,6 @@ void mcc_StringBufferAppendChar(mcc_StringBuffer_t *buffer, const char c)
 
 void mcc_StringBufferUnappendChar(mcc_StringBuffer_t *buffer)
 {
-   //Should I also clobber the last char?
    buffer->stringLength--;
 }
 

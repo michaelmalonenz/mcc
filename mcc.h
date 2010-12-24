@@ -3,6 +3,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <limits.h>
 #include <assert.h>
 
@@ -45,6 +46,8 @@ typedef _Bool bool_t;
                          (c) == '\v' || (c) == ' ')
 
 #define isNonBreakingWhiteSpace(c) ((c) == ' ' || (c) == '\t' || (c) == '\v')
+
+#define isBreakingWhiteSpace(c) ((c) == '\r' || (c) == '\n')
 
 #define isWordChar(c) ( ((c) >= 'A' && (c) <= 'Z') || \
                         ((c) >= 'a' && (c) <= 'z') || \

@@ -23,7 +23,7 @@ static void test_Append(void)
 	
 	do
 	{
-		mcc_StringBufferAppendChar(buffer, *ptr);
+           mcc_StringBufferAppendChar(buffer, *ptr);
 	}while(*ptr++);
 	mcc_StringBufferAppendChar(buffer, '\0');
 	mcc_PrintStringBuffer(buffer);

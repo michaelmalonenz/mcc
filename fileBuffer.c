@@ -111,15 +111,13 @@ mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer
       }
       while ((fileBuffer->bufferIndex < fileBuffer->chars_read) && !lineIsRead)
       {
-         if (fileBuffer->buffer[fileBuffer->bufferIndex] != '\n')
+         if (!isBreakingWhiteSpace(fileBuffer->buffer[fileBuffer->bufferIndex]))
          {
             mcc_StringBufferAppendChar(lineBuffer,
                                        fileBuffer->buffer[fileBuffer->bufferIndex++]);
          }
          else
          {
-            //Should escaped new lines be able to explicitly handle any of \r or \r\n or \n?
-            //Shouldn't the C library return a single '\n' instead of '\r\n' anyway?
             if (fileBuffer->buffer[(fileBuffer->bufferIndex - 1)] == '\\')
             {
                mcc_StringBufferUnappendChar(lineBuffer);
@@ -129,7 +127,17 @@ mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer
                mcc_StringBufferAppendChar(lineBuffer, '\0');
                lineIsRead = TRUE;
             }
-            fileBuffer->bufferIndex++;
+            //This might seem weird, but the construction here will allow us to handle any
+            //of the 3 different line ending types without handling more than a single line
+            //in the buffer.
+            if(fileBuffer->buffer[fileBuffer->bufferIndex] == '\r')
+            {
+               fileBuffer->bufferIndex++;
+            }
+            if(fileBuffer->buffer[fileBuffer->bufferIndex] == '\n')
+            {
+               fileBuffer->bufferIndex++;
+            }
             //We want to increase this regardless of whether we have a full logical line or not,
             //so we keep the line numbers in sync with the source file
             fileBuffer->line_no++;

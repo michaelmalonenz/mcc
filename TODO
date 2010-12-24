@@ -13,6 +13,7 @@ As soon as possible, start eating my own dog food -> alongside gcc?
 Preprocessor:
 make it run under valgrind again - it currently leaks like a sieve
 fix the extra garbage at the end of some macros and the newline in the middle of the multi-line macro
+Fix the /**/ style comments to allow for more than one set per line (I don't want to sink to GOTO statements!)
 macro replacement
 tokenise expressions - should this be passed off to the tokeniser?  The rules are slightly different...
 evaluate macro expressions (like #if etc)
