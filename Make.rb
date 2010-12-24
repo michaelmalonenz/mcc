@@ -130,13 +130,13 @@ if $0 == __FILE__ then
          run_command("#{CC} #{dependencies.join(' ')} -o #{test_exe}", 
                      "Linking #{test_exe} Failed...")
       end
-   end
 
-   Dir.new(TEST_BIN_DIR).each do |file|
-      if !FileTest.directory?(file) && FileTest.executable?(file)
-         #Why the hell doesn't this work????
-         run_command(file, "#{File.basename(file)} failed to run correctly!")
+      Dir.new(TEST_BIN_DIR).each do |file|
+         if !FileTest.directory?(file) && FileTest.executable?(file)
+            run_command("./#{file}", "#{File.basename(file)} failed to run correctly!")
+         end
       end
    end
+
 
 end

@@ -1,18 +1,14 @@
 Misc:
 Should I be tokenising before I get to the preprocessor?
-unit test the file stuff??  - is it possible to write a test that does this?
 write a ruby script to replace all tri-graphs in c code OR
 add in a compile-time switched ability to handle tri-graphs (so I can eventually claim full c99 compliance)
-convert building to use a Makefile?
 options
-run the unit tests automagically
 run the unit tests under valgrind
 Use stopper for the unit tests??
 As soon as possible, start eating my own dog food -> alongside gcc?
 
 Preprocessor:
-make it run under valgrind again - it currently leaks like a sieve
-fix the extra garbage at the end of some macros and the newline in the middle of the multi-line macro
+make it run under valgrind again - it currently leaks like a sieve (Less so now!)
 Fix the /**/ style comments to allow for more than one set per line (I don't want to sink to GOTO statements!)
 macro replacement
 tokenise expressions - should this be passed off to the tokeniser?  The rules are slightly different...

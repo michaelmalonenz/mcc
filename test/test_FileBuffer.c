@@ -33,7 +33,7 @@ static void SetupFileBufferTest(void)
 
 static void TearDownFileBufferTest(void)
 {
-//   remove(FILENAME);
+   remove(FILENAME);
 }
 
 
