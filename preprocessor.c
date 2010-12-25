@@ -47,8 +47,6 @@ static void handleDefinedConditional(mcc_LogicalLine_t *line, mcc_FileBuffer_t *
                                      bool_t skip, bool_t isTrue);
 
 static FILE *outputFile;
-static bool_t insideConditional;
-static bool_t conditionalIsTrue;
 
 static void SearchPreprocessorDirectives(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
 {
@@ -248,9 +246,10 @@ static void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, b
 }
 
 static void handleDefinedConditional(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer,
-                                     bool_t skip, bool_t isTrue)
+                                     bool_t skip, bool_t isPositive)
 {
    mcc_StringBuffer_t *idBuffer;
+   bool_t conditionalIsTrue;
    idBuffer = GetMacroIdentifier(line, fileBuffer);
    SkipWhiteSpace(line);
    if (line->index != line->length)
@@ -259,14 +258,13 @@ static void handleDefinedConditional(mcc_LogicalLine_t *line, mcc_FileBuffer_t *
                 mcc_GetFileBufferFilename(fileBuffer),
                 mcc_GetFileBufferCurrentLineNo(fileBuffer));
    }
-   insideConditional = TRUE;
    if (mcc_ResolveMacro(mcc_StringBufferGetString(idBuffer)))
    {
-      conditionalIsTrue = isTrue;
+      conditionalIsTrue = isPositive;
    }
    else
    {
-      conditionalIsTrue = !isTrue;
+      conditionalIsTrue = !isPositive;
    }
    line = mcc_FileBufferGetNextLogicalLine(fileBuffer);
    while (!mcc_FileBufferEOFReached(fileBuffer))
@@ -309,7 +307,6 @@ static void handleIfndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, 
 
 static void handleIf(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer), bool_t UNUSED(skip))
 {
-   insideConditional = TRUE;
 }
 
 static void handleEndif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t UNUSED(skip))
@@ -322,22 +319,20 @@ static void handleEndif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, b
                 mcc_GetFileBufferFilename(fileBuffer),
                 mcc_GetFileBufferCurrentLineNo(fileBuffer));
    }
-   if (insideConditional)
-   {
-      insideConditional = FALSE;
-   }
 }
 
-static void handleElse(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t UNUSED(skip))
+static void handleElse(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
 {
    SkipWhiteSpace(line);
+   if (skip)
+      return;
    if (line->index != line->length)
    {
       mcc_Error("Extra Characters after else at %s:%d\n",
                 mcc_GetFileBufferFilename(fileBuffer),
                 mcc_GetFileBufferCurrentLineNo(fileBuffer));
    }
-   if (insideConditional)
+/*   if (insideConditional)
    {
       conditionalIsTrue = !conditionalIsTrue;
    }
@@ -347,6 +342,8 @@ static void handleElse(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bo
                 mcc_GetFileBufferFilename(fileBuffer),
                 mcc_GetFileBufferCurrentLineNo(fileBuffer));
    }
+*/ //need to make this while thing use the stack to figure out where it should be
+   //otherwise nested conditionals will get lost pretty quickly
 }
 
 static void handleElif(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer), bool_t UNUSED(skip)) {}
