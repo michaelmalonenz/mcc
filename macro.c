@@ -4,6 +4,9 @@
 #include "macro.h"
 #include "mcc.h"
 
+static int macroCount;
+static long macroMem;
+
 /* Do I actually want to turn my binary tree into a hash table?
  * it could be faster, but I don't really know how many macros I'm
  * likely to define in the average case.  TCC uses a hash table
@@ -29,6 +32,8 @@ static mcc_Macro_t *create_macro(const char *text, const char UNUSED(*value))
 {
    mcc_Macro_t *result = (mcc_Macro_t *) malloc(sizeof(mcc_Macro_t));
    result->text = (char *) malloc(sizeof(char) * (strlen(text) + 1));
+   macroCount++;
+   macroMem += sizeof(mcc_Macro_t) + (sizeof(char) * (strlen(text) + 1));
    MCC_ASSERT(result != NULL);
    MCC_ASSERT(result->text != NULL);
    strncpy(result->text, text, strlen(text) + 1);
@@ -41,10 +46,16 @@ static void delete_macro(mcc_Macro_t *macro)
 {
    MCC_ASSERT(macro != NULL);
    MCC_ASSERT(macro->text != NULL);
+   macroCount--;
+   macroMem -= sizeof(mcc_Macro_t) + (sizeof(char) * (strlen(macro->text) + 1));
    free(macro->text);
    free(macro);
 }
 
+void mcc_DeleteAllMacros(void)
+{
+   printf("Num Macros: %d, Macro Memory used: %ld\n", macroCount, macroMem);
+}
 
 void mcc_DoMacroReplacement(mcc_LogicalLine_t UNUSED(*line))
 {
@@ -70,10 +81,14 @@ void mcc_DefineMacro(const char *text, char *value)
       if (cmpResult > 0)
       {
          if (current->right == NULL)
+         {
             current->right = create_macro(text, value);
+            return;
+         }
          else
+         {
             current = current->right;
-         return;
+         }
       }
       else if (cmpResult == 0)
       {
@@ -83,10 +98,14 @@ void mcc_DefineMacro(const char *text, char *value)
       else
       {
          if (current->left == NULL)
+         {
             current->left = create_macro(text, value);
+            return;
+         }
          else
+         {
             current = current->left;
-         return;
+         }
       }
    }
 }
