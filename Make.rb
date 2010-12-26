@@ -15,6 +15,44 @@ CFLAGS = "-Wall -Wextra -Werror -g -ggdb3 -Os"
 
 CC = "/usr/bin/gcc"
 
+class SimpleLogger
+
+   def initialize(filename="#{File.basename($0)}.log",
+                  to_screen=true)
+      @log = File.open(filename, 'w+')
+      @count = 0
+      @to_screen = to_screen
+   end
+
+   def note(string)
+      log_string(string+"\n")
+   end
+
+   def print(string)
+      log_string(string)
+   end
+
+   def error(string)
+      log_string(string+"\n", STDERR)
+   end
+
+   def close
+      @log.close()
+   end
+
+   private
+   def log_string(string, out_stream=STDOUT)
+      @log.print(string)
+      out_stream.print(string) if @to_screen
+      @count += 1
+      if @count % 2 == 0
+         @log.flush()
+         STDOUT.flush()
+      end
+   end
+
+end
+
 class Linker
 
    FILE_SYMBOL_REGEX = %r{^(.*?):[a-f0-9]*\s+\w\s+(\w+?)$}i
@@ -71,13 +109,17 @@ def c_to_o(file)
    return file.gsub(%r{ \.c$ }x,".o")
 end
 
+#should refactor this to raise an exception, rather
+# than clean up after itself.
 def run_command(cmd, failure_message)
+   $log_file.note(cmd)
    result = `#{cmd}  2>#{TEMP_STDERR_FILE}`
    if $?.exitstatus != 0
-      STDERR.puts "Error whilst running command: '#{cmd}'"
-      STDERR.puts failure_message
-      STDERR.puts( IO.read(TEMP_STDERR_FILE))
+      $log_file.error("Error whilst running command: '#{cmd}'")
+      $log_file.error(failure_message)
+      $log_file.error( IO.read(TEMP_STDERR_FILE))
       FileUtils.rm(TEMP_STDERR_FILE)
+      $log_file.close
       exit($?.exitstatus)
    end
    FileUtils.rm(TEMP_STDERR_FILE)
@@ -102,12 +144,17 @@ end
 
 if $0 == __FILE__ then
 
+   $log_file = SimpleLogger.new('mcc.log')
+
    ARGV.each do |arg|
       if arg =~ %r{--?c(?:l(?:e(?:a(?:n)?)?)?)?}ix
          clean()
          exit(0)
       end
    end
+
+
+   $log_file.note "Initialising..."
 
    #These options, while better for finding specific errors, are really slow when it comes to just running the test suite.
 #   VALGRIND_COMMAND = "valgrind --leak-check=full --track-origins=yes --error-exitcode=1 --read-var-info=yes --show-reachable=yes"
@@ -116,18 +163,22 @@ if $0 == __FILE__ then
    FileUtils.mkdir(BIN_DIR, :mode => 0775) unless FileTest.exist?(BIN_DIR)
    FileUtils.mkdir(TEST_BIN_DIR, :mode => 0775) unless FileTest.exist?(TEST_BIN_DIR)
 
+   $log_file.note("Compiling...")
    compile_a_directory(SRC_DIR, BIN_DIR)
    compile_a_directory(TEST_SRC_DIR, TEST_BIN_DIR)
 
    linker = Linker.new()
    linker.add_bin_dir(BIN_DIR)
 
+   $log_file.note("Calculating dependencies...")
    Dir.chdir(BIN_DIR) do
       dependencies = linker.discover_required_files('mcc.o')
+      $log_file.note("Linking main program...")
       run_command("#{CC} #{dependencies.join(' ')} -o mcc", "Linking mcc Failed...")
    end
 
    Dir.chdir(TEST_BIN_DIR) do
+      $log_file.note("Linking Tests...")
       Dir.glob("test_*.o").each do |test_exe_o|
          test_exe = test_exe_o.gsub(/\.o$/, '')
          dependencies = linker.discover_required_files(test_exe_o)
@@ -135,6 +186,7 @@ if $0 == __FILE__ then
                      "Linking #{test_exe} Failed...")
       end
 
+      $log_file.note("Running tests...")
       Dir.new(TEST_BIN_DIR).each do |file|
          if !FileTest.directory?(file) && FileTest.executable?(file)
             run_command("#{VALGRIND_COMMAND} ./#{file}", "#{File.basename(file)} failed to run correctly!")
@@ -142,5 +194,6 @@ if $0 == __FILE__ then
       end
    end
 
-
+   $log_file.note("All build actions completed successfully!")
+   $log_file.close
 end

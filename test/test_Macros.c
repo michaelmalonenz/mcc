@@ -1,8 +1,3 @@
-//void mcc_DefineMacro(char *text, char *value);
-
-//void mcc_UndefineMacro(char *text);
-
-//mcc_Macro_t *mcc_ResolveMacro(const char *text);
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>

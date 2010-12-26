@@ -20,30 +20,36 @@ enum pp_directives { PP_INCLUDE, PP_DEFINE, PP_IFDEF, PP_IFNDEF, PP_IF, PP_ENDIF
 static const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES] = { "include", "define", "ifdef", "ifndef", "if",
                                                                             "endif", "else", "elif", "undef", "error", "pragma" };
 
+#ifdef MCC_DEBUG
+#define HANDLER_LINKAGE extern
+#else
+#define HANDLER_LINKAGE static
+#endif
+
 typedef void (preprocessorDirectiveHandler_t)(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
 
-static void handleInclude(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
-static void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
-static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
-static void handleIfndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
-static void handleIf(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
-static void handleEndif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
-static void handleElse(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
-static void handleElif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
-static void handleUndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
-static void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
-static void handlePragma(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
+HANDLER_LINKAGE void handleInclude(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
+HANDLER_LINKAGE void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
+HANDLER_LINKAGE void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
+HANDLER_LINKAGE void handleIfndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
+HANDLER_LINKAGE void handleIf(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
+HANDLER_LINKAGE void handleEndif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
+HANDLER_LINKAGE void handleElse(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
+HANDLER_LINKAGE void handleElif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
+HANDLER_LINKAGE void handleUndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
+HANDLER_LINKAGE void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
+HANDLER_LINKAGE void handlePragma(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
 
 static void SearchPreprocessorDirectives(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip);
 static mcc_StringBuffer_t *GetMacroIdentifier(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t *fileBuffer);
+HANDLER_LINKAGE mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t *fileBuffer);
 
 static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = { &handleInclude, &handleDefine, &handleIfdef,
                                                                                    &handleIfndef, &handleIf, &handleEndif,
                                                                                    &handleElse, &handleElif, &handleUndef,
                                                                                    &handleError, &handlePragma };
 
-static void handleDefinedConditional(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer,
+HANDLER_LINKAGE void handleDefinedConditional(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer,
                                      bool_t skip, bool_t isTrue);
 
 static FILE *outputFile;
@@ -89,7 +95,7 @@ static mcc_StringBuffer_t *GetMacroIdentifier(mcc_LogicalLine_t *line, mcc_FileB
 
 
 // only handles c++ style comments just now - like this one!
-static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t *fileBuffer)
+HANDLER_LINKAGE mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t *fileBuffer)
 {
    unsigned int tempIndex;
    SkipWhiteSpace(line);
@@ -157,7 +163,7 @@ void mcc_PreprocessFile(const char *inFilename, FILE *outFile)
    mcc_DeleteAllMacros();
 }
 
-static void handleInclude(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
+HANDLER_LINKAGE void handleInclude(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
 {
    mcc_StringBuffer_t *fileInclude = mcc_CreateStringBuffer();
    char terminator;
@@ -210,7 +216,7 @@ static void handleInclude(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer,
 }
 
 //currently doesn't handle function-like macros
-static void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
+HANDLER_LINKAGE void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
 {
    mcc_StringBuffer_t *idBuffer = GetMacroIdentifier(line, fileBuffer);
    char *macro_value = NULL;
@@ -225,7 +231,7 @@ static void handleDefine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, 
    mcc_DeleteStringBuffer(idBuffer);
 }
 
-static void handleUndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
+HANDLER_LINKAGE void handleUndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
 {
    mcc_StringBuffer_t *idBuffer;
    if (skip)
@@ -235,7 +241,7 @@ static void handleUndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, b
    mcc_DeleteStringBuffer(idBuffer);
 }
 
-static void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
+HANDLER_LINKAGE void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
 {
    if (skip)
       return;
@@ -245,7 +251,7 @@ static void handleError(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, b
              mcc_GetFileBufferCurrentLineNo(fileBuffer));
 }
 
-static void handleDefinedConditional(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer,
+HANDLER_LINKAGE void handleDefinedConditional(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer,
                                      bool_t skip, bool_t isPositive)
 {
    mcc_StringBuffer_t *idBuffer;
@@ -295,21 +301,21 @@ static void handleDefinedConditional(mcc_LogicalLine_t *line, mcc_FileBuffer_t *
    
 }
 
-static void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
+HANDLER_LINKAGE void handleIfdef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
 {
    handleDefinedConditional(line, fileBuffer, skip, TRUE);
 }
 
-static void handleIfndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
+HANDLER_LINKAGE void handleIfndef(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
 {
    handleDefinedConditional(line, fileBuffer, skip, FALSE);
 }
 
-static void handleIf(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer), bool_t UNUSED(skip))
+HANDLER_LINKAGE void handleIf(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer), bool_t UNUSED(skip))
 {
 }
 
-static void handleEndif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t UNUSED(skip))
+HANDLER_LINKAGE void handleEndif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t UNUSED(skip))
 {
    SkipWhiteSpace(line);
    if (line->index != line->length)
@@ -321,7 +327,7 @@ static void handleEndif(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, b
    }
 }
 
-static void handleElse(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
+HANDLER_LINKAGE void handleElse(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
 {
    SkipWhiteSpace(line);
    if (skip)
@@ -346,7 +352,7 @@ static void handleElse(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bo
    //otherwise nested conditionals will get lost pretty quickly
 }
 
-static void handleElif(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer), bool_t UNUSED(skip)) {}
+HANDLER_LINKAGE void handleElif(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer), bool_t UNUSED(skip)) {}
 
 //What shall I do with #pragmas???
-static void handlePragma(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer), bool_t UNUSED(skip)) {}
+HANDLER_LINKAGE void handlePragma(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer), bool_t UNUSED(skip)) {}
