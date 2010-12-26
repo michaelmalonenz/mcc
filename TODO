@@ -1,5 +1,6 @@
 Misc:
-Should I be tokenising before I get to the preprocessor?
+Should I be tokenising before I get to the preprocessor? (The tokens don't actually change, 
+unless we have a ## in there!, but we could modify that one in places)
 write a ruby script to replace all tri-graphs in c code OR
 add in a compile-time switched ability to handle tri-graphs (so I can eventually claim full c99 compliance)
 options
@@ -27,6 +28,7 @@ macro replacement
 tokenise expressions - should this be passed off to the tokeniser?  The rules are slightly different...
 evaluate macro expressions (like #if etc)
 support function macros
+Need to handle the ## operator
 
 Tokeniser:
 break a string into consecutive tokens
