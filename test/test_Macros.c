@@ -47,6 +47,7 @@ static void test_BulkMacros(void)
       mcc_DefineMacro(test_Macros[i], test_MacroValues[i]);
    }
    mcc_DeleteAllMacros();
+   printf("ok\n");
 }
 
 int main(void)

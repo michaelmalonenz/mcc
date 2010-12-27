@@ -8,7 +8,8 @@ Use stopper for the unit tests??
 As soon as possible, start eating my own dog food -> alongside gcc?
 
 Unit Tests I really should write:
-test_Macros  (Believed to be the source of the memory leaks, as I currently don't free the macros when I'm done!
+test_Macros // I still need to write a test which deletes a macro in the middle of the tree somewhere 
+            // and maintains the integrity.  Perhaps I should write a function that asserts the invariant.
 test_Preprocessor
 
 Should I also write some overall tests for the preprocessor section?
@@ -18,7 +19,7 @@ fix ifndef to work correctly
   - remove the file-scoped variables to handle conditionals (put them on the stack, for recursive goodness)
   - add in the "skip" variable to the logic deciding whether or not to ignore the conditional portion
 change the macro definitions to be a hash table?  It seems unnecessarily limiting to do it this way.
-Figure out how one goes about deleting the macro definitions correctly
+Fix the b-tree after a macro deletion
 make it run under valgrind again - it currently leaks like a seive (Less so now!)
 Fix the /**/ style comments to allow for more than one set per line 
   - I don't want to sink to GOTO statements!

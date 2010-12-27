@@ -4,8 +4,10 @@
 #include "macro.h"
 #include "mcc.h"
 
-static int macroCount;
-static long macroMem;
+/** This whole implementation is pretty crappy. It has too much duplication,
+ *  the functions are too ad-hoc and it feels generally fragile.
+ *  It's also the source of many of my valgrind problems.
+ */
 
 /* Do I actually want to turn my binary tree into a hash table?
  * it could be faster, but I don't really know how many macros I'm
@@ -32,8 +34,6 @@ static mcc_Macro_t *create_macro(const char *text, const char UNUSED(*value))
 {
    mcc_Macro_t *result = (mcc_Macro_t *) malloc(sizeof(mcc_Macro_t));
    result->text = (char *) malloc(sizeof(char) * (strlen(text) + 1));
-   macroCount++;
-   macroMem += sizeof(mcc_Macro_t) + (sizeof(char) * (strlen(text) + 1));
    MCC_ASSERT(result != NULL);
    MCC_ASSERT(result->text != NULL);
    strncpy(result->text, text, strlen(text) + 1);
@@ -46,15 +46,29 @@ static void delete_macro(mcc_Macro_t *macro)
 {
    MCC_ASSERT(macro != NULL);
    MCC_ASSERT(macro->text != NULL);
-   macroCount--;
-   macroMem -= sizeof(mcc_Macro_t) + (sizeof(char) * (strlen(macro->text) + 1));
    free(macro->text);
    free(macro);
 }
 
+static void delete_macroTree(mcc_Macro_t *root)
+{
+   if (root->left != NULL)
+   {
+      delete_macroTree(root->left);
+      root->left = NULL;
+   }
+   if (root->right != NULL)
+   {
+      delete_macroTree(root->right);
+      root->right = NULL;
+   }
+   delete_macro(root);
+   root = NULL;
+}
+
 void mcc_DeleteAllMacros(void)
 {
-   printf("Num Macros: %d, Macro Memory used: %ld\n", macroCount, macroMem);
+   delete_macroTree(root);
 }
 
 void mcc_DoMacroReplacement(mcc_LogicalLine_t UNUSED(*line))
@@ -113,18 +127,28 @@ void mcc_DefineMacro(const char *text, char *value)
 void mcc_UndefineMacro(const char *text)
 {
    mcc_Macro_t *current = root;
+   mcc_Macro_t *last = NULL;
    while (current != NULL)
    {
       int cmpResult = strncmp(text, current->text, 
                               max(strlen(current->text), strlen(text)));
+      last = current;
+
       if (cmpResult > 0)
       {
          current = current->right;
       }
       else if (cmpResult == 0)
       {
-         //still need to repair the b-tree
+         bool_t nullify = (current == root);
          delete_macro(current);
+         if (nullify)
+         {
+            root = NULL;
+         }
+         else
+         {
+         }
          return;
       }
       else
@@ -132,6 +156,8 @@ void mcc_UndefineMacro(const char *text)
          current = current->left;
       }
    }
+   //the spec says we need to silently ignore undef directives when the macro isn't previously defined.
+   //However, I would like to have an option to issue a warning here.
 }
 
 mcc_Macro_t *mcc_ResolveMacro(const char *text)
