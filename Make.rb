@@ -45,12 +45,15 @@ class SimpleLogger
       @log.print(string)
       out_stream.print(string) if @to_screen
       @count += 1
-      if @count % 2 == 0
+      if @count % 5 == 0
          @log.flush()
-         STDOUT.flush()
       end
+      STDOUT.flush()
    end
 
+end
+
+class BuildError < Exception
 end
 
 class Linker
@@ -109,18 +112,15 @@ def c_to_o(file)
    return file.gsub(%r{ \.c$ }x,".o")
 end
 
-#should refactor this to raise an exception, rather
-# than clean up after itself.
 def run_command(cmd, failure_message)
    $log_file.note(cmd)
    result = `#{cmd}  2>#{TEMP_STDERR_FILE}`
    if $?.exitstatus != 0
-      $log_file.error("Error whilst running command: '#{cmd}'")
-      $log_file.error(failure_message)
-      $log_file.error( IO.read(TEMP_STDERR_FILE))
+      message = "Error whilst running command: '#{cmd}'
+#{failure_message}
+#{IO.read(TEMP_STDERR_FILE)}"
       FileUtils.rm(TEMP_STDERR_FILE)
-      $log_file.close
-      exit($?.exitstatus)
+      raise BuildError.new(message)
    end
    FileUtils.rm(TEMP_STDERR_FILE)
 end
@@ -163,35 +163,41 @@ if $0 == __FILE__ then
    FileUtils.mkdir(BIN_DIR, :mode => 0775) unless FileTest.exist?(BIN_DIR)
    FileUtils.mkdir(TEST_BIN_DIR, :mode => 0775) unless FileTest.exist?(TEST_BIN_DIR)
 
-   $log_file.note("Compiling...")
-   compile_a_directory(SRC_DIR, BIN_DIR)
-   compile_a_directory(TEST_SRC_DIR, TEST_BIN_DIR)
+   begin
+      $log_file.note("Compiling...")
+      compile_a_directory(SRC_DIR, BIN_DIR)
+      compile_a_directory(TEST_SRC_DIR, TEST_BIN_DIR)
 
-   linker = Linker.new()
-   linker.add_bin_dir(BIN_DIR)
+      linker = Linker.new()
+      linker.add_bin_dir(BIN_DIR)
 
-   $log_file.note("Calculating dependencies...")
-   Dir.chdir(BIN_DIR) do
-      dependencies = linker.discover_required_files('mcc.o')
-      $log_file.note("Linking main program...")
-      run_command("#{CC} #{dependencies.join(' ')} -o mcc", "Linking mcc Failed...")
-   end
-
-   Dir.chdir(TEST_BIN_DIR) do
-      $log_file.note("Linking Tests...")
-      Dir.glob("test_*.o").each do |test_exe_o|
-         test_exe = test_exe_o.gsub(/\.o$/, '')
-         dependencies = linker.discover_required_files(test_exe_o)
-         run_command("#{CC} #{dependencies.join(' ')} -o #{test_exe}", 
-                     "Linking #{test_exe} Failed...")
+      $log_file.note("Calculating dependencies...")
+      Dir.chdir(BIN_DIR) do
+         dependencies = linker.discover_required_files('mcc.o')
+         $log_file.note("Linking main program...")
+         run_command("#{CC} #{dependencies.join(' ')} -o mcc", "Linking mcc Failed...")
       end
 
-      $log_file.note("Running tests...")
-      Dir.new(TEST_BIN_DIR).each do |file|
-         if !FileTest.directory?(file) && FileTest.executable?(file)
-            run_command("#{VALGRIND_COMMAND} ./#{file}", "#{File.basename(file)} failed to run correctly!")
+      Dir.chdir(TEST_BIN_DIR) do
+         $log_file.note("Linking Tests...")
+         Dir.glob("test_*.o").each do |test_exe_o|
+            test_exe = test_exe_o.gsub(/\.o$/, '')
+            dependencies = linker.discover_required_files(test_exe_o)
+            run_command("#{CC} #{dependencies.join(' ')} -o #{test_exe}", 
+                        "Linking #{test_exe} Failed...")
+         end
+
+         $log_file.note("Running tests...")
+         Dir.new(TEST_BIN_DIR).each do |file|
+            if !FileTest.directory?(file) && FileTest.executable?(file)
+               run_command("#{VALGRIND_COMMAND} ./#{file}", "#{File.basename(file)} failed to run correctly!")
+            end
          end
       end
+   rescue Exception => error
+      $log_file.error(error.to_s)         
+      $log_file.close()
+      exit(1)
    end
 
    $log_file.note("All build actions completed successfully!")
