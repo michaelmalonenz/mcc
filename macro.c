@@ -2,20 +2,18 @@
 #include <stdlib.h>
 
 #include "macro.h"
+#include "macro_private.h"
 #include "mcc.h"
 
-/** This whole implementation is pretty crappy. It has too much duplication,
- *  the functions are too ad-hoc and it feels generally fragile.
- *  It's also the source of many of my valgrind problems.
- */
 
-/* Do I actually want to turn my binary tree into a hash table?
- * it could be faster, but I don't really know how many macros I'm
- * likely to define in the average case.  TCC uses a hash table
- * for both its macro and symbol table lookup, with a size of 8192
- * (I would actually use a prime number, but you know)
- */
-static mcc_Macro_t *root = NULL;
+void delete_macro(mcc_Macro_t *macro)
+{
+   MCC_ASSERT(macro != NULL);
+   MCC_ASSERT(macro->text != NULL);
+   free(macro->text);
+   free(macro);
+}
+
 
 // This step should involve macro replacement, so we only have to
 // process each macro once - as a side-effect it will correct a bug
@@ -30,7 +28,7 @@ static mcc_Macro_t *root = NULL;
 // would yield the same result as YET_ANOTHER_MACRO, which is bad!
 //
 // To make life better, I also need to evaluate constant expressions here
-static mcc_Macro_t *create_macro(const char *text, const char UNUSED(*value))
+mcc_Macro_t *create_macro(const char *text, const char UNUSED(*value))
 {
    mcc_Macro_t *result = (mcc_Macro_t *) malloc(sizeof(mcc_Macro_t));
    result->text = (char *) malloc(sizeof(char) * (strlen(text) + 1));
@@ -42,143 +40,9 @@ static mcc_Macro_t *create_macro(const char *text, const char UNUSED(*value))
    return result;
 }
 
-static void delete_macro(mcc_Macro_t *macro)
-{
-   MCC_ASSERT(macro != NULL);
-   MCC_ASSERT(macro->text != NULL);
-   free(macro->text);
-   free(macro);
-}
-
-static void delete_macroTree(mcc_Macro_t *root)
-{
-   if (root->left != NULL)
-   {
-      delete_macroTree(root->left);
-      root->left = NULL;
-   }
-   if (root->right != NULL)
-   {
-      delete_macroTree(root->right);
-      root->right = NULL;
-   }
-   delete_macro(root);
-   root = NULL;
-}
-
-void mcc_DeleteAllMacros(void)
-{
-   delete_macroTree(root);
-}
 
 void mcc_DoMacroReplacement(mcc_LogicalLine_t UNUSED(*line))
 {
    // search through the text, and any whole word is potentially
    // a macro.  If it does turn out to be, replace it.
-}
-
-// I should really refactor these next couple of functions
-// because they're somewhat similar
-void mcc_DefineMacro(const char *text, char *value)
-{
-   mcc_Macro_t *current = root;
-   if (root == NULL)
-   {
-      root = create_macro(text, value);
-      return;
-   }
-
-   while (current != NULL)
-   {
-      int cmpResult = strncmp(text, current->text, 
-                              max(strlen(current->text), strlen(text)));
-      if (cmpResult > 0)
-      {
-         if (current->right == NULL)
-         {
-            current->right = create_macro(text, value);
-            return;
-         }
-         else
-         {
-            current = current->right;
-         }
-      }
-      else if (cmpResult == 0)
-      {
-         mcc_Error("Macro '%s' is already defined\n", text);
-         return;
-      }
-      else
-      {
-         if (current->left == NULL)
-         {
-            current->left = create_macro(text, value);
-            return;
-         }
-         else
-         {
-            current = current->left;
-         }
-      }
-   }
-}
-
-void mcc_UndefineMacro(const char *text)
-{
-   mcc_Macro_t *current = root;
-   mcc_Macro_t *last = NULL;
-   while (current != NULL)
-   {
-      int cmpResult = strncmp(text, current->text, 
-                              max(strlen(current->text), strlen(text)));
-      last = current;
-
-      if (cmpResult > 0)
-      {
-         current = current->right;
-      }
-      else if (cmpResult == 0)
-      {
-         bool_t nullify = (current == root);
-         delete_macro(current);
-         if (nullify)
-         {
-            root = NULL;
-         }
-         else
-         {
-         }
-         return;
-      }
-      else
-      {
-         current = current->left;
-      }
-   }
-   //the spec says we need to silently ignore undef directives when the macro isn't previously defined.
-   //However, I would like to have an option to issue a warning here.
-}
-
-mcc_Macro_t *mcc_ResolveMacro(const char *text)
-{
-   mcc_Macro_t *current = root;
-   while (current != NULL)
-   {
-      int cmpResult = strncmp(text, current->text, 
-                              max(strlen(current->text), strlen(text)));
-      if (cmpResult > 0)
-      {
-         current = current->right;
-      }
-      else if (cmpResult == 0)
-      {
-         return current;
-      }
-      else
-      {
-         current = current->left;
-      }
-   }
-   return NULL;
 }
