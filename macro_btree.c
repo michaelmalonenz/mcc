@@ -4,7 +4,7 @@
 #include "macro_private.h"
 
 
-#if !MCC_USE_HASH_TABLE_FOR_MACROS
+#if MCC_USE_B_TREE_FOR_MACROS
 
 static mcc_Macro_t *root = NULL;
 
