@@ -35,8 +35,12 @@ mcc_Macro_t *create_macro(const char *text, const char UNUSED(*value))
    MCC_ASSERT(result != NULL);
    MCC_ASSERT(result->text != NULL);
    strncpy(result->text, text, strlen(text) + 1);
+#if MCC_USE_HASH_TABLE_FOR_MACROS
+   result->next = NULL;
+#elif MCC_USE_B_TREE_FOR_MACROS
    result->left = NULL;
    result->right = NULL;
+#endif
    return result;
 }
 

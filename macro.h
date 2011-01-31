@@ -2,13 +2,18 @@
 #define MCC_MACRO_H
 
 #include "fileBuffer.h"
+#include "config.h"
 
 typedef struct macro {
    char *text;
    char *value;
    //char **args; ??
+#if MCC_USE_HASH_TABLE_FOR_MACROS
+   struct macro *next;
+#elif MCC_USE_B_TREE_FOR_MACROS
    struct macro *left;
    struct macro *right;
+#endif
 }mcc_Macro_t;
 
 void mcc_DeleteAllMacros(void);
