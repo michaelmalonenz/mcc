@@ -41,7 +41,14 @@ void mcc_DeleteAllMacros(void)
    {
       if (macro_table[i] != NULL)
       {
-         delete_macro(macro_table[i]);
+         mcc_Macro_t *current = macro_table[i];
+         mcc_Macro_t *next;
+         while (current != NULL)
+         {
+            next = current->next;
+            delete_macro(current);
+            current = next;
+         }
       }
    }
 }
@@ -49,20 +56,27 @@ void mcc_DeleteAllMacros(void)
 void mcc_DefineMacro(const char *text, char *value)
 {
    uint32_t hashVal = elf_hash(text, strlen(text)) % HASH_TABLE_LENGTH;
-   mcc_Macro_t *store = macro_table[hashVal];
-   while (store != NULL)
-      store = store->next;
-
-   store = create_macro(text, value);
+   mcc_Macro_t *temp;
+   if (macro_table[hashVal] == NULL)
+   {
+      macro_table[hashVal] = create_macro(text, value);
+   }
+   else
+   {
+      temp = macro_table[hashVal];
+      while(temp->next != NULL)
+         temp = temp->next;
+      temp->next = create_macro(text, value);
+   }   
 }
 
-void mcc_UndefineMacro(const char UNUSED(*text))
+void mcc_UndefineMacro(const char *text)
 {
+   mcc_Macro_t *deathRow = NULL, *previous = NULL;
+   delete_macro(mcc_ResolveMacro(text));
 }
-
-mcc_Macro_t *mcc_ResolveMacro(const char UNUSED(*text))
-{
-   mcc_Macro_t *result = NULL;
+   uint32_t hash = elf_hash(text, strlen(text));
+   result = macro_table[hash];
    return result;
 }
 
