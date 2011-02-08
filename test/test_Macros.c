@@ -29,6 +29,7 @@ static void test_Find(void)
    printf("ok\n");
 }
 
+
 static void test_Undefine(void)
 {
    printf("Testing undefine...");

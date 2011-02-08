@@ -72,16 +72,17 @@ void mcc_DefineMacro(const char *text, char *value)
 
 void mcc_UndefineMacro(const char *text)
 {
-   mcc_Macro_t *deathRow = mcc_ResolveMacro(text);
-   delete_macro(deathRow);
-   deathRow = NULL;
+  uint32_t hash = elf_hash(text, (uint16_t) strlen(text));
+  delete_macro(macro_table[hash]);
+  #error "this function is still broken"
+  macro_table[hash] = NULL;
 }
 
 mcc_Macro_t *mcc_ResolveMacro(const char *text)
 {
-   mcc_Macro_t *result;
    uint32_t hash = elf_hash(text, (uint16_t) strlen(text));
-   result = macro_table[hash];
+   mcc_Macro_t *result = macro_table[hash];
+
    while (result != NULL)
    {
       if (memcmp(text, result->text, sizeof(*text)) == 0)
