@@ -15,7 +15,7 @@
 
 static mcc_Macro_t *macro_table[HASH_TABLE_LENGTH];
 
-static uint32_t elf_hash (const void *key, uint16_t len )
+static uint32_t elf_hash(const void *key, uint16_t len )
 {
    const unsigned char *array = key;
    uint32_t hash = 0, mixer;
@@ -31,7 +31,7 @@ static uint32_t elf_hash (const void *key, uint16_t len )
       hash &= ~mixer;
    }
  
-   return hash;
+   return hash % HASH_TABLE_LENGTH;
 }
 
 void mcc_DeleteAllMacros(void)
@@ -55,15 +55,15 @@ void mcc_DeleteAllMacros(void)
 
 void mcc_DefineMacro(const char *text, char *value)
 {
-   uint32_t hashVal = elf_hash(text, strlen(text)) % HASH_TABLE_LENGTH;
+   uint32_t hash = elf_hash(text, strlen(text));
    mcc_Macro_t *temp;
-   if (macro_table[hashVal] == NULL)
+   if (macro_table[hash] == NULL)
    {
-      macro_table[hashVal] = create_macro(text, value);
+      macro_table[hash] = create_macro(text, value);
    }
    else
    {
-      temp = macro_table[hashVal];
+      temp = macro_table[hash];
       while(temp->next != NULL)
          temp = temp->next;
       temp->next = create_macro(text, value);
@@ -72,11 +72,27 @@ void mcc_DefineMacro(const char *text, char *value)
 
 void mcc_UndefineMacro(const char *text)
 {
-   mcc_Macro_t *deathRow = NULL, *previous = NULL;
-   delete_macro(mcc_ResolveMacro(text));
+   mcc_Macro_t *deathRow = mcc_ResolveMacro(text);
+   delete_macro(deathRow);
+   deathRow = NULL;
 }
-   uint32_t hash = elf_hash(text, strlen(text));
+
+mcc_Macro_t *mcc_ResolveMacro(const char *text)
+{
+   mcc_Macro_t *result;
+   uint32_t hash = elf_hash(text, (uint16_t) strlen(text));
    result = macro_table[hash];
+   while (result != NULL)
+   {
+      if (memcmp(text, result->text, sizeof(*text)) == 0)
+      {
+         return result;
+      }
+      else
+      {
+         result = result->next;
+      }
+   }
    return result;
 }
 

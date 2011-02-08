@@ -21,7 +21,6 @@ static void test_Define(void)
    printf("ok\n");
 }
 
-
 static void test_Find(void)
 {	
    printf("Testing Find...");
