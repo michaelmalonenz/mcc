@@ -72,10 +72,31 @@ void mcc_DefineMacro(const char *text, char *value)
 
 void mcc_UndefineMacro(const char *text)
 {
-  uint32_t hash = elf_hash(text, (uint16_t) strlen(text));
-  delete_macro(macro_table[hash]);
-  #error "this function is still broken"
-  macro_table[hash] = NULL;
+   uint32_t hash = elf_hash(text, (uint16_t) strlen(text));
+   mcc_Macro_t *previous,*current;
+   current = previous = macro_table[hash];
+   while(current != NULL)
+   {
+      if (memcmp(text, current->text, sizeof(*text)) == 0)
+      {
+         /* This means that we're at the head of the list */
+         if (previous == current)
+         {
+            macro_table[hash] = current->next;
+         }
+         else
+         {
+            previous->next = current->next;
+         }
+         delete_macro(current);
+         return;
+      }
+      else
+      {
+         previous = current;
+         current = current->next;
+      }
+   }
 }
 
 mcc_Macro_t *mcc_ResolveMacro(const char *text)
