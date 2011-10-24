@@ -5,7 +5,6 @@
 #include "config.h"
 #include "mcc.h"
 
-
 static mcc_Token_t *firstToken = NULL;
 
 //I'm not convinced currentToken is the best name for this
@@ -18,14 +17,12 @@ static int numberOfTokens = 0;
 #endif
 
 //Does this imply that I should really have an opaque type?
-mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len, int type)
+mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len)
 {
    mcc_Token_t *token = (mcc_Token_t *) malloc(sizeof(mcc_Token_t));
    token->name = (char *) malloc(sizeof(char) * (text_len + 1));
    memcpy(token->name, text, text_len + 1);
    token->name[text_len + 1] = '\0';
-   token->type = type;
-   token->isOperator = TRUE;
    
    return token;
 }

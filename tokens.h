@@ -27,16 +27,17 @@
 */
 #include "mcc.h"
 #include "config.h"
+#include "fileBuffer.h"
 
+typedef enum TYPE { TOK_KEYWORD, TOK_SYMBOL, TOK_OPERATOR } TOKEN_TYPE;
+ 
 typedef struct token {
    char *name;
-   int type;
-   bool_t isKeyword; /* won't make the distinction for c99 keywords, because by the time
-                        we are parsing the grammar tree, we don't care */
-   bool_t isSymbol;
-   bool_t isOperator;
+   TOKEN_TYPE tokenType;
+   int tokenIndex;
    unsigned short fileno;
    int lineno;
+   int line_index;
    struct token *next;
 } mcc_Token_t;
 
@@ -51,19 +52,22 @@ enum key_index { KEY_AUTO, KEY_BREAK, KEY_CASE, KEY_CHAR, KEY_CONST, KEY_CONTINU
                  NUM_KEYWORDS};
 extern const char *keywords[NUM_KEYWORDS];
 
-enum operator_index {OP_ADD, OP_MINUS, OP_DIVIDE, OP_MULTIPLY, OP_MODULO, OP_DECREMENT, OP_INCREMENT,
+typedef enum operator_index {OP_ADD, OP_MINUS, OP_DIVIDE, OP_MULTIPLY, OP_MODULO, OP_DECREMENT, OP_INCREMENT,
                      OP_EQUALS_ASSIGN, OP_TIMES_EQUALS, OP_DIVIDE_EQUALS, OP_MOD_EQUALS, OP_PLUS_EQUALS,
                      OP_MINUS_EQUALS, OP_L_SHIFT_EQUALS, OP_R_SHIFT_EQUALS, OP_BITWISE_AND_EQUALS,
                      OP_BITWISE_EXCL_OR_EQUALS, OP_BITWISE_INCL_OR_EQUALS, OP_COMPARE_TO, OP_NOT_EQUAL,
                      OP_GREATER_THAN, OP_LESS_THAN, OP_GREATER_EQUAL, OP_LESS_EQUAL, OP_LOGICAL_AND,
                      OP_LOGICAL_EXCL_OR, OP_LOGICAL_INCL_OR, OP_NOT, OP_BITWISE_AND, OP_BITWISE_INCL_OR,
                      OP_BITWISE_EXCL_OR, OP_L_SHIFT, OP_R_SHIFT, OP_NEGATE, OP_SIZEOF, OP_ADDRESS_OF, OP_TERNARY_IF,
-                     OP_TERNARY_ELSE, OP_COMMA, NUM_OPERATORS};
+                             OP_TERNARY_ELSE, OP_COMMA, NUM_OPERATORS, OP_NONE} MCC_OPERATOR;
 extern char *operators[NUM_OPERATORS];
 
-enum symbol_index {SYM_OPEN_BRACE, SYM_CLOSE_BRACE, SYM_OPEN_BRACKET, SYM_CLOSE_BRACKET, SYM_SEMI_COLON, 
-                   SYM_OPEN_PAREN, SYM_CLOSE_PAREN, SYM_DOUBLE_QUOTE, SYM_SINGLE_QUOTE, SYM_ESCAPE, NUM_SYMBOLS};
+typedef enum symbol_index {SYM_OPEN_BRACE, SYM_CLOSE_BRACE, SYM_OPEN_BRACKET, SYM_CLOSE_BRACKET, SYM_SEMI_COLON, 
+                   SYM_OPEN_PAREN, SYM_CLOSE_PAREN, SYM_DOUBLE_QUOTE, SYM_SINGLE_QUOTE, SYM_ESCAPE, NUM_SYMBOLS, SYM_NONE} MCC_SYMBOL;
 extern char *symbols[NUM_SYMBOLS];
+
+MCC_SYMBOL mcc_GetSymbol(mcc_LogicalLine_t *line);
+MCC_OPERATOR mcc_GetOperator(mcc_LogicalLine_t *line);
 
 
 #endif /* MCC_TOKENS_H_ */
