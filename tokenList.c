@@ -16,7 +16,6 @@ static mcc_Token_t *nextToken = NULL;
 static int numberOfTokens = 0;
 #endif
 
-//Does this imply that I should really have an opaque type?
 mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len)
 {
    mcc_Token_t *token = (mcc_Token_t *) malloc(sizeof(mcc_Token_t));

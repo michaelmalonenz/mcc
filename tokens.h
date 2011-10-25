@@ -42,18 +42,21 @@ typedef struct token {
 } mcc_Token_t;
 
 /* The following enums need to be kept in sync with the corresponding char *[] */
-enum key_index { KEY_AUTO, KEY_BREAK, KEY_CASE, KEY_CHAR, KEY_CONST, 
-                 KEY_CONTINUE, KEY_DEFAULT, KEY_DO, KEY_DOUBLE,
-                 KEY_ELSE, KEY_ENUM, KEY_EXTERN, KEY_FLOAT, KEY_FOR, KEY_GOTO,
-                 KEY_IF, KEY_INT, KEY_LONG, KEY_REGISTER, KEY_RETURN, KEY_SHORT,
-                 KEY_SIGNED, KEY_SIZEOF, KEY_STATIC, KEY_STRUCT, KEY_SWITCH,
-                 KEY_TYPEDEF, KEY_UNION, KEY_UNSIGNED, KEY_VOID, KEYVOLATILE,
-                 KEY_WHILE,
+typedef enum key_index { KEY_AUTO, KEY_BREAK, KEY_CASE, KEY_CHAR, KEY_CONST, 
+                         KEY_CONTINUE, KEY_DEFAULT, KEY_DO, KEY_DOUBLE, KEY_ELSE,
+                         KEY_ENUM, KEY_EXTERN, KEY_FLOAT, KEY_FOR, KEY_GOTO,
+                         KEY_IF, KEY_INT, KEY_LONG, KEY_REGISTER, KEY_RETURN,
+                         KEY_SHORT, KEY_SIGNED, KEY_SIZEOF, KEY_STATIC,
+                         KEY_STRUCT, KEY_SWITCH, KEY_TYPEDEF, KEY_UNION,
+                         KEY_UNSIGNED, KEY_VOID, KEYVOLATILE, KEY_WHILE,
 #if MCC_C99_COMPATIBLE
-                 KEY_BOOL, KEY_COMPLEX, KEY_IMAGINARY, KEY_INLINE, KEY_RESTRICT, 
+                         KEY_BOOL, KEY_COMPLEX, KEY_IMAGINARY, KEY_INLINE,
+                         KEY_RESTRICT, 
 #endif
-                 NUM_KEYWORDS, KEY_NONE};
+                         NUM_KEYWORDS, KEY_NONE } MCC_KEYWORD;
+
 extern const char *keywords[NUM_KEYWORDS];
+extern size_t keyword_strlens[NUM_KEYWORDS];
 
 typedef enum operator_index {OP_ADD, OP_MINUS, OP_DIVIDE, OP_MULTIPLY, OP_MODULO,
                              OP_DECREMENT, OP_INCREMENT, OP_EQUALS_ASSIGN, 
@@ -76,6 +79,7 @@ typedef enum symbol_index {SYM_OPEN_BRACE, SYM_CLOSE_BRACE, SYM_OPEN_BRACKET,
                            SYM_CLOSE_PAREN, SYM_DOUBLE_QUOTE, SYM_SINGLE_QUOTE,
                            SYM_ESCAPE, NUM_SYMBOLS, SYM_NONE} MCC_SYMBOL;
 extern char *symbols[NUM_SYMBOLS];
+extern size_t symbol_strlens[NUM_SYMBOLS];
 
 /* The order here, is my guess at the relative frequency of each directive's
    use - so we can match earlier in the list, and hopefully speed up the
@@ -88,9 +92,11 @@ typedef enum pp_directives { PP_INCLUDE, PP_DEFINE, PP_IFDEF, PP_IFNDEF,
 extern const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES];
 extern size_t pp_strlens[NUM_PREPROCESSOR_DIRECTIVES];
 
+
 MCC_SYMBOL mcc_GetSymbol(mcc_LogicalLine_t *line);
 MCC_OPERATOR mcc_GetOperator(mcc_LogicalLine_t *line);
 PREPROC_DIRECTIVE mcc_GetPreprocessorDirective(mcc_LogicalLine_t *line);
+MCC_KEYWORD mcc_GetKeyword(mcc_LogicalLine_t * line);
 
 mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len);
 
