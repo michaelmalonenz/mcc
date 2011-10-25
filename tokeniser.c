@@ -100,6 +100,8 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t UNUSED(*f
          //this isn't accurate, even though the line no is, because it's
          //potentially more than one physical line's length mapped to a single
          //logical line.  Maybe I should fix it?
+         //I could have a list of line lengths and resolve the line index based
+         //on minusing them until it's less than then the next line length
          //token->line_index = line->index;
       }
    }

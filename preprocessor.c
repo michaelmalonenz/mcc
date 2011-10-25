@@ -13,11 +13,6 @@
 #define LOCAL_INCLUDE_OPENER '"'
 #define LOCAL_INCLUDE_TERMINATOR '"'
 
-const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES] = { "include", "define", "ifdef", "ifndef", "if",
-                                                                            "endif", "else", "elif", "undef", "error", "pragma" };
-
-size_t pp_strlens[NUM_PREPROCESSOR_DIRECTIVES];
-static bool_t initialised;
 
 #ifdef MCC_DEBUG
 #define HANDLER_LINKAGE extern
@@ -53,27 +48,6 @@ HANDLER_LINKAGE void handleDefinedConditional(mcc_LogicalLine_t *line, mcc_FileB
 
 static FILE *outputFile;
 
-PREPROC_DIRECTIVE mcc_GetPreprocessorDirective(mcc_LogicalLine_t *line)
-{
-   int i;
-   if (!initialised)
-   {
-      for (i = 0; i < NUM_PREPROCESSOR_DIRECTIVES; i++)
-      {
-         pp_strlens[i] = strlen(preprocessor_directives[i]);
-      }
-      initialised = TRUE;
-   }
-
-   for (i = 0; i < NUM_PREPROCESSOR_DIRECTIVES; i++)
-   {
-      if (strncmp(&line->string[line->index], preprocessor_directives[i], pp_strlens[i]) == 0)
-      {
-         return i;
-      }
-   }
-   return PP_NONE;
-}
 void SearchPreprocessorDirectives(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
 {
    int i;
