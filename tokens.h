@@ -72,13 +72,13 @@ typedef enum operator_index {OP_ADD, OP_MINUS, OP_DIVIDE, OP_MULTIPLY, OP_MODULO
                              OP_R_SHIFT, OP_NEGATE, OP_SIZEOF, OP_ADDRESS_OF, 
                              OP_TERNARY_IF, OP_TERNARY_ELSE, OP_COMMA,
                              NUM_OPERATORS, OP_NONE} MCC_OPERATOR;
-extern char *operators[NUM_OPERATORS];
+extern const char *operators[NUM_OPERATORS];
 
 typedef enum symbol_index {SYM_OPEN_BRACE, SYM_CLOSE_BRACE, SYM_OPEN_BRACKET,
                            SYM_CLOSE_BRACKET, SYM_SEMI_COLON, SYM_OPEN_PAREN,
                            SYM_CLOSE_PAREN, SYM_DOUBLE_QUOTE, SYM_SINGLE_QUOTE,
                            SYM_ESCAPE, NUM_SYMBOLS, SYM_NONE} MCC_SYMBOL;
-extern char *symbols[NUM_SYMBOLS];
+extern const char *symbols[NUM_SYMBOLS];
 extern size_t symbol_strlens[NUM_SYMBOLS];
 
 /* The order here, is my guess at the relative frequency of each directive's
