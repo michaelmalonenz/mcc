@@ -29,7 +29,7 @@
 #include "config.h"
 #include "fileBuffer.h"
 
-typedef enum TYPE { TOK_KEYWORD, TOK_SYMBOL, TOK_OPERATOR } TOKEN_TYPE;
+typedef enum TYPE { TOK_PP_DIRECTIVE, TOK_KEYWORD, TOK_SYMBOL, TOK_OPERATOR } TOKEN_TYPE;
  
 typedef struct token {
    char *name;
@@ -42,32 +42,56 @@ typedef struct token {
 } mcc_Token_t;
 
 /* The following enums need to be kept in sync with the corresponding char *[] */
-enum key_index { KEY_AUTO, KEY_BREAK, KEY_CASE, KEY_CHAR, KEY_CONST, KEY_CONTINUE, KEY_DEFAULT, KEY_DO, KEY_DOUBLE,
-                 KEY_ELSE, KEY_ENUM, KEY_EXTERN, KEY_FLOAT, KEY_FOR, KEY_GOTO, KEY_IF, KEY_INT, KEY_LONG,
-                 KEY_REGISTER, KEY_RETURN, KEY_SHORT, KEY_SIGNED, KEY_SIZEOF, KEY_STATIC, KEY_STRUCT,
-                 KEY_SWITCH, KEY_TYPEDEF, KEY_UNION, KEY_UNSIGNED, KEY_VOID, KEYVOLATILE, KEY_WHILE,
+enum key_index { KEY_AUTO, KEY_BREAK, KEY_CASE, KEY_CHAR, KEY_CONST, 
+                 KEY_CONTINUE, KEY_DEFAULT, KEY_DO, KEY_DOUBLE,
+                 KEY_ELSE, KEY_ENUM, KEY_EXTERN, KEY_FLOAT, KEY_FOR, KEY_GOTO,
+                 KEY_IF, KEY_INT, KEY_LONG, KEY_REGISTER, KEY_RETURN, KEY_SHORT,
+                 KEY_SIGNED, KEY_SIZEOF, KEY_STATIC, KEY_STRUCT, KEY_SWITCH,
+                 KEY_TYPEDEF, KEY_UNION, KEY_UNSIGNED, KEY_VOID, KEYVOLATILE,
+                 KEY_WHILE,
 #if MCC_C99_COMPATIBLE
                  KEY_BOOL, KEY_COMPLEX, KEY_IMAGINARY, KEY_INLINE, KEY_RESTRICT, 
 #endif
-                 NUM_KEYWORDS};
+                 NUM_KEYWORDS, KEY_NONE};
 extern const char *keywords[NUM_KEYWORDS];
 
-typedef enum operator_index {OP_ADD, OP_MINUS, OP_DIVIDE, OP_MULTIPLY, OP_MODULO, OP_DECREMENT, OP_INCREMENT,
-                     OP_EQUALS_ASSIGN, OP_TIMES_EQUALS, OP_DIVIDE_EQUALS, OP_MOD_EQUALS, OP_PLUS_EQUALS,
-                     OP_MINUS_EQUALS, OP_L_SHIFT_EQUALS, OP_R_SHIFT_EQUALS, OP_BITWISE_AND_EQUALS,
-                     OP_BITWISE_EXCL_OR_EQUALS, OP_BITWISE_INCL_OR_EQUALS, OP_COMPARE_TO, OP_NOT_EQUAL,
-                     OP_GREATER_THAN, OP_LESS_THAN, OP_GREATER_EQUAL, OP_LESS_EQUAL, OP_LOGICAL_AND,
-                     OP_LOGICAL_EXCL_OR, OP_LOGICAL_INCL_OR, OP_NOT, OP_BITWISE_AND, OP_BITWISE_INCL_OR,
-                     OP_BITWISE_EXCL_OR, OP_L_SHIFT, OP_R_SHIFT, OP_NEGATE, OP_SIZEOF, OP_ADDRESS_OF, OP_TERNARY_IF,
-                             OP_TERNARY_ELSE, OP_COMMA, NUM_OPERATORS, OP_NONE} MCC_OPERATOR;
+typedef enum operator_index {OP_ADD, OP_MINUS, OP_DIVIDE, OP_MULTIPLY, OP_MODULO,
+                             OP_DECREMENT, OP_INCREMENT, OP_EQUALS_ASSIGN, 
+                             OP_TIMES_EQUALS, OP_DIVIDE_EQUALS, OP_MOD_EQUALS,
+                             OP_PLUS_EQUALS, OP_MINUS_EQUALS, OP_L_SHIFT_EQUALS,
+                             OP_R_SHIFT_EQUALS, OP_BITWISE_AND_EQUALS,
+                             OP_BITWISE_EXCL_OR_EQUALS, OP_BITWISE_INCL_OR_EQUALS,
+                             OP_COMPARE_TO, OP_NOT_EQUAL, OP_GREATER_THAN, 
+                             OP_LESS_THAN, OP_GREATER_EQUAL, OP_LESS_EQUAL, 
+                             OP_LOGICAL_AND, OP_LOGICAL_EXCL_OR,
+                             OP_LOGICAL_INCL_OR, OP_NOT, OP_BITWISE_AND, 
+                             OP_BITWISE_INCL_OR, OP_BITWISE_EXCL_OR, OP_L_SHIFT,
+                             OP_R_SHIFT, OP_NEGATE, OP_SIZEOF, OP_ADDRESS_OF, 
+                             OP_TERNARY_IF, OP_TERNARY_ELSE, OP_COMMA,
+                             NUM_OPERATORS, OP_NONE} MCC_OPERATOR;
 extern char *operators[NUM_OPERATORS];
 
-typedef enum symbol_index {SYM_OPEN_BRACE, SYM_CLOSE_BRACE, SYM_OPEN_BRACKET, SYM_CLOSE_BRACKET, SYM_SEMI_COLON, 
-                   SYM_OPEN_PAREN, SYM_CLOSE_PAREN, SYM_DOUBLE_QUOTE, SYM_SINGLE_QUOTE, SYM_ESCAPE, NUM_SYMBOLS, SYM_NONE} MCC_SYMBOL;
+typedef enum symbol_index {SYM_OPEN_BRACE, SYM_CLOSE_BRACE, SYM_OPEN_BRACKET,
+                           SYM_CLOSE_BRACKET, SYM_SEMI_COLON, SYM_OPEN_PAREN,
+                           SYM_CLOSE_PAREN, SYM_DOUBLE_QUOTE, SYM_SINGLE_QUOTE,
+                           SYM_ESCAPE, NUM_SYMBOLS, SYM_NONE} MCC_SYMBOL;
 extern char *symbols[NUM_SYMBOLS];
+
+/* The order here, is my guess at the relative frequency of each directive's
+   use - so we can match earlier in the list, and hopefully speed up the
+   pre-processing portion a little bit */
+typedef enum pp_directives { PP_INCLUDE, PP_DEFINE, PP_IFDEF, PP_IFNDEF,
+                             PP_IF, PP_ENDIF, PP_ELSE, PP_ELIF, PP_UNDEF,
+                             PP_ERROR, PP_PRAGMA, NUM_PREPROCESSOR_DIRECTIVES,
+                             PP_NONE } PREPROC_DIRECTIVE;
+
+extern const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES];
+extern size_t pp_strlens[NUM_PREPROCESSOR_DIRECTIVES];
 
 MCC_SYMBOL mcc_GetSymbol(mcc_LogicalLine_t *line);
 MCC_OPERATOR mcc_GetOperator(mcc_LogicalLine_t *line);
+PREPROC_DIRECTIVE mcc_GetPreprocessorDirective(mcc_LogicalLine_t *line);
 
+mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len);
 
 #endif /* MCC_TOKENS_H_ */

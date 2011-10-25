@@ -5,8 +5,9 @@
 #include "tokens.h"
 #include "mcc.h"
 #include "fileBuffer.h"
-
 #include "stringBuffer.h"
+#include "tokens.h"
+
 static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t UNUSED(*fileBuffer));
 
 static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t *fileBuffer)
@@ -82,7 +83,25 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t UNUSED(*f
    SkipWhiteSpace(line);
    if (line->string[line->index] == '#')
    {
-      //it's a pre-processor directive
+      mcc_Token_t *token;
+      line->index++;
+      if (line->string[line->index] == '#')
+      {
+         //it's a preprocessor join operator
+      }
+      else
+      {
+         PREPROC_DIRECTIVE pp_dir = mcc_GetPreprocessorDirective(line);
+         MCC_ASSERT(pp_dir != PP_NONE);
+         token = mcc_CreateToken(preprocessor_directives[pp_dir], pp_strlens[pp_dir]);
+         line->index += pp_strlens[pp_dir];
+         token->tokenType = TOK_PP_DIRECTIVE;
+         token->lineno = mcc_GetFileBufferCurrentLineNo(fileBuffer);
+         //this isn't accurate, even though the line no is, because it's
+         //potentially more than one physical line's length mapped to a single
+         //logical line.  Maybe I should fix it?
+         //token->line_index = line->index;
+      }
    }
    else if (isWordChar(line->string[line->index]))
    {

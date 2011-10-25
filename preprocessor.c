@@ -6,19 +6,18 @@
 #include "fileBuffer.h"
 #include "stringBuffer.h"
 #include "macro.h"
+#include "tokens.h"
 
 #define SYSTEM_INCLUDE_OPENER '<'
 #define SYSTEM_INCLUDE_TERMINATOR '>'
 #define LOCAL_INCLUDE_OPENER '"'
 #define LOCAL_INCLUDE_TERMINATOR '"'
 
-/* The order here, is my guess at the relative frequency of each directive's use - so we can match
-   earlier in the list, and hopefully speed up the pre-processing portion a little bit */
-enum pp_directives { PP_INCLUDE, PP_DEFINE, PP_IFDEF, PP_IFNDEF, PP_IF, PP_ENDIF, PP_ELSE,
-                     PP_ELIF, PP_UNDEF, PP_ERROR, PP_PRAGMA, NUM_PREPROCESSOR_DIRECTIVES };
-
-static const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES] = { "include", "define", "ifdef", "ifndef", "if",
+const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES] = { "include", "define", "ifdef", "ifndef", "if",
                                                                             "endif", "else", "elif", "undef", "error", "pragma" };
+
+size_t pp_strlens[NUM_PREPROCESSOR_DIRECTIVES];
+static bool_t initialised;
 
 #ifdef MCC_DEBUG
 #define HANDLER_LINKAGE extern
@@ -54,7 +53,28 @@ HANDLER_LINKAGE void handleDefinedConditional(mcc_LogicalLine_t *line, mcc_FileB
 
 static FILE *outputFile;
 
-static void SearchPreprocessorDirectives(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
+PREPROC_DIRECTIVE mcc_GetPreprocessorDirective(mcc_LogicalLine_t *line)
+{
+   int i;
+   if (!initialised)
+   {
+      for (i = 0; i < NUM_PREPROCESSOR_DIRECTIVES; i++)
+      {
+         pp_strlens[i] = strlen(preprocessor_directives[i]);
+      }
+      initialised = TRUE;
+   }
+
+   for (i = 0; i < NUM_PREPROCESSOR_DIRECTIVES; i++)
+   {
+      if (strncmp(&line->string[line->index], preprocessor_directives[i], pp_strlens[i]) == 0)
+      {
+         return i;
+      }
+   }
+   return PP_NONE;
+}
+void SearchPreprocessorDirectives(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer, bool_t skip)
 {
    int i;
    SkipWhiteSpace(line);
