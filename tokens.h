@@ -58,8 +58,7 @@ typedef enum key_index { KEY_AUTO, KEY_BREAK, KEY_CASE, KEY_CHAR, KEY_CONST,
 extern const char *keywords[NUM_KEYWORDS];
 extern size_t keyword_strlens[NUM_KEYWORDS];
 
-typedef enum operator_index {OP_ADD, OP_MINUS, OP_DIVIDE, OP_MULTIPLY, OP_MODULO,
-                             OP_DECREMENT, OP_INCREMENT, OP_EQUALS_ASSIGN, 
+typedef enum operator_index {OP_DECREMENT, OP_INCREMENT, OP_EQUALS_ASSIGN, 
                              OP_TIMES_EQUALS, OP_DIVIDE_EQUALS, OP_MOD_EQUALS,
                              OP_PLUS_EQUALS, OP_MINUS_EQUALS, OP_L_SHIFT_EQUALS,
                              OP_R_SHIFT_EQUALS, OP_BITWISE_AND_EQUALS,
@@ -71,6 +70,7 @@ typedef enum operator_index {OP_ADD, OP_MINUS, OP_DIVIDE, OP_MULTIPLY, OP_MODULO
                              OP_BITWISE_INCL_OR, OP_BITWISE_EXCL_OR, OP_L_SHIFT,
                              OP_R_SHIFT, OP_NEGATE, OP_SIZEOF, OP_ADDRESS_OF, 
                              OP_TERNARY_IF, OP_TERNARY_ELSE, OP_COMMA,
+                             OP_ADD, OP_MINUS, OP_DIVIDE, OP_MULTIPLY, OP_MODULO,
                              NUM_OPERATORS, OP_NONE} MCC_OPERATOR;
 extern const char *operators[NUM_OPERATORS];
 
