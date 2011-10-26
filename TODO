@@ -32,6 +32,7 @@ support function macros
 Need to handle the ## operator
 
 Tokeniser:
+handle #include "" and string constants properly
 fix it
 deal with errors
 

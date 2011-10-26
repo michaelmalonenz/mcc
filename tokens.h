@@ -30,7 +30,8 @@
 #include "fileBuffer.h"
 
 typedef enum TYPE { TOK_PP_DIRECTIVE, TOK_IDENTIFIER, TOK_KEYWORD, TOK_SYMBOL,
-                    TOK_OPERATOR, TOK_NUMBER, TOK_NONE } TOKEN_TYPE;
+                    TOK_OPERATOR, TOK_NUMBER, TOK_STR_CONST, TOK_CHAR_CONST,
+                    TOK_NONE } TOKEN_TYPE;
  
 typedef struct token {
    char *name;
@@ -40,6 +41,7 @@ typedef struct token {
    int lineno;
    int line_index;
    struct token *next;
+   struct token *previous;
 } mcc_Token_t;
 
 /* The following enums need to be kept in sync with the corresponding char *[] */
@@ -59,9 +61,9 @@ typedef enum key_index { KEY_AUTO, KEY_BREAK, KEY_CASE, KEY_CHAR, KEY_CONST,
 extern const char *keywords[NUM_KEYWORDS];
 extern size_t keyword_strlens[NUM_KEYWORDS];
 
-typedef enum operator_index {OP_DECREMENT, OP_INCREMENT, OP_EQUALS_ASSIGN, 
-                             OP_TIMES_EQUALS, OP_DIVIDE_EQUALS, OP_MOD_EQUALS,
-                             OP_PLUS_EQUALS, OP_MINUS_EQUALS, OP_L_SHIFT_EQUALS,
+typedef enum operator_index {OP_DECREMENT, OP_INCREMENT, OP_TIMES_EQUALS,
+                             OP_DIVIDE_EQUALS, OP_MOD_EQUALS, OP_PLUS_EQUALS,
+                             OP_MINUS_EQUALS, OP_L_SHIFT_EQUALS,
                              OP_R_SHIFT_EQUALS, OP_BITWISE_AND_EQUALS,
                              OP_BITWISE_EXCL_OR_EQUALS, OP_BITWISE_INCL_OR_EQUALS,
                              OP_COMPARE_TO, OP_NOT_EQUAL, OP_GREATER_THAN, 
@@ -71,8 +73,8 @@ typedef enum operator_index {OP_DECREMENT, OP_INCREMENT, OP_EQUALS_ASSIGN,
                              OP_BITWISE_INCL_OR, OP_BITWISE_EXCL_OR, OP_L_SHIFT,
                              OP_R_SHIFT, OP_NEGATE, OP_SIZEOF, OP_ADDRESS_OF, 
                              OP_TERNARY_IF, OP_TERNARY_ELSE, OP_MEMBER_OF,
-                             OP_DEREF_MEMBER_OF, OP_COMMA, OP_ADD, OP_MINUS,
-                             OP_DIVIDE, OP_MULTIPLY, OP_MODULO,
+                             OP_DEREF_MEMBER_OF, OP_EQUALS_ASSIGN, OP_COMMA,
+                             OP_ADD, OP_MINUS, OP_DIVIDE, OP_MULTIPLY, OP_MODULO,
                              NUM_OPERATORS, OP_NONE} MCC_OPERATOR;
 extern const char *operators[NUM_OPERATORS];
 extern size_t operator_strlens[NUM_OPERATORS];
@@ -116,5 +118,7 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
                              TOKEN_TYPE type, const int lineno);
 
 void mcc_AddToken(mcc_Token_t *token);
+void mcc_FreeTokens(void);
+mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, mcc_Token_t *second, TOKEN_TYPE newType);
 
 #endif /* MCC_TOKENS_H_ */

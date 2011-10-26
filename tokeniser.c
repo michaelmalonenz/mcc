@@ -8,7 +8,7 @@
 #include "stringBuffer.h"
 #include "tokens.h"
 
-static void mcc_TokeniseLine(mcc_LogicalLine_t *line, const int lineno);
+static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
 
 static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t *fileBuffer)
 {
@@ -53,6 +53,55 @@ static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuff
    return line;
 }
 
+static mcc_LogicalLine_t *handle_string_char_const(mcc_LogicalLine_t *line,
+                                                   mcc_FileBuffer_t *fileBuffer,
+                                                   const char delimiter,
+                                                   TOKEN_TYPE type)
+{
+   int strLen = 1;
+   mcc_Token_t *token = NULL;
+   while(line->string[line->index + strLen] != delimiter)
+   {
+      strLen++;
+      if ((line->index + strLen) == line->length)
+      {
+         if (line->string[line->index + strLen-1] != '\\' &&
+             line->string[line->index + strLen-1] != delimiter)
+         {
+            mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
+                            mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                            "Reached end of line when parsing string constant and there's no continuation character\n");
+         }
+         else
+         {
+            mcc_Token_t *temp = mcc_CreateToken(&line->string[line->index],
+                                                strLen, type,
+                                                mcc_GetFileBufferCurrentLineNo(fileBuffer));
+            token = ((token == NULL) ? temp : mcc_ConCatTokens(token, temp, type));
+            line = mcc_FileBufferGetNextLogicalLine(fileBuffer);
+         }
+      }
+   }
+   if (line->string[line->index + strLen] == delimiter)
+   {
+      token = mcc_CreateToken(&line->string[line->index + strLen],
+                              strLen, type,
+                              mcc_GetFileBufferCurrentLineNo(fileBuffer));
+      line->index += strLen + 1;
+      line = DealWithComments(line, fileBuffer);
+   }
+   else
+   {
+      mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
+                      mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                      "Couldn't find a matching %c for the character constant",
+                      delimiter);
+   }
+   MCC_ASSERT(token != NULL);
+   mcc_AddToken(token);
+   return line;
+}
+                                       
 void mcc_TokeniseFile(const char *inFilename)
 {
    mcc_FileBuffer_t *fileBuffer = mcc_CreateFileBuffer(inFilename);
@@ -68,14 +117,14 @@ void mcc_TokeniseFile(const char *inFilename)
          {
             continue;
          }
-         mcc_TokeniseLine(logicalLine, mcc_GetFileBufferCurrentLineNo(fileBuffer));
+         mcc_TokeniseLine(logicalLine, fileBuffer);
       }
    }
    mcc_DeleteFileBuffer(fileBuffer);
 }
 
 //by providing a logical line, we are guaranteed to only have whole tokens.
-static void mcc_TokeniseLine(mcc_LogicalLine_t *line, const int current_lineno)
+static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
 {
    MCC_OPERATOR current_operator = OP_NONE;
    MCC_SYMBOL current_symbol = SYM_NONE;
@@ -94,10 +143,9 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, const int current_lineno)
          else
          {
             PREPROC_DIRECTIVE pp_dir = mcc_GetPreprocessorDirective(line);
-            MCC_ASSERT(pp_dir != PP_NONE);
             token = mcc_CreateToken(preprocessor_directives[pp_dir], 
                                     pp_strlens[pp_dir], TOK_PP_DIRECTIVE,
-                                    current_lineno);
+                                    mcc_GetFileBufferCurrentLineNo(fileBuffer));
             line->index += pp_strlens[pp_dir];
          }
       }
@@ -107,7 +155,8 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, const int current_lineno)
          if (keyword != KEY_NONE)
          {
             token = mcc_CreateToken(keywords[keyword], keyword_strlens[keyword],
-                                    TOK_KEYWORD, current_lineno);
+                                    TOK_KEYWORD,
+                                    mcc_GetFileBufferCurrentLineNo(fileBuffer));
             line->index += keyword_strlens[keyword];
          }
          else //it's an identifier
@@ -120,7 +169,8 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, const int current_lineno)
                identLen++;
             }
             token = mcc_CreateToken(&line->string[line->index], identLen,
-                                    TOK_IDENTIFIER, current_lineno);
+                                    TOK_IDENTIFIER,
+                                    mcc_GetFileBufferCurrentLineNo(fileBuffer));
             line->index += identLen;
          }
       }
@@ -133,27 +183,47 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, const int current_lineno)
             numLen++;
          }
          token = mcc_CreateToken(&line->string[line->index], numLen,
-                                 TOK_NUMBER, current_lineno);
+                                 TOK_NUMBER,
+                                 mcc_GetFileBufferCurrentLineNo(fileBuffer));
          line->index += numLen;
       }
       else if ((current_symbol = mcc_GetSymbol(line)) != SYM_NONE)
       {
-         token = mcc_CreateToken(symbols[current_symbol],
-                                 symbol_strlens[current_symbol],
-                                 TOK_SYMBOL, current_lineno);
-         line->index += symbol_strlens[current_symbol];
-         //how does one tell the difference between a logical and and addressof
+         if (current_symbol == SYM_DOUBLE_QUOTE)
+         {
+            (void)handle_string_char_const(line, fileBuffer,
+                                           '\'', TOK_CHAR_CONST);
+         }
+         else if (current_symbol == SYM_SINGLE_QUOTE)
+         {
+            line = handle_string_char_const(line, fileBuffer,
+                                            '"', TOK_STR_CONST);            
+         }
+         else
+         {
+            token = mcc_CreateToken(symbols[current_symbol],
+                                    symbol_strlens[current_symbol],
+                                    TOK_SYMBOL,
+                                    mcc_GetFileBufferCurrentLineNo(fileBuffer));
+            line->index += symbol_strlens[current_symbol];
+            //addressof and logical and need to be differentiated by the parser
+            //based on context _and_ corrected
+         }
       }
       else if ((current_operator = mcc_GetOperator(line)) != OP_NONE)
       {
          token = mcc_CreateToken(operators[current_operator],
-                                 operator_strlens[current_operator],
-                                 TOK_OPERATOR, current_lineno);
+                                 operator_strlens[current_operator], 
+                                 TOK_OPERATOR,
+                                 mcc_GetFileBufferCurrentLineNo(fileBuffer));
          line->index += operator_strlens[current_operator];
       }
       else
       {
-         mcc_Error("Not a recognised character: '%c'\n", line->string[line->index]);
+         mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
+                         mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                         "Not a recognised character: '%c'\n",
+                         line->string[line->index]);
       }
       if (token != NULL)
       {

@@ -31,12 +31,12 @@ const char *keywords[NUM_KEYWORDS] = { "auto", "break", "case", "char", "const",
 
 size_t keyword_strlens[NUM_KEYWORDS];
 
-const char *operators[NUM_OPERATORS] = { "--", "++", "=", "*=", "/=", "%=", "+=",
+const char *operators[NUM_OPERATORS] = { "--", "++", "*=", "/=", "%=", "+=",
                                          "-=", "<<=", ">=", "&=", "^=", "|=",
                                          "==", "!=", ">", "<", ">=", "<=", "&&",
                                          "||", "!", "&", "|", "^", "<<", ">>",
                                          "~", "sizeof", "&", "*", "?", ":", ".",
-                                         "->", ",", "+", "-", "/", "*", "%" };
+                                         "->", "=", ",", "+", "-", "/", "*", "%" };
 size_t operator_strlens[NUM_OPERATORS];
 
 const char *symbols[NUM_SYMBOLS] = { "{", "}", "[", "]", ";", "(", ")", "\"",

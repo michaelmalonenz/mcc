@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #include "mcc.h"
+#include "tokens.h"
 
 int main(int argc, char **argv)
 {
@@ -19,6 +20,7 @@ int main(int argc, char **argv)
    for(i = 1; i < argc; i++)
    {
       mcc_TokeniseFile(argv[i]);
+      mcc_FreeTokens();
    }
 
    return 0;
