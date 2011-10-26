@@ -15,6 +15,9 @@ CFLAGS = "-Wall -Wextra -Werror -g -ggdb3 -Os"
 
 CC = "/usr/bin/gcc"
 
+MAIN_OBJECT_FILE = "mcc.o"
+MAIN_EXE_NAME = "mcc"
+
 class SimpleLogger
 
    def initialize(filename="#{File.basename($0)}.log",
@@ -144,7 +147,7 @@ end
 
 if $0 == __FILE__ then
 
-   $log_file = SimpleLogger.new('mcc.log')
+   $log_file = SimpleLogger.new("#{MAIN_EXE_NAME}.log")
 
    ARGV.each do |arg|
       if arg =~ %r{--?c(?:l(?:e(?:a(?:n)?)?)?)?}ix
@@ -173,9 +176,9 @@ if $0 == __FILE__ then
 
       $log_file.note("Calculating dependencies...")
       Dir.chdir(BIN_DIR) do
-         dependencies = linker.discover_required_files('mcc.o')
+         dependencies = linker.discover_required_files(MAIN_OBJECT_FILE)
          $log_file.note("Linking main program...")
-         run_command("#{CC} #{dependencies.join(' ')} -o mcc", "Linking mcc Failed...")
+         run_command("#{CC} #{dependencies.join(' ')} -o #{MAIN_EXE_NAME}", "Linking #{MAIN_EXE_NAME} Failed...")
       end
 
       Dir.chdir(TEST_BIN_DIR) do
