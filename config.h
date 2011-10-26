@@ -7,7 +7,9 @@
 #define MCC_USE_LIST_FOR_MACROS (0)
 
 
+#ifndef MCC_DEBUG
 #define MCC_DEBUG (1)
+#endif
 
 #define MCC_USE_DYNAMIC_STRING_BUFFER_TOKENISER (1)
 

@@ -100,5 +100,9 @@ mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, mcc_Token_t *second, TOKEN_TYP
    first->tokenType = newType;
    first->next = second->next;
    mcc_DeleteToken(second);
+#if MCC_DEBUG
+   printf("Concatenated two tokens to make '%s' of type %d\n",
+          first->name, first->tokenType);
+#endif
    return first;
 }

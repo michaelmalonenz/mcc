@@ -58,11 +58,15 @@ static mcc_LogicalLine_t *handle_string_char_const(mcc_LogicalLine_t *line,
                                                    const char delimiter,
                                                    TOKEN_TYPE type)
 {
-   int strLen = 1;
+   int strLen = 0;
    mcc_Token_t *token = NULL;
+   mcc_Token_t *tempToken = NULL;
+
+   //move the line past the initial delimiter
+   line->index++;
+
    while(line->string[line->index + strLen] != delimiter)
    {
-      strLen++;
       if ((line->index + strLen) == line->length)
       {
          if (line->string[line->index + strLen-1] != '\\' &&
@@ -74,27 +78,32 @@ static mcc_LogicalLine_t *handle_string_char_const(mcc_LogicalLine_t *line,
          }
          else
          {
-            mcc_Token_t *temp = mcc_CreateToken(&line->string[line->index],
-                                                strLen, type,
-                                                mcc_GetFileBufferCurrentLineNo(fileBuffer));
-            token = ((token == NULL) ? temp : mcc_ConCatTokens(token, temp, type));
+            tempToken = mcc_CreateToken(&line->string[line->index],
+                                        strLen, type,
+                                        mcc_GetFileBufferCurrentLineNo(fileBuffer));
+            token = ((token == NULL) ? tempToken : mcc_ConCatTokens(token, tempToken, type));
             line = mcc_FileBufferGetNextLogicalLine(fileBuffer);
          }
+      }
+      else
+      {
+         strLen++;
       }
    }
    if (line->string[line->index + strLen] == delimiter)
    {
-      token = mcc_CreateToken(&line->string[line->index + strLen],
+      tempToken = mcc_CreateToken(&line->string[line->index],
                               strLen, type,
                               mcc_GetFileBufferCurrentLineNo(fileBuffer));
       line->index += strLen + 1;
+      token = ((token == NULL) ? tempToken : mcc_ConCatTokens(token, tempToken, type));
       line = DealWithComments(line, fileBuffer);
    }
    else
    {
       mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
                       mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                      "Couldn't find a matching %c for the character constant",
+                      "Couldn't find a matching %c for the constant string or character",
                       delimiter);
    }
    MCC_ASSERT(token != NULL);
@@ -192,12 +201,12 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
          if (current_symbol == SYM_DOUBLE_QUOTE)
          {
             (void)handle_string_char_const(line, fileBuffer,
-                                           '\'', TOK_CHAR_CONST);
+                                           '"', TOK_STR_CONST);
          }
          else if (current_symbol == SYM_SINGLE_QUOTE)
          {
             line = handle_string_char_const(line, fileBuffer,
-                                            '"', TOK_STR_CONST);            
+                                            '\'', TOK_CHAR_CONST);            
          }
          else
          {

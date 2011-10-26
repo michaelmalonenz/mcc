@@ -1,5 +1,4 @@
 Misc:
-Write a test for the tokeniser and fix the tokeniser
 write a ruby script to replace all tri-graphs in c code OR
 add in a compile-time switched ability to handle tri-graphs (so I can eventually claim full c99 compliance)
 options
@@ -32,9 +31,8 @@ support function macros
 Need to handle the ## operator
 
 Tokeniser:
-handle #include "" and string constants properly
-fix it
-deal with errors
+Need to correct the handle_string_char_const to parse strings and char const properly for escape sequences.
+Write a test for the tokeniser and fix the tokeniser
 
 Parser:
 Assert that the input file conforms to the c(99) standard
