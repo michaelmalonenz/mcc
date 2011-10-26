@@ -153,7 +153,7 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, const int current_lineno)
       }
       else
       {
-         //it's an error
+         mcc_Error("Not a recognised character: '%c'\n", line->string[line->index]);
       }
       if (token != NULL)
       {

@@ -35,11 +35,12 @@ const char *operators[NUM_OPERATORS] = { "--", "++", "=", "*=", "/=", "%=", "+="
                                          "-=", "<<=", ">=", "&=", "^=", "|=",
                                          "==", "!=", ">", "<", ">=", "<=", "&&",
                                          "||", "!", "&", "|", "^", "<<", ">>",
-                                         "~", "sizeof", "&", "*", "?", ":", ",",
-                                         "+", "-", "/", "*", "%" };
+                                         "~", "sizeof", "&", "*", "?", ":", ".",
+                                         "->", ",", "+", "-", "/", "*", "%" };
 size_t operator_strlens[NUM_OPERATORS];
 
-const char *symbols[NUM_SYMBOLS] = { "{", "}", "[", "]", ";", "(", ")", "\"", "'", "\\" };
+const char *symbols[NUM_SYMBOLS] = { "{", "}", "[", "]", ";", "(", ")", "\"",
+                                     "'", "\\", "<", ">", "\"" };
 size_t symbol_strlens[NUM_SYMBOLS];
 
 static bool_t initialised;
@@ -59,7 +60,7 @@ static inline void init_tokens(void)
 
    for (i = 0; i < NUM_SYMBOLS; i++)
    {
-      symbol_strlens[i] = strlen(keywords[i]);
+      symbol_strlens[i] = strlen(symbols[i]);
    }
 
    for (i = 0; i < NUM_OPERATORS; i++)

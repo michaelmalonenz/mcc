@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "tokens.h"
 #include "config.h"
@@ -21,8 +22,8 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
 {
    mcc_Token_t *token = (mcc_Token_t *) malloc(sizeof(mcc_Token_t));
    token->name = (char *) malloc(sizeof(char) * (text_len + 1));
-   memcpy(token->name, text, text_len + 1);
-   token->name[text_len + 1] = '\0';
+   memcpy(token->name, text, text_len);
+   token->name[text_len] = '\0';
    token->tokenType = type;
    token->lineno = lineno;
    token->next = NULL;
@@ -46,6 +47,7 @@ void mcc_AddToken(mcc_Token_t *token)
    currentToken = token;
 #if MCC_DEBUG
    numberOfTokens++;
+   printf("Got me a token '%s' of type %d\n", token->name, token->tokenType);
 #endif
 }
 

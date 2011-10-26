@@ -70,8 +70,9 @@ typedef enum operator_index {OP_DECREMENT, OP_INCREMENT, OP_EQUALS_ASSIGN,
                              OP_LOGICAL_INCL_OR, OP_NOT, OP_BITWISE_AND, 
                              OP_BITWISE_INCL_OR, OP_BITWISE_EXCL_OR, OP_L_SHIFT,
                              OP_R_SHIFT, OP_NEGATE, OP_SIZEOF, OP_ADDRESS_OF, 
-                             OP_TERNARY_IF, OP_TERNARY_ELSE, OP_COMMA,
-                             OP_ADD, OP_MINUS, OP_DIVIDE, OP_MULTIPLY, OP_MODULO,
+                             OP_TERNARY_IF, OP_TERNARY_ELSE, OP_MEMBER_OF,
+                             OP_DEREF_MEMBER_OF, OP_COMMA, OP_ADD, OP_MINUS,
+                             OP_DIVIDE, OP_MULTIPLY, OP_MODULO,
                              NUM_OPERATORS, OP_NONE} MCC_OPERATOR;
 extern const char *operators[NUM_OPERATORS];
 extern size_t operator_strlens[NUM_OPERATORS];
@@ -79,7 +80,8 @@ extern size_t operator_strlens[NUM_OPERATORS];
 typedef enum symbol_index {SYM_OPEN_BRACE, SYM_CLOSE_BRACE, SYM_OPEN_BRACKET,
                            SYM_CLOSE_BRACKET, SYM_SEMI_COLON, SYM_OPEN_PAREN,
                            SYM_CLOSE_PAREN, SYM_DOUBLE_QUOTE, SYM_SINGLE_QUOTE,
-                           SYM_ESCAPE, NUM_SYMBOLS, SYM_NONE} MCC_SYMBOL;
+                           SYM_ESCAPE, SYM_OPEN_SYS_INCL, SYM_CLOSE_SYS_INCL,
+                           SYM_LOCAL_INCL, NUM_SYMBOLS, SYM_NONE} MCC_SYMBOL;
 extern const char *symbols[NUM_SYMBOLS];
 extern size_t symbol_strlens[NUM_SYMBOLS];
 
