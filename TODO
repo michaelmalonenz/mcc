@@ -1,6 +1,5 @@
 Misc:
-Should I be tokenising before I get to the preprocessor? (The tokens don't actually change, 
-unless we have a ## in there!, but we could modify that one in places)
+Write a test for the tokeniser and fix the tokeniser
 write a ruby script to replace all tri-graphs in c code OR
 add in a compile-time switched ability to handle tri-graphs (so I can eventually claim full c99 compliance)
 options
@@ -8,6 +7,7 @@ Use stopper for the unit tests??
 As soon as possible, start eating my own dog food -> alongside gcc?
 
 Unit Tests I really should write:
+test_Tokeniser
 test_Macros // I still need to write a test which deletes a macro in the middle of the tree somewhere 
             // and maintains the integrity.  Perhaps I should write a function that asserts the invariant.
 test_Preprocessor
@@ -15,6 +15,7 @@ test_Preprocessor
 Should I also write some overall tests for the preprocessor section?
 
 Preprocessor:
+Change to use the stream of tokens, instead of parsing the thing in place
 fix ifndef to work correctly
   - remove the file-scoped variables to handle conditionals (put them on the stack, for recursive goodness)
   - add in the "skip" variable to the logic deciding whether or not to ignore the conditional portion
@@ -26,16 +27,18 @@ Fix the /**/ style comments to allow for more than one set per line
   - might need to rework the algorithm entirely??
   - Also need to allow for // style comments to come after a /**/ comment on a line
 macro replacement
-tokenise expressions - should this be passed off to the tokeniser?  The rules are slightly different...
 evaluate macro expressions (like #if etc)
 support function macros
 Need to handle the ## operator
 
 Tokeniser:
-break a string into consecutive tokens
+fix it
+deal with errors
 
 Parser:
 Assert that the input file conforms to the c(99) standard
+create an AST
+walk the tree
 
 Assembler/linker - (Do I actually want to write this myself or should I attempt to write object files which are compatible with binutils' linker and use that?)
 Do I want to distribute a C library (like uClibc or Newlib etc) with this? probably.
