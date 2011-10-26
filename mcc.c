@@ -7,7 +7,6 @@
 
 #include "mcc.h"
 
-
 int main(int argc, char **argv)
 {
    int i;
@@ -19,7 +18,7 @@ int main(int argc, char **argv)
    
    for(i = 1; i < argc; i++)
    {
-      mcc_PreprocessFile(argv[i], stdout);
+      mcc_TokeniseFile(argv[i]);
    }
 
    return 0;

@@ -16,19 +16,23 @@ static mcc_Token_t *nextToken = NULL;
 static int numberOfTokens = 0;
 #endif
 
-mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len)
+mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
+                             TOKEN_TYPE type, const int lineno)
 {
    mcc_Token_t *token = (mcc_Token_t *) malloc(sizeof(mcc_Token_t));
    token->name = (char *) malloc(sizeof(char) * (text_len + 1));
    memcpy(token->name, text, text_len + 1);
    token->name[text_len + 1] = '\0';
-   
+   token->tokenType = type;
+   token->lineno = lineno;
+   token->next = NULL;
+
    return token;
 }
 
 void mcc_DeleteToken(mcc_Token_t *token)
 {
-   //This isn't complete, need to worry about the name as well
+   free(token->name);
    free(token);
 }
 

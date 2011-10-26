@@ -29,7 +29,8 @@
 #include "config.h"
 #include "fileBuffer.h"
 
-typedef enum TYPE { TOK_PP_DIRECTIVE, TOK_KEYWORD, TOK_SYMBOL, TOK_OPERATOR } TOKEN_TYPE;
+typedef enum TYPE { TOK_PP_DIRECTIVE, TOK_IDENTIFIER, TOK_KEYWORD, TOK_SYMBOL,
+                    TOK_OPERATOR, TOK_NUMBER, TOK_NONE } TOKEN_TYPE;
  
 typedef struct token {
    char *name;
@@ -48,7 +49,7 @@ typedef enum key_index { KEY_AUTO, KEY_BREAK, KEY_CASE, KEY_CHAR, KEY_CONST,
                          KEY_IF, KEY_INT, KEY_LONG, KEY_REGISTER, KEY_RETURN,
                          KEY_SHORT, KEY_SIGNED, KEY_SIZEOF, KEY_STATIC,
                          KEY_STRUCT, KEY_SWITCH, KEY_TYPEDEF, KEY_UNION,
-                         KEY_UNSIGNED, KEY_VOID, KEYVOLATILE, KEY_WHILE,
+                         KEY_UNSIGNED, KEY_VOID, KEY_VOLATILE, KEY_WHILE,
 #if MCC_C99_COMPATIBLE
                          KEY_BOOL, KEY_COMPLEX, KEY_IMAGINARY, KEY_INLINE,
                          KEY_RESTRICT, 
@@ -73,6 +74,7 @@ typedef enum operator_index {OP_DECREMENT, OP_INCREMENT, OP_EQUALS_ASSIGN,
                              OP_ADD, OP_MINUS, OP_DIVIDE, OP_MULTIPLY, OP_MODULO,
                              NUM_OPERATORS, OP_NONE} MCC_OPERATOR;
 extern const char *operators[NUM_OPERATORS];
+extern size_t operator_strlens[NUM_OPERATORS];
 
 typedef enum symbol_index {SYM_OPEN_BRACE, SYM_CLOSE_BRACE, SYM_OPEN_BRACKET,
                            SYM_CLOSE_BRACKET, SYM_SEMI_COLON, SYM_OPEN_PAREN,
@@ -98,6 +100,19 @@ MCC_OPERATOR mcc_GetOperator(mcc_LogicalLine_t *line);
 PREPROC_DIRECTIVE mcc_GetPreprocessorDirective(mcc_LogicalLine_t *line);
 MCC_KEYWORD mcc_GetKeyword(mcc_LogicalLine_t * line);
 
-mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len);
+
+/**
+ * @param text      The physical text of the token as in the source file
+ *
+ * @param text_len  The length of the physical text
+ *
+ * @param type      The type of token to create
+ *
+ * @param lineno    The current line number of the file where the token was found
+ */
+mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
+                             TOKEN_TYPE type, const int lineno);
+
+void mcc_AddToken(mcc_Token_t *token);
 
 #endif /* MCC_TOKENS_H_ */

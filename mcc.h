@@ -65,6 +65,6 @@ const char *mcc_FindLocalInclude(const char *filename);
 const char *mcc_FindSystemInclude(const char *filename);
 
 void mcc_PreprocessFile(const char *inFilename, FILE *outFile);
-void mcc_TokeniseString(const char *string, const unsigned int length);
+void mcc_TokeniseFile(const char *inFilename);
 
 #endif /* MCC_H */

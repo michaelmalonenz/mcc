@@ -8,7 +8,7 @@
 #include "stringBuffer.h"
 #include "tokens.h"
 
-static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t UNUSED(*fileBuffer));
+static void mcc_TokeniseLine(mcc_LogicalLine_t *line, const int lineno);
 
 static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t *fileBuffer)
 {
@@ -68,62 +68,99 @@ void mcc_TokeniseFile(const char *inFilename)
          {
             continue;
          }
-         mcc_TokeniseLine(logicalLine, fileBuffer);
+         mcc_TokeniseLine(logicalLine, mcc_GetFileBufferCurrentLineNo(fileBuffer));
       }
    }
    mcc_DeleteFileBuffer(fileBuffer);
 }
 
 //by providing a logical line, we are guaranteed to only have whole tokens.
-static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t UNUSED(*fileBuffer))
+static void mcc_TokeniseLine(mcc_LogicalLine_t *line, const int current_lineno)
 {
    MCC_OPERATOR current_operator = OP_NONE;
    MCC_SYMBOL current_symbol = SYM_NONE;
+   mcc_Token_t *token = NULL;
 
    SkipWhiteSpace(line);
-   if (line->string[line->index] == '#')
+   while(line->index < line->length)
    {
-      mcc_Token_t *token;
-      line->index++;
       if (line->string[line->index] == '#')
       {
-         //it's a preprocessor join operator
+         line->index++;
+         if (line->string[line->index] == '#')
+         {
+            //it's a preprocessor join operator
+         }
+         else
+         {
+            PREPROC_DIRECTIVE pp_dir = mcc_GetPreprocessorDirective(line);
+            MCC_ASSERT(pp_dir != PP_NONE);
+            token = mcc_CreateToken(preprocessor_directives[pp_dir], 
+                                    pp_strlens[pp_dir], TOK_PP_DIRECTIVE,
+                                    current_lineno);
+            line->index += pp_strlens[pp_dir];
+         }
+      }
+      else if (isWordChar(line->string[line->index]))
+      {
+         MCC_KEYWORD keyword = mcc_GetKeyword(line);
+         if (keyword != KEY_NONE)
+         {
+            token = mcc_CreateToken(keywords[keyword], keyword_strlens[keyword],
+                                    TOK_KEYWORD, current_lineno);
+            line->index += keyword_strlens[keyword];
+         }
+         else //it's an identifier
+         {
+            int identLen = 1;
+            while ((isWordChar(line->string[line->index + identLen]) ||
+                    isNumber(line->string[line->index + identLen])) &&
+                   ((line->index + identLen) < line->length))
+            {
+               identLen++;
+            }
+            token = mcc_CreateToken(&line->string[line->index], identLen,
+                                    TOK_IDENTIFIER, current_lineno);
+            line->index += identLen;
+         }
+      }
+      else if (isNumber(line->string[line->index]))
+      {
+         int numLen = 1;
+         while (isNumericChar(line->string[line->index + numLen]) &&
+                 line->index + numLen < line->length)
+         {
+            numLen++;
+         }
+         token = mcc_CreateToken(&line->string[line->index], numLen,
+                                 TOK_NUMBER, current_lineno);
+         line->index += numLen;
+      }
+      else if ((current_symbol = mcc_GetSymbol(line)) != SYM_NONE)
+      {
+         token = mcc_CreateToken(symbols[current_symbol],
+                                 symbol_strlens[current_symbol],
+                                 TOK_SYMBOL, current_lineno);
+         line->index += symbol_strlens[current_symbol];
+         //how does one tell the difference between a logical and and addressof
+      }
+      else if ((current_operator = mcc_GetOperator(line)) != OP_NONE)
+      {
+         token = mcc_CreateToken(operators[current_operator],
+                                 operator_strlens[current_operator],
+                                 TOK_OPERATOR, current_lineno);
+         line->index += operator_strlens[current_operator];
       }
       else
       {
-         PREPROC_DIRECTIVE pp_dir = mcc_GetPreprocessorDirective(line);
-         MCC_ASSERT(pp_dir != PP_NONE);
-         token = mcc_CreateToken(preprocessor_directives[pp_dir], pp_strlens[pp_dir]);
-         line->index += pp_strlens[pp_dir];
-         token->tokenType = TOK_PP_DIRECTIVE;
-         token->lineno = mcc_GetFileBufferCurrentLineNo(fileBuffer);
-         //this isn't accurate, even though the line no is, because it's
-         //potentially more than one physical line's length mapped to a single
-         //logical line.  Maybe I should fix it?
-         //I could have a list of line lengths and resolve the line index based
-         //on minusing them until it's less than then the next line length
-         //token->line_index = line->index;
+         //it's an error
       }
-   }
-   else if (isWordChar(line->string[line->index]))
-   {
-      //either a reserved word or identifier
-   }
-   else if (isNumericChar(line->string[line->index]))
-   {
-      //it's a number
-   }
-   else if ((current_symbol = mcc_GetSymbol(line)) != SYM_NONE)
-   {
-      //it's a symbol
-   }
-   else if ((current_operator = mcc_GetOperator(line)) != OP_NONE)
-   {
-      //it's an operator
-   }
-   else
-   {
-      //it's an error
+      if (token != NULL)
+      {
+         mcc_AddToken(token);
+         token = NULL;
+      }
+      SkipWhiteSpace(line);
    }
 }
 
