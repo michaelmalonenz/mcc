@@ -152,9 +152,11 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
          else
          {
             PREPROC_DIRECTIVE pp_dir = mcc_GetPreprocessorDirective(line);
+            MCC_ASSERT(pp_dir != PP_NONE);
             token = mcc_CreateToken(preprocessor_directives[pp_dir], 
                                     pp_strlens[pp_dir], TOK_PP_DIRECTIVE,
                                     mcc_GetFileBufferCurrentLineNo(fileBuffer));
+            token->tokenIndex = pp_dir;
             line->index += pp_strlens[pp_dir];
          }
       }
@@ -166,6 +168,7 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
             token = mcc_CreateToken(keywords[keyword], keyword_strlens[keyword],
                                     TOK_KEYWORD,
                                     mcc_GetFileBufferCurrentLineNo(fileBuffer));
+            token->tokenIndex = keyword;
             line->index += keyword_strlens[keyword];
          }
          else //it's an identifier
@@ -214,6 +217,7 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
                                     symbol_strlens[current_symbol],
                                     TOK_SYMBOL,
                                     mcc_GetFileBufferCurrentLineNo(fileBuffer));
+            token->tokenIndex = current_symbol;
             line->index += symbol_strlens[current_symbol];
             //addressof and logical and need to be differentiated by the parser
             //based on context _and_ corrected
@@ -225,13 +229,14 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
                                  operator_strlens[current_operator], 
                                  TOK_OPERATOR,
                                  mcc_GetFileBufferCurrentLineNo(fileBuffer));
+         token->tokenIndex = current_operator;
          line->index += operator_strlens[current_operator];
       }
       else
       {
          mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
                          mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                         "Not a recognised character: '%c'\n",
+                         "Not a recognised character: '%c'.  This is probably a bug in the tokeniser.\n",
                          line->string[line->index]);
       }
       if (token != NULL)
