@@ -24,6 +24,7 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
    memcpy(token->name, text, text_len);
    token->name[text_len] = '\0';
    token->tokenType = type;
+   token->tokenIndex = 0;
    token->lineno = lineno;
    token->next = NULL;
    token->previous = NULL;

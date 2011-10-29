@@ -271,6 +271,7 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
                          "Not a recognised character: '%c'.  This is probably a bug in the tokeniser.\n",
                          line->string[line->index]);
       }
+     
       if (token != NULL)
       {
          mcc_AddToken(token);

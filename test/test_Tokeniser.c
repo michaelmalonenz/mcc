@@ -12,7 +12,7 @@
 
 #define NUM_TEST_CASES 1
 const char *strings_to_tokenise[NUM_TEST_CASES] = { 
-   "#include \"12some_header.h\"",
+   "#include \"12some_header.h\"\n",
 };
 
 const int32_t expected_num_tokens[NUM_TEST_CASES] = {
@@ -63,6 +63,8 @@ int main(int UNUSED(argc), char UNUSED(**argv))
          MCC_ASSERT(token->tokenType == expected_token_types[i][j]);
          MCC_ASSERT(token->tokenIndex == expected_token_indices[i][j]);
       }
+
+      MCC_ASSERT(mcc_GetNextToken() == NULL);
 
       unlink(tmp_filename);
    }
