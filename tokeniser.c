@@ -95,6 +95,8 @@ static mcc_LogicalLine_t *handle_string_char_const(mcc_LogicalLine_t *line,
    {
       if ((line->index + strLen) == line->length)
       {
+         //The fileBuffer should have already found all the line continuations
+         //and we should be able to handle all string constants as a single logical line.
          mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
                          mcc_GetFileBufferCurrentLineNo(fileBuffer),
                          "Reached end of line when parsing %s constant and there's no continuation character\n",

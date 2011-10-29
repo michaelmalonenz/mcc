@@ -14,6 +14,8 @@ static mcc_Token_t *current = NULL;
 static int numberOfTokens = 0;
 #endif
 
+static bool_t finished_iterating = FALSE;
+
 mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
                              TOKEN_TYPE type, const int lineno)
 {
@@ -73,20 +75,25 @@ void mcc_FreeTokens(void)
 }
 
 
-//This will go around and around.  Need a way of doing it exactly once?
-mcc_Token_t *mcc_GetNextToken()
+mcc_Token_t *mcc_GetNextToken(void)
 {
-   mcc_Token_t *result;
-   if (current == NULL)
+   mcc_Token_t *result = NULL;
+   if (!finished_iterating)
    {
-      result = listHead;
-      current = listHead->next;
+      if (current == NULL)
+      {
+         MCC_ASSERT(listHead != NULL);
+         result = listHead;
+         current = listHead->next;
+      }
+      else
+      {
+         result = current;
+         current = current->next;
+      }
+      finished_iterating = (result == listTail);
    }
-   else
-   {
-      result = current;
-      current = current->next;
-   }
+
    return result;
 }
 

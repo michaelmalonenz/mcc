@@ -120,5 +120,5 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
 void mcc_AddToken(mcc_Token_t *token);
 void mcc_FreeTokens(void);
 mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, mcc_Token_t *second, TOKEN_TYPE newType);
-
+mcc_Token_t *mcc_GetNextToken(void);
 #endif /* MCC_TOKENS_H_ */
