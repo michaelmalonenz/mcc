@@ -12,7 +12,7 @@
 
 #define NUM_TEST_CASES 1
 const char *strings_to_tokenise[NUM_TEST_CASES] = { 
-   "#include \"12some_header.h\"\n",
+   "#include \"12/some_header.h\"\n",
 };
 
 const int32_t expected_num_tokens[NUM_TEST_CASES] = {
@@ -21,7 +21,7 @@ const int32_t expected_num_tokens[NUM_TEST_CASES] = {
 #define LARGEST_NUM_TOKENS 2
 
 const uint32_t expected_token_types[NUM_TEST_CASES][LARGEST_NUM_TOKENS] = {
-   { TOK_PP_DIRECTIVE, TOK_STR_CONST }
+   { TOK_PP_DIRECTIVE, TOK_LOCAL_FILE_INC }
 };
 
 const int expected_token_indices[NUM_TEST_CASES][LARGEST_NUM_TOKENS] = {
@@ -60,6 +60,8 @@ int main(int UNUSED(argc), char UNUSED(**argv))
       for (j = 0; j < expected_num_tokens[i]; j++)
       {
          mcc_Token_t *token = mcc_GetNextToken();
+         printf("Expected token type: %d, Actual token type: %d\n",
+                expected_token_types[i][j], token->tokenType);
          MCC_ASSERT(token->tokenType == expected_token_types[i][j]);
          MCC_ASSERT(token->tokenIndex == expected_token_indices[i][j]);
       }

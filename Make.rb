@@ -119,6 +119,7 @@ def run_command(cmd, failure_message)
    $log_file.note(cmd)
    result = `#{cmd}  2>#{TEMP_STDERR_FILE}`
    if $?.exitstatus != 0
+      puts result
       message = "Error whilst running command: '#{cmd}'
 #{failure_message}
 #{IO.read(TEMP_STDERR_FILE)}"

@@ -62,8 +62,82 @@ static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuff
    return line;
 }
 
-static void handle_pp_include_filename(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer))
+static void handle_pp_include_filename(mcc_LogicalLine_t *line,
+                                       mcc_FileBuffer_t *fileBuffer)
 {
+   char delimiter;
+   TOKEN_TYPE type;
+   int filenameLen = 0;
+   mcc_Token_t *token = NULL;
+
+   SkipWhiteSpace(line);
+
+   delimiter = line->string[line->index];
+   if (delimiter == '"')
+   {
+      type = TOK_LOCAL_FILE_INC;
+   }
+   else if (delimiter == '<')
+   {
+      type = TOK_SYS_FILE_INC;
+      delimiter = '>';
+   }
+   else
+   {
+      mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
+                      mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                      "Not a recognised character %c for file include\n",
+                      delimiter);
+   }
+   line->index++;
+
+   while (line->string[line->index + filenameLen] != delimiter)
+   {
+      if (line->index + filenameLen == line->length)
+      {
+         mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
+                         mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                         "Reached the end of the line while looking for the include file delimiter '%c'\n",
+                         delimiter);
+      }
+      else
+      {
+         if (line->string[line->index + filenameLen] == '\\' ||
+             line->string[line->index + filenameLen] == '\'' ||
+             line->string[line->index + filenameLen] == '"')
+         {
+            mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
+                            mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                            "Invalid character '%c' found in the included file name\n",
+                            line->string[line->index + filenameLen]);
+         }
+         else if (line->string[line->index + filenameLen] == '/')
+         {
+            if (line->string[line->index + filenameLen + 1] == '/' ||
+                line->string[line->index + filenameLen + 1] == '*')
+            {
+               mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
+                               mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                               "Comments are not allowed inside an include filename\n");
+            }
+         }
+         filenameLen++;
+      }
+   }
+
+   token =  mcc_CreateToken(&line->string[line->index],
+                                         filenameLen, type,
+                                         mcc_GetFileBufferCurrentLineNo(fileBuffer));
+   token->tokenType = type;
+   mcc_AddToken(token);
+   line->index += filenameLen + 1; //+1 for the delimiter
+   SkipWhiteSpace(line);
+   if (line->index != line->length)
+   {
+      mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
+                      mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                      "Found extra characters after file include\n");
+   }
 }
 
 static mcc_LogicalLine_t *handle_string_char_const(mcc_LogicalLine_t *line,
@@ -145,12 +219,8 @@ static mcc_LogicalLine_t *handle_string_char_const(mcc_LogicalLine_t *line,
                                line->string[line->index + strLen], type_name);
                break;
          }
-         strLen++;
       }
-      else
-      {
-         strLen++;
-      }
+      strLen++;
    }
    token = mcc_CreateToken(&line->string[line->index],
                            strLen, type,
@@ -211,6 +281,8 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
             line->index += pp_strlens[pp_dir];
             if (pp_dir == PP_INCLUDE)
             {
+               mcc_AddToken(token);
+               token = NULL;
                handle_pp_include_filename(line, fileBuffer);
             }
          }

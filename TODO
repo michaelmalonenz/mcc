@@ -6,7 +6,7 @@ Use stopper for the unit tests??
 As soon as possible, start eating my own dog food -> alongside gcc?
 
 Unit Tests I really should write:
-test_Tokeniser
+test_Tokeniser //extend and make more complex situations
 test_Macros // I still need to write a test which deletes a macro in the middle of the tree somewhere 
             // and maintains the integrity.  Perhaps I should write a function that asserts the invariant.
 test_Preprocessor
@@ -31,7 +31,7 @@ support function macros
 Need to handle the ## operator
 
 Tokeniser:
-Need to correct the handle_string_char_const to parse strings and char const properly for escape sequences.
+Need to correct the handle_string_char_const to parse strings and char const properly for literal integer escape sequences.
 Write a test for the tokeniser and fix the tokeniser
 
 Parser:
@@ -39,5 +39,8 @@ Assert that the input file conforms to the c(99) standard
 create an AST
 walk the tree
 
-Assembler/linker - (Do I actually want to write this myself or should I attempt to write object files which are compatible with binutils' linker and use that?)
+Assembler
+output ELF files and DWARF (4?)
+
+linker - (Do I actually want to write this myself or should I attempt to write object files which are compatible with binutils' linker/gold and use that?)
 Do I want to distribute a C library (like uClibc or Newlib etc) with this? probably.
