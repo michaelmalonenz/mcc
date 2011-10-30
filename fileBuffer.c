@@ -156,6 +156,17 @@ inline void SkipWhiteSpace(mcc_LogicalLine_t *line)
       line->index++;
 }
 
+void mcc_ShiftLineLeftAndShrink(mcc_LogicalLine_t *line, uint32_t shiftOffset)
+{
+   uint32_t i;
+   for (i = 0; i < line->length - (shiftOffset + 1); i++)
+   {
+      line->string[shiftOffset + i] = line->string[shiftOffset + i + 1];
+   }
+   line->length -= 1;
+   line->string = (char *) realloc(line->string, line->length);
+}
+
 #if MCC_DEBUG
 void printFileBuffer(mcc_FileBuffer_t *buffer)
 {

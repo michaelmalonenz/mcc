@@ -2,6 +2,7 @@
 #define MCC_FILE_BUFFER_H
 
 #include <stdio.h>
+#include <stdint.h>
 #include "mcc.h"
 
 typedef struct FileBuffer mcc_FileBuffer_t;
@@ -21,9 +22,9 @@ bool_t mcc_FileBufferEOFReached(mcc_FileBuffer_t *buffer);
 mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer);
 
 inline void SkipWhiteSpace(mcc_LogicalLine_t *line);
+void mcc_ShiftLineLeftAndShrink(mcc_LogicalLine_t *line, uint32_t shiftOffset);
 
 const char *mcc_GetFileBufferFilename(mcc_FileBuffer_t *fileBuffer);
 
 unsigned int mcc_GetFileBufferCurrentLineNo(mcc_FileBuffer_t *fileBuffer);
-
 #endif /* MCC_FILE_BUFFER_H */

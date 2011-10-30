@@ -104,25 +104,48 @@ static mcc_LogicalLine_t *handle_string_char_const(mcc_LogicalLine_t *line,
       }
       else if (line->string[line->index + strLen] == '\\')
       {
-         strLen++;
+         mcc_ShiftLineLeftAndShrink(line, line->index + strLen);
          switch (line->string[line->index + strLen])
          {
-            /*a,7
-              b,8
-              t,9
-              n,10
-              v,11
-              f,12
-              r,13
-              \
-              integer constant (octal or hex)*/
+            case 'a':
+               line->string[line->index + strLen] = '\a';
+               break;
+            case 'b':
+               line->string[line->index + strLen] = '\b';
+               break;
+            case 't':
+               line->string[line->index + strLen] = '\t';
+               break;
+            case 'n':
+               line->string[line->index + strLen] = '\n';
+               break;
+            case 'v':
+               line->string[line->index + strLen] = '\v';
+               break;
+            case 'f':
+               line->string[line->index + strLen] = '\f';
+               break;
+            case 'r':
+               line->string[line->index + strLen] = '\r';
+               break;
+            case '\\':
+               line->string[line->index + strLen] = '\\';
+               break;
+            case '\'':
+               line->string[line->index + strLen] = '\'';
+               break;
+            case '"':
+               line->string[line->index + strLen] = '"';
+               break;
+               /*integer constant (octal or hex)*/
             default:
                mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
                                mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                               "Unrecognised escape sequence when parsing %s constant\n",
-                               type_name);
+                               "Unrecognised escape sequence \\%c when parsing %s constant\n",
+                               line->string[line->index + strLen], type_name);
                break;
          }
+         strLen++;
       }
       else
       {
