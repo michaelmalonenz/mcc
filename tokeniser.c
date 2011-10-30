@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "tokens.h"
 #include "mcc.h"
@@ -9,11 +10,13 @@
 #include "tokens.h"
 
 static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static mcc_LogicalLine_t *handle_string_char_const(mcc_LogicalLine_t *line,
-                                                   mcc_FileBuffer_t *fileBuffer,
-                                                   const char delimiter,
-                                                   TOKEN_TYPE type);
+static void handle_string_char_const(mcc_LogicalLine_t *line,
+                                     mcc_FileBuffer_t *fileBuffer,
+                                     const char delimiter,
+                                     TOKEN_TYPE type);
 static void handle_pp_include_filename(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+static void handle_octal_integer_const(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+static void handle_hex_integer_const(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
 
 static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t *fileBuffer)
 {
@@ -140,10 +143,10 @@ static void handle_pp_include_filename(mcc_LogicalLine_t *line,
    }
 }
 
-static mcc_LogicalLine_t *handle_string_char_const(mcc_LogicalLine_t *line,
-                                                   mcc_FileBuffer_t *fileBuffer,
-                                                   const char delimiter,
-                                                   TOKEN_TYPE type)
+static void handle_string_char_const(mcc_LogicalLine_t *line,
+                                     mcc_FileBuffer_t *fileBuffer,
+                                     const char delimiter,
+                                     TOKEN_TYPE type)
 {
    int strLen = 0;
    mcc_Token_t *token = NULL;
@@ -211,7 +214,12 @@ static mcc_LogicalLine_t *handle_string_char_const(mcc_LogicalLine_t *line,
             case '"':
                line->string[line->index + strLen] = '"';
                break;
-               /*integer constant (octal or hex)*/
+            case '0':
+               handle_octal_integer_const(line, fileBuffer);
+               break;
+            case 'x':
+               handle_hex_integer_const(line, fileBuffer);
+               break;
             default:
                mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
                                mcc_GetFileBufferCurrentLineNo(fileBuffer),
@@ -229,7 +237,15 @@ static mcc_LogicalLine_t *handle_string_char_const(mcc_LogicalLine_t *line,
    line->index += strLen + 1;
    line = DealWithComments(line, fileBuffer);
    mcc_AddToken(token);
-   return line;
+}
+
+static void handle_octal_integer_const(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer))
+{
+   
+}
+
+static void handle_hex_integer_const(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer))
+{
 }
                                        
 void mcc_TokeniseFile(const char *inFilename)
@@ -287,6 +303,46 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
             }
          }
       }
+      else if ((current_symbol = mcc_GetSymbol(line)) != SYM_NONE ||
+               (toupper(line->string[line->index]) == 'L' &&
+                (line->string[line->index+1] == '\'' || 
+                 line->string[line->index+1] == '"')))
+      {
+         if (toupper(line->string[line->index]) == 'L')
+         {
+            line->index++;
+         }
+         if (current_symbol == SYM_DOUBLE_QUOTE)
+         {
+            handle_string_char_const(line, fileBuffer,
+                                           '"', TOK_STR_CONST);
+         }
+         else if (current_symbol == SYM_SINGLE_QUOTE)
+         {
+            handle_string_char_const(line, fileBuffer,
+                                     '\'', TOK_CHAR_CONST);            
+         }
+         else
+         {
+            token = mcc_CreateToken(symbols[current_symbol],
+                                    symbol_strlens[current_symbol],
+                                    TOK_SYMBOL,
+                                    mcc_GetFileBufferCurrentLineNo(fileBuffer));
+            token->tokenIndex = current_symbol;
+            line->index += symbol_strlens[current_symbol];
+            //addressof and logical and need to be differentiated by the parser
+            //based on context _and_ corrected
+         }
+      }
+      else if ((current_operator = mcc_GetOperator(line)) != OP_NONE)
+      {
+         token = mcc_CreateToken(operators[current_operator],
+                                 operator_strlens[current_operator], 
+                                 TOK_OPERATOR,
+                                 mcc_GetFileBufferCurrentLineNo(fileBuffer));
+         token->tokenIndex = current_operator;
+         line->index += operator_strlens[current_operator];
+      }
       else if (isWordChar(line->string[line->index]))
       {
          MCC_KEYWORD keyword = mcc_GetKeyword(line);
@@ -325,39 +381,6 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
                                  TOK_NUMBER,
                                  mcc_GetFileBufferCurrentLineNo(fileBuffer));
          line->index += numLen;
-      }
-      else if ((current_symbol = mcc_GetSymbol(line)) != SYM_NONE)
-      {
-         if (current_symbol == SYM_DOUBLE_QUOTE)
-         {
-            (void)handle_string_char_const(line, fileBuffer,
-                                           '"', TOK_STR_CONST);
-         }
-         else if (current_symbol == SYM_SINGLE_QUOTE)
-         {
-            line = handle_string_char_const(line, fileBuffer,
-                                            '\'', TOK_CHAR_CONST);            
-         }
-         else
-         {
-            token = mcc_CreateToken(symbols[current_symbol],
-                                    symbol_strlens[current_symbol],
-                                    TOK_SYMBOL,
-                                    mcc_GetFileBufferCurrentLineNo(fileBuffer));
-            token->tokenIndex = current_symbol;
-            line->index += symbol_strlens[current_symbol];
-            //addressof and logical and need to be differentiated by the parser
-            //based on context _and_ corrected
-         }
-      }
-      else if ((current_operator = mcc_GetOperator(line)) != OP_NONE)
-      {
-         token = mcc_CreateToken(operators[current_operator],
-                                 operator_strlens[current_operator], 
-                                 TOK_OPERATOR,
-                                 mcc_GetFileBufferCurrentLineNo(fileBuffer));
-         token->tokenIndex = current_operator;
-         line->index += operator_strlens[current_operator];
       }
       else
       {
