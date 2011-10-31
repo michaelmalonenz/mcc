@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <assert.h>
+#include <ctype.h>
 
 #include "config.h"
 
@@ -56,6 +57,10 @@ typedef _Bool bool_t;
                         ((c) == '_') )
 
 #define isNumber(d) ( ((d) >= '0') && ((d) <= '9') )
+
+#define isOctalChar(d) ( ((d) >= '0') && ((d) <= '7') )
+
+#define isHexChar(x) ( isNumber(x) || (toupper(x) >= 'A' && toupper(x) <= 'F') )
 
 #define isNumericChar(d) ( (((d) >= '0') && ((d) <= '9')) || \
                            (d) == 'e' || (d) == 'E' || (d) == '.')

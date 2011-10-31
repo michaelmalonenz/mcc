@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 
 #include "tokens.h"
 #include "mcc.h"
@@ -16,7 +17,8 @@ static void handle_string_char_const(mcc_LogicalLine_t *line,
                                      TOKEN_TYPE type);
 static void handle_pp_include_filename(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
 static void handle_octal_integer_const(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static void handle_hex_integer_const(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+static void handle_hex_integer_const(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer,
+                                     int maxprecisionBytes);
 
 static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t *fileBuffer)
 {
@@ -181,7 +183,7 @@ static void handle_string_char_const(mcc_LogicalLine_t *line,
       }
       else if (line->string[line->index + strLen] == '\\')
       {
-         mcc_ShiftLineLeftAndShrink(line, line->index + strLen);
+         mcc_ShiftLineLeftAndShrink(line, line->index + strLen, 1);
          switch (line->string[line->index + strLen])
          {
             case 'a':
@@ -218,7 +220,7 @@ static void handle_string_char_const(mcc_LogicalLine_t *line,
                handle_octal_integer_const(line, fileBuffer);
                break;
             case 'x':
-               handle_hex_integer_const(line, fileBuffer);
+               handle_hex_integer_const(line, fileBuffer, sizeof(char));
                break;
             default:
                mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
@@ -239,12 +241,35 @@ static void handle_string_char_const(mcc_LogicalLine_t *line,
    mcc_AddToken(token);
 }
 
-static void handle_octal_integer_const(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer))
+static void handle_octal_integer_const(mcc_LogicalLine_t *line,
+                                       mcc_FileBuffer_t *fileBuffer)
 {
-   
+   int intLen = 0, j;
+   long long number = 0;
+   unsigned long long mask = 0xFF;
+
+   while (isOctalChar(line->string[line->index + intLen]))
+   {
+      intLen++;
+   }   
+   for (j = 0; j < intLen; j++)
+   {
+      number += (line->string[line->index + j] - '0') * (long long)pow(8, intLen-j-1);
+   }
+   if (number != (long long)(number & mask))
+   {
+      mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
+                      mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                      "Octal integer %lld constant exceeds allowed precision\n",
+                      number);
+   }
+   mcc_ShiftLineLeftAndShrink(line, line->index + intLen, intLen-1);
+   line->string[line->index] = (char) number;
 }
 
-static void handle_hex_integer_const(mcc_LogicalLine_t UNUSED(*line), mcc_FileBuffer_t UNUSED(*fileBuffer))
+static void handle_hex_integer_const(mcc_LogicalLine_t UNUSED(*line),
+                                     mcc_FileBuffer_t UNUSED(*fileBuffer),
+                                     int UNUSED(maxprecisionBytes))
 {
 }
                                        

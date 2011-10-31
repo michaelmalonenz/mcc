@@ -11,7 +11,8 @@ TEST_SRC_DIR = "#{SRC_DIR}/test"
 
 TEMP_STDERR_FILE = 'stderr'
 
-CFLAGS = "-Wall -Wextra -Werror -g -ggdb3 -Os"
+CFLAGS = "-Wall -Wextra -Werror -g -ggdb3 -O0"
+LINKER_FLAGS = "-lm"
 
 CC = "/usr/bin/gcc"
 
@@ -179,7 +180,7 @@ if $0 == __FILE__ then
       Dir.chdir(BIN_DIR) do
          dependencies = linker.discover_required_files(MAIN_OBJECT_FILE)
          $log_file.note("Linking main program...")
-         run_command("#{CC} #{dependencies.join(' ')} -o #{MAIN_EXE_NAME}", "Linking #{MAIN_EXE_NAME} Failed...")
+         run_command("#{CC} #{dependencies.join(' ')} #{LINKER_FLAGS} -o #{MAIN_EXE_NAME}", "Linking #{MAIN_EXE_NAME} Failed...")
       end
 
       Dir.chdir(TEST_BIN_DIR) do
@@ -187,7 +188,7 @@ if $0 == __FILE__ then
          Dir.glob("test_*.o").each do |test_exe_o|
             test_exe = test_exe_o.gsub(/\.o$/, '')
             dependencies = linker.discover_required_files(test_exe_o)
-            run_command("#{CC} #{dependencies.join(' ')} -o #{test_exe}", 
+            run_command("#{CC} #{dependencies.join(' ')} #{LINKER_FLAGS} -o #{test_exe}", 
                         "Linking #{test_exe} Failed...")
          end
 
