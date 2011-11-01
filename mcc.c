@@ -19,6 +19,7 @@ int main(int argc, char **argv)
    
    for(i = 1; i < argc; i++)
    {
+      fprintf(stderr, "Tokenising %s...\n", argv[i]);
       mcc_TokeniseFile(argv[i]);
       mcc_FreeTokens();
    }

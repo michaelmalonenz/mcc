@@ -53,7 +53,7 @@ void mcc_AddToken(mcc_Token_t *token)
    }
 #if MCC_DEBUG
    numberOfTokens++;
-   printf("Got me a token '%s' of type %d\n", token->name, token->tokenType);
+//   printf("Got me a token '%s' of type %d\n", token->name, token->tokenType);
 #endif
 }
 
@@ -70,6 +70,8 @@ void mcc_FreeTokens(void)
          temp = current->next;
       numberOfTokens--;
    }
+   listHead = NULL;
+   listTail = NULL;
 #if MCC_DEBUG
    MCC_ASSERT(numberOfTokens == 0);
 #endif
@@ -109,6 +111,7 @@ mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, mcc_Token_t *second, TOKEN_TYP
    first->next = second->next;
    mcc_DeleteToken(second);
 #if MCC_DEBUG
+   numberOfTokens--;
    printf("Concatenated two tokens to make '%s' of type %d\n",
           first->name, first->tokenType);
 #endif
