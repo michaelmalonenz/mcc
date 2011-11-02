@@ -21,7 +21,7 @@ bool_t mcc_FileBufferEOFReached(mcc_FileBuffer_t *buffer);
 
 mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer);
 
-inline void SkipWhiteSpace(mcc_LogicalLine_t *line);
+inline int SkipWhiteSpace(mcc_LogicalLine_t *line);
 void mcc_ShiftLineLeftAndShrink(mcc_LogicalLine_t *line, uint32_t shiftOffset, int amountToShift);
 
 const char *mcc_GetFileBufferFilename(mcc_FileBuffer_t *fileBuffer);

@@ -150,10 +150,16 @@ mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer
    return &fileBuffer->currentLine;
 }
 
-inline void SkipWhiteSpace(mcc_LogicalLine_t *line)
+inline int SkipWhiteSpace(mcc_LogicalLine_t *line)
 {
-   while( (line->index < line->length) && (isNonBreakingWhiteSpace(line->string[line->index])) )
-      line->index++;
+   int numChars = 0;
+   while( (line->index + numChars < line->length) && 
+          (isNonBreakingWhiteSpace(line->string[line->index + numChars])) )
+   {
+      numChars++;
+   }
+   line->index += numChars;
+   return numChars;
 }
 
 void mcc_ShiftLineLeftAndShrink(mcc_LogicalLine_t *line,

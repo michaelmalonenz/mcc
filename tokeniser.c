@@ -19,6 +19,7 @@ static void handle_pp_include_filename(mcc_LogicalLine_t *line, mcc_FileBuffer_t
 static void handle_octal_integer_const(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
 static void handle_hex_integer_const(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer,
                                      int maxprecisionBytes);
+static void handle_whitespace(mcc_LogicalLine_t *line);
 
 static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t *fileBuffer)
 {
@@ -67,6 +68,14 @@ static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuff
    return line;
 }
 
+static void handle_whitespace(mcc_LogicalLine_t *line)
+{
+   if (SkipWhiteSpace(line) > 0)
+   {
+      //create a new whitespace token
+   }
+}
+
 static void handle_pp_include_filename(mcc_LogicalLine_t *line,
                                        mcc_FileBuffer_t *fileBuffer)
 {
@@ -75,7 +84,7 @@ static void handle_pp_include_filename(mcc_LogicalLine_t *line,
    int filenameLen = 0;
    mcc_Token_t *token = NULL;
 
-   SkipWhiteSpace(line);
+   handle_whitespace(line);
 
    delimiter = line->string[line->index];
    if (delimiter == '"')
@@ -136,7 +145,7 @@ static void handle_pp_include_filename(mcc_LogicalLine_t *line,
    token->tokenType = type;
    mcc_AddToken(token);
    line->index += filenameLen + 1; //+1 for the delimiter
-   SkipWhiteSpace(line);
+   handle_whitespace(line);
    if (line->index != line->length)
    {
       mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
@@ -301,7 +310,7 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
    MCC_SYMBOL current_symbol = SYM_NONE;
    mcc_Token_t *token = NULL;
 
-   SkipWhiteSpace(line);
+   handle_whitespace(line);
    while(line->index < line->length)
    {
       if (line->string[line->index] == '#')
@@ -420,7 +429,7 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
          mcc_AddToken(token);
          token = NULL;
       }
-      SkipWhiteSpace(line);
+      handle_whitespace(line);
    }
 }
 
