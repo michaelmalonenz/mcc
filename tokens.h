@@ -31,7 +31,7 @@
 
 typedef enum TYPE { TOK_PP_DIRECTIVE, TOK_IDENTIFIER, TOK_KEYWORD, TOK_SYMBOL,
                     TOK_OPERATOR, TOK_NUMBER, TOK_STR_CONST, TOK_CHAR_CONST,
-                    TOK_SYS_FILE_INC, TOK_LOCAL_FILE_INC,
+                    TOK_SYS_FILE_INC, TOK_LOCAL_FILE_INC, TOK_WHITESPACE,
                     TOK_NONE } TOKEN_TYPE;
  
 typedef struct token {
@@ -117,6 +117,13 @@ MCC_KEYWORD mcc_GetKeyword(mcc_LogicalLine_t * line);
  */
 mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
                              TOKEN_TYPE type, const int lineno);
+
+/**
+ * @param lineno The line number in the file
+ *
+ * Creates a whitespace token and adds it in the current position.
+ */
+void mcc_CreateAndAddWhitespaceToken(const int lineno);
 
 void mcc_AddToken(mcc_Token_t *token);
 void mcc_FreeTokens(void);

@@ -16,12 +16,12 @@ const char *strings_to_tokenise[NUM_TEST_CASES] = {
 };
 
 const int32_t expected_num_tokens[NUM_TEST_CASES] = {
-   2
+   3
 };
-#define LARGEST_NUM_TOKENS 2
+#define LARGEST_NUM_TOKENS 3
 
 const uint32_t expected_token_types[NUM_TEST_CASES][LARGEST_NUM_TOKENS] = {
-   { TOK_PP_DIRECTIVE, TOK_LOCAL_FILE_INC }
+   { TOK_PP_DIRECTIVE, TOK_WHITESPACE, TOK_LOCAL_FILE_INC }
 };
 
 const int expected_token_indices[NUM_TEST_CASES][LARGEST_NUM_TOKENS] = {

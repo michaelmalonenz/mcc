@@ -33,6 +33,8 @@ Need to handle the ## operator
 Tokeniser:
 Need to correct the handle_string_char_const to parse strings and char const properly for literal integer escape sequences.
 Write a test for the tokeniser and fix the tokeniser
+handle hex constant character escape sequences.
+handle constant numbers better (floating point, decimal, octal and hex!)
 
 Parser:
 Assert that the input file conforms to the c(99) standard

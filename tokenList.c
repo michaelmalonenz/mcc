@@ -14,6 +14,8 @@ static mcc_Token_t *current = NULL;
 static int numberOfTokens = 0;
 #endif
 
+static const char whitespaceName = ' ';
+
 static bool_t finished_iterating = FALSE;
 
 mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
@@ -30,6 +32,13 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
    token->previous = NULL;
 
    return token;
+}
+
+void mcc_CreateAndAddWhitespaceToken(const int lineno)
+{
+   mcc_Token_t *token = mcc_CreateToken(&whitespaceName, sizeof(whitespaceName),
+                                        TOK_WHITESPACE, lineno);
+   mcc_AddToken(token);
 }
 
 void mcc_DeleteToken(mcc_Token_t *token)
