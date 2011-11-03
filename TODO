@@ -20,7 +20,6 @@ fix ifndef to work correctly
   - add in the "skip" variable to the logic deciding whether or not to ignore the conditional portion
 change the macro definitions to be a hash table?  It seems unnecessarily limiting to do it this way.
 Fix the b-tree after a macro deletion
-make it run under valgrind again - it currently leaks like a seive (Less so now!)
 Fix the /**/ style comments to allow for more than one set per line 
   - I don't want to sink to GOTO statements!
   - might need to rework the algorithm entirely??
