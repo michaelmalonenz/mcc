@@ -38,7 +38,8 @@ char *mcc_DestroyBufferNotString(mcc_StringBuffer_t *buffer)
                                    buffer->stringLength+1);
    if (buffer->stringLength == 0)
    {
-      string = NULL;
+      free(buffer->string);
+      buffer->string = NULL;
    }
    MCC_ASSERT(buffer != NULL);
    free(buffer);
