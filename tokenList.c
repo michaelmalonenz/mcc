@@ -14,7 +14,7 @@ static mcc_Token_t *current = NULL;
 static int numberOfTokens = 0;
 #endif
 
-static const char whitespaceName = ' ';
+static const char whitespaceText = ' ';
 
 static bool_t finished_iterating = FALSE;
 
@@ -22,9 +22,9 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
                              TOKEN_TYPE type, const int lineno)
 {
    mcc_Token_t *token = (mcc_Token_t *) malloc(sizeof(mcc_Token_t));
-   token->name = (char *) malloc(sizeof(char) * (text_len + 1));
-   memcpy(token->name, text, text_len);
-   token->name[text_len] = '\0';
+   token->text = (char *) malloc(sizeof(char) * (text_len + 1));
+   memcpy(token->text, text, text_len);
+   token->text[text_len] = '\0';
    token->tokenType = type;
    token->tokenIndex = 0;
    token->lineno = lineno;
@@ -36,14 +36,14 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
 
 void mcc_CreateAndAddWhitespaceToken(const int lineno)
 {
-   mcc_Token_t *token = mcc_CreateToken(&whitespaceName, sizeof(whitespaceName),
+   mcc_Token_t *token = mcc_CreateToken(&whitespaceText, sizeof(whitespaceText),
                                         TOK_WHITESPACE, lineno);
    mcc_AddToken(token);
 }
 
 void mcc_DeleteToken(mcc_Token_t *token)
 {
-   free(token->name);
+   free(token->text);
    free(token);
 }
 
@@ -62,7 +62,7 @@ void mcc_AddToken(mcc_Token_t *token)
    }
 #if MCC_DEBUG
    numberOfTokens++;
-//   printf("Got me a token '%s' of type %d\n", token->name, token->tokenType);
+//   printf("Got me a token '%s' of type %d\n", token->text, token->tokenType);
 #endif
 }
 
@@ -111,18 +111,18 @@ mcc_Token_t *mcc_GetNextToken(void)
 
 mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, mcc_Token_t *second, TOKEN_TYPE newType)
 {
-   int newLength = strlen(first->name) + strlen(second->name);
+   int newLength = strlen(first->text) + strlen(second->text);
    //it really only makes sense to be concatenating tokens which are on the same line.
    MCC_ASSERT(first->lineno == second->lineno);
-   first->name = (char *) realloc(first->name, newLength);
-   strncat(first->name, second->name, newLength);
+   first->text = (char *) realloc(first->text, newLength);
+   strncat(first->text, second->text, newLength);
    first->tokenType = newType;
    first->next = second->next;
    mcc_DeleteToken(second);
 #if MCC_DEBUG
    numberOfTokens--;
    printf("Concatenated two tokens to make '%s' of type %d\n",
-          first->name, first->tokenType);
+          first->text, first->tokenType);
 #endif
    return first;
 }

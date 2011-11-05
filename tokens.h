@@ -35,7 +35,7 @@ typedef enum TYPE { TOK_PP_DIRECTIVE, TOK_IDENTIFIER, TOK_KEYWORD, TOK_SYMBOL,
                     TOK_NONE } TOKEN_TYPE;
  
 typedef struct token {
-   char *name;
+   char *text;
    TOKEN_TYPE tokenType;
    int tokenIndex;
    unsigned short fileno;
