@@ -70,7 +70,7 @@ FILE *mcc_OpenFile(const char *filename, char *flags);
 const char *mcc_FindLocalInclude(const char *filename);
 const char *mcc_FindSystemInclude(const char *filename);
 
-void mcc_PreprocessFile(const char *inFilename, FILE *outFile);
+void mcc_PreprocessCurrentTokens(void);
 void mcc_TokeniseFile(const char *inFilename);
 
 #endif /* MCC_H */

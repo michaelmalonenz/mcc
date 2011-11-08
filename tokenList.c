@@ -47,6 +47,7 @@ void mcc_DeleteToken(mcc_Token_t *token)
    free(token);
 }
 
+//Need to handle the "insert" case
 void mcc_AddToken(mcc_Token_t *token)
 {
    if (listHead == NULL)
