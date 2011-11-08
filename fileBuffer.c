@@ -162,6 +162,10 @@ inline int SkipWhiteSpace(mcc_LogicalLine_t *line)
    return numChars;
 }
 
+/**
+ * We don't realloc here, because it's a side effect which would break client
+ * referential integrity.
+ */
 void mcc_ShiftLineLeftAndShrink(mcc_LogicalLine_t *line,
                                 uint32_t shiftOffset,
                                 int amountToShift)
@@ -172,7 +176,7 @@ void mcc_ShiftLineLeftAndShrink(mcc_LogicalLine_t *line,
       line->string[shiftOffset + i] = line->string[shiftOffset + i + amountToShift];
    }
    line->length -= amountToShift;
-   line->string = (char *) realloc(line->string, line->length);
+   line->string[line->length] = '\0';
 }
 
 #if MCC_DEBUG

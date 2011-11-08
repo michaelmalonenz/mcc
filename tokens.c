@@ -9,7 +9,7 @@
 #include "fileBuffer.h"
 
 const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES] = { "include", "define", "ifdef", "ifndef", "if",
-                                                                            "endif", "else", "elif", "undef", "error", "pragma" };
+                                                                     "endif", "else", "elif", "undef", "error", "pragma", "#" };
 
 size_t pp_strlens[NUM_PREPROCESSOR_DIRECTIVES];
 

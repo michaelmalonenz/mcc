@@ -16,9 +16,8 @@ static void handle_string_char_const(mcc_LogicalLine_t *line,
                                      const char delimiter,
                                      TOKEN_TYPE type);
 static void handle_pp_include_filename(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static void handle_octal_integer_const(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static void handle_hex_integer_const(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer,
-                                     int maxprecisionBytes);
+static char handle_octal_integer_const(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+static char handle_hex_integer_const(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
 static void handle_whitespace(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
 
 static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t *fileBuffer)
@@ -226,10 +225,10 @@ static void handle_string_char_const(mcc_LogicalLine_t *line,
                line->string[line->index + strLen] = '"';
                break;
             case '0':
-               handle_octal_integer_const(line, fileBuffer);
+               line->string[line->index + strLen] = handle_octal_integer_const(line, fileBuffer);
                break;
             case 'x':
-               handle_hex_integer_const(line, fileBuffer, sizeof(char));
+               line->string[line->index + strLen] = handle_hex_integer_const(line, fileBuffer);
                break;
             default:
                mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
@@ -246,11 +245,10 @@ static void handle_string_char_const(mcc_LogicalLine_t *line,
                            mcc_GetFileBufferCurrentLineNo(fileBuffer));
    token->tokenType = type;
    line->index += strLen + 1;
-   line = DealWithComments(line, fileBuffer);
    mcc_AddToken(token);
 }
 
-static void handle_octal_integer_const(mcc_LogicalLine_t *line,
+static char handle_octal_integer_const(mcc_LogicalLine_t *line,
                                        mcc_FileBuffer_t *fileBuffer)
 {
    int intLen = 0, j;
@@ -269,17 +267,56 @@ static void handle_octal_integer_const(mcc_LogicalLine_t *line,
    {
       mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
                       mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                      "Octal integer %lld constant exceeds allowed precision\n",
+                      "Octal integer constant '%lld' exceeds allowed precision\n",
                       number);
    }
-   mcc_ShiftLineLeftAndShrink(line, line->index + intLen, intLen-1);
-   line->string[line->index] = (char) number;
+   mcc_ShiftLineLeftAndShrink(line, line->index, intLen-1);
+   return (char) number;
 }
 
-static void handle_hex_integer_const(mcc_LogicalLine_t UNUSED(*line),
-                                     mcc_FileBuffer_t UNUSED(*fileBuffer),
-                                     int UNUSED(maxprecisionBytes))
+static char convertHexCharToNum(char character)
 {
+   character = (char) toupper(character);
+   if (character >= '0' && character <= '9')
+   {
+      return character - '0';
+   }
+   else if (character >= 'A' && character <= 'F')
+   {
+      return (character - 'A') + 10;
+   }
+   return 0;
+}
+
+static char handle_hex_integer_const(mcc_LogicalLine_t *line,
+                                     mcc_FileBuffer_t *fileBuffer)
+{
+   int intLen = 1, j;
+   long long number = 0;
+
+   while (isHexChar(line->string[line->index + intLen]))
+   {
+      intLen++;
+   }
+
+   for (j = 1; j < intLen; j++)
+   {
+      number |= convertHexCharToNum(line->string[line->index + j]) << ((intLen - j - 1) * 4);
+   }
+
+   if ((long long)(number & 0xFF) != number)
+   {
+      char *tempStr = (char *) malloc((intLen + 1) * sizeof(char));
+      memcpy(tempStr, &line->string[line->index + 1], intLen-1);
+      tempStr[intLen-1] = 0;
+      mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
+                      mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                      "hexadecimal integer constant \\x%s exceeds allowed precision\n",
+                      tempStr);
+   }
+
+   mcc_ShiftLineLeftAndShrink(line, line->index, intLen-2);
+   return (char) number;
 }
                                        
 void mcc_TokeniseFile(const char *inFilename)
@@ -318,7 +355,11 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
          line->index++;
          if (line->string[line->index] == '#')
          {
-            //it's a preprocessor join operator
+            token = mcc_CreateToken("#", 1, TOK_PP_DIRECTIVE,
+                                    mcc_GetFileBufferCurrentLineNo(fileBuffer));
+            token->tokenIndex = PP_JOIN;
+            mcc_AddToken(token);
+            token = NULL;
          }
          else
          {
@@ -411,6 +452,7 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
          {
             numLen++;
          }
+         //check for u, f, d suffixes
          token = mcc_CreateToken(&line->string[line->index], numLen,
                                  TOK_NUMBER,
                                  mcc_GetFileBufferCurrentLineNo(fileBuffer));

@@ -10,22 +10,28 @@
 #include "mcc.h"
 #include "tokens.h"
 
-#define NUM_TEST_CASES 1
+#define NUM_TEST_CASES 3
 const char *strings_to_tokenise[NUM_TEST_CASES] = { 
    "#include \"12/some_header.h\"\n",
+   "char a = '\\0377';\n",
+   "char a = '\\xFF';\n"
 };
 
 const int32_t expected_num_tokens[NUM_TEST_CASES] = {
-   3
+   3, 8, 8
 };
-#define LARGEST_NUM_TOKENS 3
+#define LARGEST_NUM_TOKENS 8
 
 const uint32_t expected_token_types[NUM_TEST_CASES][LARGEST_NUM_TOKENS] = {
-   { TOK_PP_DIRECTIVE, TOK_WHITESPACE, TOK_LOCAL_FILE_INC }
+   { TOK_PP_DIRECTIVE, TOK_WHITESPACE, TOK_LOCAL_FILE_INC },
+   { TOK_KEYWORD, TOK_WHITESPACE, TOK_IDENTIFIER, TOK_WHITESPACE, TOK_OPERATOR, TOK_WHITESPACE, TOK_CHAR_CONST, TOK_SYMBOL},
+   { TOK_KEYWORD, TOK_WHITESPACE, TOK_IDENTIFIER, TOK_WHITESPACE, TOK_OPERATOR, TOK_WHITESPACE, TOK_CHAR_CONST, TOK_SYMBOL}
 };
 
 const int expected_token_indices[NUM_TEST_CASES][LARGEST_NUM_TOKENS] = {
-   { PP_INCLUDE, 0}
+   { PP_INCLUDE, 0},
+   { KEY_CHAR, 0, 0, 0, OP_EQUALS_ASSIGN, 0, 0, SYM_SEMI_COLON},
+   { KEY_CHAR, 0, 0, 0, OP_EQUALS_ASSIGN, 0, 0, SYM_SEMI_COLON}
 };
 
 
@@ -60,6 +66,7 @@ int main(int UNUSED(argc), char UNUSED(**argv))
       for (j = 0; j < expected_num_tokens[i]; j++)
       {
          mcc_Token_t *token = mcc_GetNextToken();
+         MCC_ASSERT(token != NULL);
          printf("Expected token type: %d, Actual token type: %d\n",
                 expected_token_types[i][j], token->tokenType);
          MCC_ASSERT(token->tokenType == expected_token_types[i][j]);
@@ -67,6 +74,7 @@ int main(int UNUSED(argc), char UNUSED(**argv))
       }
 
       MCC_ASSERT(mcc_GetNextToken() == NULL);
+      mcc_FreeTokens();
 
       unlink(tmp_filename);
    }

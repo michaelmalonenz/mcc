@@ -81,6 +81,7 @@ void mcc_FreeTokens(void)
    }
    listHead = NULL;
    listTail = NULL;
+   finished_iterating = FALSE;
 #if MCC_DEBUG
    MCC_ASSERT(numberOfTokens == 0);
 #endif
