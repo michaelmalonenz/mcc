@@ -335,6 +335,7 @@ void mcc_TokeniseFile(const char *inFilename)
             continue;
          }
          mcc_TokeniseLine(logicalLine, fileBuffer);
+         mcc_AddEndOfLineToken(mcc_GetFileBufferCurrentLineNo(fileBuffer));
       }
    }
    mcc_DeleteFileBuffer(fileBuffer);

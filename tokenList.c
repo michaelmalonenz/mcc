@@ -34,6 +34,13 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
    return token;
 }
 
+void mcc_AddEndOfLineToken(const int lineno)
+{
+   mcc_Token_t *token = mcc_CreateToken(&whitespaceText, sizeof(whitespaceText),
+                                        TOK_EOL, lineno);
+   mcc_AddToken(token);   
+}
+
 void mcc_CreateAndAddWhitespaceToken(const int lineno)
 {
    mcc_Token_t *token = mcc_CreateToken(&whitespaceText, sizeof(whitespaceText),
