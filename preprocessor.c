@@ -16,6 +16,7 @@
 
 typedef void (preprocessorDirectiveHandler_t)(mcc_Token_t *currentToken);
 
+HANDLER_LINKAGE void handleInclude(mcc_Token_t *currentToken);
 HANDLER_LINKAGE void handleDefine(mcc_Token_t *currentToken);
 HANDLER_LINKAGE void handleIfdef(mcc_Token_t *currentToken);
 HANDLER_LINKAGE void handleIfndef(mcc_Token_t *currentToken);
@@ -41,7 +42,7 @@ static inline void mcc_ExpectTokenType(mcc_Token_t *token, TOKEN_TYPE tokenType)
    }
 }
 
-static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = { &handleDefine, &handleIfdef,
+static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = { &handleInclude, &handleDefine, &handleIfdef,
                                                                                    &handleIfndef, &handleIf, &handleEndif,
                                                                                    &handleElse, &handleElif, &handleUndef,
                                                                                    &handleError, &handlePragma, &handleJoin };
@@ -54,6 +55,7 @@ void mcc_PreprocessCurrentTokens(void)
    currentToken = mcc_GetNextToken();
    while(currentToken != NULL)
    {
+      printf("Current Token Type: %s\n", token_types[currentToken->tokenType]);
       if (currentToken->tokenType == TOK_PP_DIRECTIVE)
       {
          ppHandlers[currentToken->tokenIndex](currentToken);
@@ -102,7 +104,8 @@ HANDLER_LINKAGE void handleError(mcc_Token_t *currentToken)
       else
       {
          temp = mcc_ConCatTokens(temp, currentToken, TOK_STR_CONST);
-      } 
+      }
+      currentToken = mcc_GetNextToken(); 
    }
    mcc_PrettyError(mcc_ResolveFileNameFromNumber(temp->fileno),
                    temp->lineno,
