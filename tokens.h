@@ -32,8 +32,9 @@
 typedef enum TYPE { TOK_PP_DIRECTIVE, TOK_IDENTIFIER, TOK_KEYWORD, TOK_SYMBOL,
                     TOK_OPERATOR, TOK_NUMBER, TOK_STR_CONST, TOK_CHAR_CONST,
                     TOK_SYS_FILE_INC, TOK_LOCAL_FILE_INC, TOK_WHITESPACE, TOK_EOL,
-                    TOK_NONE } TOKEN_TYPE;
- 
+                    NUM_TOK_TYPES, TOK_NONE } TOKEN_TYPE;
+extern const char *token_types[NUM_TOK_TYPES];
+
 typedef struct token {
    char *text;
    TOKEN_TYPE tokenType;
@@ -117,21 +118,22 @@ MCC_KEYWORD mcc_GetKeyword(mcc_LogicalLine_t * line);
  * @param lineno    The current line number of the file where the token was found
  */
 mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
-                             TOKEN_TYPE type, const int lineno);
+                             TOKEN_TYPE type, const int lineno,
+                             const unsigned short fileno);
 
 /**
  * @param lineno The line number in the file
  *
  * Creates a whitespace token and adds it in the current position.
  */
-void mcc_CreateAndAddWhitespaceToken(const int lineno);
+void mcc_CreateAndAddWhitespaceToken(const int lineno, const unsigned short fileno);
 
 /**
  * @param lineno The line number in the file
  *
  * Creates an end of Line token and adds it in the current position.
  */
-void mcc_AddEndOfLineToken(const int lineno);
+void mcc_AddEndOfLineToken(const int lineno, const unsigned short fileno);
 
 void mcc_AddToken(mcc_Token_t *token);
 void mcc_FreeTokens(void);

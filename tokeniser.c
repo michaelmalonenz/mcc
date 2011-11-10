@@ -71,7 +71,8 @@ static void handle_whitespace(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuf
 {
    if (SkipWhiteSpace(line) > 0)
    {
-      mcc_CreateAndAddWhitespaceToken(mcc_GetFileBufferCurrentLineNo(fileBuffer));
+      mcc_CreateAndAddWhitespaceToken(mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                                      mcc_GetFileBufferFileNumber(fileBuffer));
    }
 }
 
@@ -139,8 +140,9 @@ static void handle_pp_include_filename(mcc_LogicalLine_t *line,
    }
 
    token =  mcc_CreateToken(&line->string[line->index],
-                                         filenameLen, type,
-                                         mcc_GetFileBufferCurrentLineNo(fileBuffer));
+                            filenameLen, type,
+                            mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                            mcc_GetFileBufferFileNumber(fileBuffer));
    token->tokenType = type;
    mcc_AddToken(token);
    line->index += filenameLen + 1; //+1 for the delimiter
@@ -242,7 +244,8 @@ static void handle_string_char_const(mcc_LogicalLine_t *line,
    }
    token = mcc_CreateToken(&line->string[line->index],
                            strLen, type,
-                           mcc_GetFileBufferCurrentLineNo(fileBuffer));
+                           mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                           mcc_GetFileBufferFileNumber(fileBuffer));
    token->tokenType = type;
    line->index += strLen + 1;
    mcc_AddToken(token);
@@ -335,7 +338,8 @@ void mcc_TokeniseFile(const char *inFilename)
             continue;
          }
          mcc_TokeniseLine(logicalLine, fileBuffer);
-         mcc_AddEndOfLineToken(mcc_GetFileBufferCurrentLineNo(fileBuffer));
+         mcc_AddEndOfLineToken(mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                               mcc_GetFileBufferFileNumber(fileBuffer));
       }
    }
    mcc_DeleteFileBuffer(fileBuffer);
@@ -357,7 +361,8 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
          if (line->string[line->index] == '#')
          {
             token = mcc_CreateToken("#", 1, TOK_PP_DIRECTIVE,
-                                    mcc_GetFileBufferCurrentLineNo(fileBuffer));
+                                    mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                                    mcc_GetFileBufferFileNumber(fileBuffer));
             token->tokenIndex = PP_JOIN;
             mcc_AddToken(token);
             token = NULL;
@@ -368,7 +373,8 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
             MCC_ASSERT(pp_dir != PP_NONE);
             token = mcc_CreateToken(preprocessor_directives[pp_dir], 
                                     pp_strlens[pp_dir], TOK_PP_DIRECTIVE,
-                                    mcc_GetFileBufferCurrentLineNo(fileBuffer));
+                                    mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                                    mcc_GetFileBufferFileNumber(fileBuffer));
             token->tokenIndex = pp_dir;
             line->index += pp_strlens[pp_dir];
             if (pp_dir == PP_INCLUDE)
@@ -403,7 +409,8 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
             token = mcc_CreateToken(symbols[current_symbol],
                                     symbol_strlens[current_symbol],
                                     TOK_SYMBOL,
-                                    mcc_GetFileBufferCurrentLineNo(fileBuffer));
+                                    mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                                    mcc_GetFileBufferFileNumber(fileBuffer));
             token->tokenIndex = current_symbol;
             line->index += symbol_strlens[current_symbol];
             //addressof and logical and need to be differentiated by the parser
@@ -415,7 +422,8 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
          token = mcc_CreateToken(operators[current_operator],
                                  operator_strlens[current_operator], 
                                  TOK_OPERATOR,
-                                 mcc_GetFileBufferCurrentLineNo(fileBuffer));
+                                 mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                                 mcc_GetFileBufferFileNumber(fileBuffer));
          token->tokenIndex = current_operator;
          line->index += operator_strlens[current_operator];
       }
@@ -426,7 +434,8 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
          {
             token = mcc_CreateToken(keywords[keyword], keyword_strlens[keyword],
                                     TOK_KEYWORD,
-                                    mcc_GetFileBufferCurrentLineNo(fileBuffer));
+                                    mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                                    mcc_GetFileBufferFileNumber(fileBuffer));
             token->tokenIndex = keyword;
             line->index += keyword_strlens[keyword];
          }
@@ -441,7 +450,8 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
             }
             token = mcc_CreateToken(&line->string[line->index], identLen,
                                     TOK_IDENTIFIER,
-                                    mcc_GetFileBufferCurrentLineNo(fileBuffer));
+                                    mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                                    mcc_GetFileBufferFileNumber(fileBuffer));
             line->index += identLen;
          }
       }
@@ -456,7 +466,8 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
          //check for u, f, d suffixes
          token = mcc_CreateToken(&line->string[line->index], numLen,
                                  TOK_NUMBER,
-                                 mcc_GetFileBufferCurrentLineNo(fileBuffer));
+                                 mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                                 mcc_GetFileBufferFileNumber(fileBuffer));
          line->index += numLen;
       }
       else

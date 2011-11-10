@@ -65,7 +65,8 @@ typedef _Bool bool_t;
 #define isNumericChar(d) ( (((d) >= '0') && ((d) <= '9')) || \
                            (d) == 'e' || (d) == 'E' || (d) == '.')
 
-FILE *mcc_OpenFile(const char *filename, char *flags);
+FILE *mcc_OpenFile(const char *filename, char *flags, unsigned short *out_fileno);
+const char *mcc_ResolveFileNameFromNumber(const unsigned short fileno);
 
 const char *mcc_FindLocalInclude(const char *filename);
 const char *mcc_FindSystemInclude(const char *filename);

@@ -19,6 +19,7 @@
 struct FileBuffer {
    FILE *file;
    const char *filename;
+   unsigned short fileNumber;
    unsigned int line_no;
    unsigned int bufferIndex;
    char buffer[FILE_BUFFER_SIZE + 1];
@@ -41,11 +42,16 @@ unsigned int mcc_GetFileBufferCurrentLineNo(mcc_FileBuffer_t *fileBuffer)
    return fileBuffer->line_no;
 }
 
+unsigned short mcc_GetFileBufferFileNumber(mcc_FileBuffer_t *fileBuffer)
+{
+   return fileBuffer->fileNumber;
+}
+
 mcc_FileBuffer_t *mcc_CreateFileBuffer(const char *file)
 {
    mcc_FileBuffer_t *fileBuffer = (mcc_FileBuffer_t *) malloc(sizeof(mcc_FileBuffer_t));
    fileBuffer->filename = file;
-   fileBuffer->file = mcc_OpenFile(file, "r");
+   fileBuffer->file = mcc_OpenFile(file, "r", &fileBuffer->fileNumber);
    fileBuffer->line_no = 0;
    fileBuffer->bufferIndex = 0;
    fileBuffer->chars_read = 0;

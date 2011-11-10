@@ -19,7 +19,8 @@ static const char whitespaceText = ' ';
 static bool_t finished_iterating = FALSE;
 
 mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
-                             TOKEN_TYPE type, const int lineno)
+                             TOKEN_TYPE type, const int lineno,
+                             const unsigned short fileno)
 {
    mcc_Token_t *token = (mcc_Token_t *) malloc(sizeof(mcc_Token_t));
    token->text = (char *) malloc(sizeof(char) * (text_len + 1));
@@ -28,23 +29,24 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
    token->tokenType = type;
    token->tokenIndex = 0;
    token->lineno = lineno;
+   token->fileno = fileno;
    token->next = NULL;
    token->previous = NULL;
 
    return token;
 }
 
-void mcc_AddEndOfLineToken(const int lineno)
+void mcc_AddEndOfLineToken(const int lineno, const unsigned short fileno)
 {
    mcc_Token_t *token = mcc_CreateToken(&whitespaceText, sizeof(whitespaceText),
-                                        TOK_EOL, lineno);
+                                        TOK_EOL, lineno, fileno);
    mcc_AddToken(token);   
 }
 
-void mcc_CreateAndAddWhitespaceToken(const int lineno)
+void mcc_CreateAndAddWhitespaceToken(const int lineno, const unsigned short fileno)
 {
    mcc_Token_t *token = mcc_CreateToken(&whitespaceText, sizeof(whitespaceText),
-                                        TOK_WHITESPACE, lineno);
+                                        TOK_WHITESPACE, lineno, fileno);
    mcc_AddToken(token);
 }
 

@@ -8,6 +8,11 @@
 #include "tokens.h"
 #include "fileBuffer.h"
 
+const char *token_types[NUM_TOK_TYPES] = { "Preprocessor directive", "Identifier", "Keyword", "Symbol",
+                                           "Operator", "Number", "String Constant", "Character Constant",
+                                           "System File Include", "Local File Include", "Whitespace",
+                                           "End Of Line"};
+
 const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES] = { "include", "define", "ifdef", "ifndef", "if",
                                                                      "endif", "else", "elif", "undef", "error", "pragma", "#" };
 
