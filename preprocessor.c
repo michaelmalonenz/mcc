@@ -87,7 +87,27 @@ HANDLER_LINKAGE void handleDefine(mcc_Token_t *currentToken)
 
 HANDLER_LINKAGE void handleUndef(mcc_Token_t UNUSED(*currentToken)) {}
 
-HANDLER_LINKAGE void handleError(mcc_Token_t UNUSED(*currentToken)) {}
+HANDLER_LINKAGE void handleError(mcc_Token_t *currentToken)
+{
+   mcc_Token_t *temp = NULL;
+   currentToken = mcc_GetNextToken();
+   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE);
+   currentToken = mcc_GetNextToken();
+   while (currentToken->tokenType != TOK_EOL)
+   {
+      if (temp == NULL)
+      {
+         temp = currentToken;
+      }
+      else
+      {
+         temp = mcc_ConCatTokens(temp, currentToken, TOK_STR_CONST);
+      } 
+   }
+   mcc_PrettyError(mcc_ResolveFileNameFromNumber(temp->fileno),
+                   temp->lineno,
+                   "Error: %s\n", temp->text);
+}
 
 HANDLER_LINKAGE void handleIfdef(mcc_Token_t UNUSED(*currentToken)) {}
 
