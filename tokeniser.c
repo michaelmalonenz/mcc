@@ -384,11 +384,14 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
                                     mcc_GetFileBufferFileNumber(fileBuffer));
             token->tokenIndex = PP_JOIN;
             mcc_InsertToken(token, iter);
+            line->index++;
             token = NULL;
          }
          else
          {
-            PREPROC_DIRECTIVE pp_dir = mcc_GetPreprocessorDirective(line);
+            PREPROC_DIRECTIVE pp_dir;
+            handle_whitespace(line, fileBuffer, iter);
+            pp_dir = mcc_GetPreprocessorDirective(line);
             MCC_ASSERT(pp_dir != PP_NONE);
             token = mcc_CreateToken(preprocessor_directives[pp_dir], 
                                     pp_strlens[pp_dir], TOK_PP_DIRECTIVE,

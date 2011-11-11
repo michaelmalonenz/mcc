@@ -27,8 +27,6 @@
  */
 #define FILE_BUFFER_SIZE 32768
 
-#define TAB_REPLACEMENT_SPACES "    "
-
 /* Should avoid allocating these on the stack - it could use up memory much too quickly
  * (stacks are usually limited to around 8MB) Which, I suppose is big enough to hold a 
  * decent amount, but don't I want to leave plenty of room for other stuff?
