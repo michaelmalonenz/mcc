@@ -165,12 +165,15 @@ end
 
 if $0 == __FILE__ then
 
+   tests = []
    $log_file = SimpleLogger.new("#{MAIN_EXE_NAME}.log")
 
    ARGV.each do |arg|
       if arg =~ %r{--?c(?:l(?:e(?:a(?:n)?)?)?)?}ix
          clean()
          exit(0)
+      elsif arg =~ %r{--?t(?:e(?:s(?:t(?:[-_](?:o(?:n(?:ly)?)?)?)?)?)?)?=(.+)}ix
+         tests << $1
       end
    end
 
@@ -209,9 +212,17 @@ if $0 == __FILE__ then
          end
 
          $log_file.note("Running tests...")
-         Dir.new(TEST_BIN_DIR).each do |file|
-            if !FileTest.directory?(file) && FileTest.executable?(file)
-               run_command("#{VALGRIND_COMMAND} ./#{file}", "#{File.basename(file)} failed to run correctly!")
+         if tests.empty?
+            Dir.new(TEST_BIN_DIR).each do |file|
+               if !FileTest.directory?(file) && FileTest.executable?(file)
+                  run_command("#{VALGRIND_COMMAND} ./#{file}", "#{File.basename(file)} failed to run correctly!")
+               end
+            end
+         else
+            tests.each do |test|
+               if !FileTest.directory?(test) && FileTest.executable?(test)
+                  run_command("#{VALGRIND_COMMAND} ./#{test}", "#{File.basename(test)} failed to run correctly!")
+               end               
             end
          end
       end

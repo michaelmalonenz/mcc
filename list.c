@@ -140,16 +140,19 @@ void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, void *data)
       }
       else
       {
-         node->next = iter->list->head;
-         iter->list->head = node;
+         MCC_ASSERT(FALSE);
       }
    }
    else
    {
       node->next = iter->current->next;
+      if (iter->current == iter->list->tail)
+      {
+         iter->list->tail = node;
+      }
       iter->current->next = node;
-      iter->current = node;
    }
+   iter->current = node;
    iter->list->nItems++;
 }
 

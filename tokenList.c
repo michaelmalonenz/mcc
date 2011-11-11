@@ -45,34 +45,33 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
    return token;
 }
 
-void mcc_AddEndOfLineToken(const int lineno, const unsigned short fileno)
+void mcc_AddEndOfLineToken(const int lineno, const unsigned short fileno,
+                           mcc_TokenListIterator_t *iter)
 {
    mcc_Token_t *token = mcc_CreateToken(&whitespaceText, sizeof(whitespaceText),
                                         TOK_EOL, lineno, fileno);
-   mcc_AppendToken(token);   
+   mcc_InsertToken(token, iter);   
 }
 
-void mcc_CreateAndAddWhitespaceToken(const int lineno, const unsigned short fileno)
+void mcc_CreateAndAddWhitespaceToken(const int lineno,
+                                     const unsigned short fileno,
+                                     mcc_TokenListIterator_t *iter)
 {
    mcc_Token_t *token = mcc_CreateToken(&whitespaceText, sizeof(whitespaceText),
                                         TOK_WHITESPACE, lineno, fileno);
-   mcc_AppendToken(token);
+   mcc_InsertToken(token, iter);
 }
 
-void mcc_DeleteToken(void *token)
+static void mcc_DeleteToken(void *token)
 {
    mcc_Token_t *temp = (mcc_Token_t *) token;
    free(temp->text);
    free(temp);
 }
 
-void mcc_AppendToken(mcc_Token_t *token)
+void mcc_InsertToken(mcc_Token_t *token, mcc_TokenListIterator_t *iter)
 {
-   if (token_list == NULL)
-   {
-      token_list = mcc_ListCreate();
-   }
-   mcc_ListAppendData(token_list, token);
+   mcc_ListInsertDataAtCurrentPosition(iter, token);
 
 #if MCC_DEBUG
 //   printf("Got me a token '%s' of type %d\n", token->text, token->tokenType);
@@ -99,9 +98,14 @@ mcc_TokenListIterator_t *mcc_GetTokenListIterator(void)
    return (mcc_TokenListIterator_t *) mcc_ListGetIterator(token_list);
 }
 
+mcc_TokenListIterator_t *mcc_TokenListCopyIterator(mcc_TokenListIterator_t *iter)
+{
+   return (mcc_TokenListIterator_t *) mcc_ListCopyIterator((mcc_ListIterator_t *) iter);
+}
+
 mcc_Token_t *mcc_GetNextToken(mcc_TokenListIterator_t *iter)
 {
-   return mcc_ListGetNextData((mcc_ListIterator_t *) iter);
+   return (mcc_Token_t *) mcc_ListGetNextData((mcc_ListIterator_t *) iter);
 }
 
 mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, mcc_Token_t *second, TOKEN_TYPE newType)

@@ -90,8 +90,9 @@ int main(int UNUSED(argc), char UNUSED(**argv))
       {
          mcc_Token_t *token = mcc_GetNextToken(tokenListIter);
          MCC_ASSERT(token != NULL);
-         printf("Expected token type: %d, Actual token type: %d\n",
-                expected_token_types[i][j], token->tokenType);
+         printf("Expected token type: %s, Actual token type: %s\n",
+                token_types[expected_token_types[i][j]],
+                token_types[token->tokenType]);
          MCC_ASSERT(token->tokenType == expected_token_types[i][j]);
          MCC_ASSERT(token->tokenIndex == expected_token_indices[i][j]);
       }

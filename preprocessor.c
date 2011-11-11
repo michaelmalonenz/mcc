@@ -76,7 +76,6 @@ void mcc_PreprocessCurrentTokens(void)
    
    while(currentToken != NULL)
    {
-      printf("Current Token Type: %s\n", token_types[currentToken->tokenType]);
       if (currentToken->tokenType == TOK_PP_DIRECTIVE)
       {
          ppHandlers[currentToken->tokenIndex](currentToken, tokenListIter);
@@ -86,9 +85,30 @@ void mcc_PreprocessCurrentTokens(void)
 }
 
 HANDLER_LINKAGE void handleInclude(mcc_Token_t *currentToken,
-                                   mcc_TokenListIterator_t UNUSED(*tokenListIter))
+                                   mcc_TokenListIterator_t *tokenListIter)
 {
-   mcc_TokeniseFile(currentToken->text, tokenListIter);
+   mcc_TokenListIterator_t *incIter = mcc_TokenListCopyIterator(tokenListIter);
+   const char *include_path;
+   currentToken = mcc_GetNextToken(tokenListIter);
+   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE);
+   currentToken = mcc_GetNextToken(tokenListIter);
+   if (currentToken->tokenType == TOK_LOCAL_FILE_INC)
+   {
+      include_path = mcc_FindLocalInclude(currentToken->text);
+   }
+   else if (currentToken->tokenType == TOK_SYS_FILE_INC)
+   {
+      include_path = mcc_FindSystemInclude(currentToken->text);
+   }
+   else
+   {
+      mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
+                      currentToken->lineno,
+                      "Expected a filename to include, got '%s'\n",
+                      currentToken->text);      
+   }
+   mcc_TokeniseFile(include_path, incIter);
+   mcc_DeleteTokenListIterator(incIter);
 }
 
 //currently doesn't handle function-like macros
@@ -102,7 +122,10 @@ HANDLER_LINKAGE void handleDefine(mcc_Token_t *currentToken,
    mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER);
    macro_identifier = currentToken->text;
    currentToken = mcc_GetNextToken(tokenListIter);
-   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE);
+   if (currentToken->tokenType == TOK_WHITESPACE)
+   {
+      currentToken = mcc_GetNextToken(tokenListIter);
+   }
    //everything to the end of the line (i.e. need end of line tokens)
 }
 

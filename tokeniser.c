@@ -11,15 +11,24 @@
 #include "tokens.h"
 #include "tokenList.h"
 
-static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
+                             mcc_FileBuffer_t *fileBuffer,
+                             mcc_TokenListIterator_t *iter);
 static void handle_string_char_const(mcc_LogicalLine_t *line,
                                      mcc_FileBuffer_t *fileBuffer,
                                      const char delimiter,
-                                     TOKEN_TYPE type);
-static void handle_pp_include_filename(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static char handle_octal_integer_const(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static char handle_hex_integer_const(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
-static void handle_whitespace(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
+                                     TOKEN_TYPE type,
+                                     mcc_TokenListIterator_t *iter);
+static void handle_pp_include_filename(mcc_LogicalLine_t *line,
+                                       mcc_FileBuffer_t *fileBuffer,
+                                       mcc_TokenListIterator_t *iter);
+static char handle_octal_integer_const(mcc_LogicalLine_t *line,
+                                       mcc_FileBuffer_t *fileBuffer);
+static char handle_hex_integer_const(mcc_LogicalLine_t *line,
+                                     mcc_FileBuffer_t *fileBuffer);
+static void handle_whitespace(mcc_LogicalLine_t *line,
+                              mcc_FileBuffer_t *fileBuffer,
+                              mcc_TokenListIterator_t *iter);
 
 static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t *fileBuffer)
 {
@@ -68,24 +77,28 @@ static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuff
    return line;
 }
 
-static void handle_whitespace(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
+static void handle_whitespace(mcc_LogicalLine_t *line,
+                              mcc_FileBuffer_t *fileBuffer,
+                              mcc_TokenListIterator_t *iter)
 {
    if (SkipWhiteSpace(line) > 0)
    {
       mcc_CreateAndAddWhitespaceToken(mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                                      mcc_GetFileBufferFileNumber(fileBuffer));
+                                      mcc_GetFileBufferFileNumber(fileBuffer),
+                                      iter);
    }
 }
 
 static void handle_pp_include_filename(mcc_LogicalLine_t *line,
-                                       mcc_FileBuffer_t *fileBuffer)
+                                       mcc_FileBuffer_t *fileBuffer,
+                                       mcc_TokenListIterator_t *iter)
 {
    char delimiter;
    TOKEN_TYPE type;
    int filenameLen = 0;
    mcc_Token_t *token = NULL;
 
-   handle_whitespace(line, fileBuffer);
+   handle_whitespace(line, fileBuffer, iter);
 
    delimiter = line->string[line->index];
    if (delimiter == '"')
@@ -145,9 +158,9 @@ static void handle_pp_include_filename(mcc_LogicalLine_t *line,
                             mcc_GetFileBufferCurrentLineNo(fileBuffer),
                             mcc_GetFileBufferFileNumber(fileBuffer));
    token->tokenType = type;
-   mcc_AppendToken(token);
+   mcc_InsertToken(token, iter);
    line->index += filenameLen + 1; //+1 for the delimiter
-   handle_whitespace(line, fileBuffer);
+   handle_whitespace(line, fileBuffer, iter);
    if (line->index != line->length)
    {
       mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
@@ -159,7 +172,8 @@ static void handle_pp_include_filename(mcc_LogicalLine_t *line,
 static void handle_string_char_const(mcc_LogicalLine_t *line,
                                      mcc_FileBuffer_t *fileBuffer,
                                      const char delimiter,
-                                     TOKEN_TYPE type)
+                                     TOKEN_TYPE type,
+                                     mcc_TokenListIterator_t *iter)
 {
    int strLen = 0;
    mcc_Token_t *token = NULL;
@@ -249,7 +263,7 @@ static void handle_string_char_const(mcc_LogicalLine_t *line,
                            mcc_GetFileBufferFileNumber(fileBuffer));
    token->tokenType = type;
    line->index += strLen + 1;
-   mcc_AppendToken(token);
+   mcc_InsertToken(token, iter);
 }
 
 static char handle_octal_integer_const(mcc_LogicalLine_t *line,
@@ -324,7 +338,7 @@ static char handle_hex_integer_const(mcc_LogicalLine_t *line,
 }
                                        
 void mcc_TokeniseFile(const char *inFilename, 
-                      mcc_TokenListIterator_t UNUSED(*iter))
+                      mcc_TokenListIterator_t *iter)
 {
    mcc_FileBuffer_t *fileBuffer = mcc_CreateFileBuffer(inFilename);
    mcc_LogicalLine_t *logicalLine = NULL;
@@ -339,22 +353,25 @@ void mcc_TokeniseFile(const char *inFilename,
          {
             continue;
          }
-         mcc_TokeniseLine(logicalLine, fileBuffer);
+         mcc_TokeniseLine(logicalLine, fileBuffer, iter);
          mcc_AddEndOfLineToken(mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                               mcc_GetFileBufferFileNumber(fileBuffer));
+                               mcc_GetFileBufferFileNumber(fileBuffer),
+                               iter);
       }
    }
    mcc_DeleteFileBuffer(fileBuffer);
 }
 
 //by providing a logical line, we are guaranteed to only have whole tokens.
-static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer)
+static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
+                             mcc_FileBuffer_t *fileBuffer,
+                             mcc_TokenListIterator_t *iter)
 {
    MCC_OPERATOR current_operator = OP_NONE;
    MCC_SYMBOL current_symbol = SYM_NONE;
    mcc_Token_t *token = NULL;
 
-   handle_whitespace(line, fileBuffer);
+   handle_whitespace(line, fileBuffer, iter);
    while(line->index < line->length)
    {
       if (line->string[line->index] == '#')
@@ -366,7 +383,7 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
                                     mcc_GetFileBufferCurrentLineNo(fileBuffer),
                                     mcc_GetFileBufferFileNumber(fileBuffer));
             token->tokenIndex = PP_JOIN;
-            mcc_AppendToken(token);
+            mcc_InsertToken(token, iter);
             token = NULL;
          }
          else
@@ -381,9 +398,9 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
             line->index += pp_strlens[pp_dir];
             if (pp_dir == PP_INCLUDE)
             {
-               mcc_AppendToken(token);
+               mcc_InsertToken(token, iter);
                token = NULL;
-               handle_pp_include_filename(line, fileBuffer);
+               handle_pp_include_filename(line, fileBuffer, iter);
             }
          }
       }
@@ -399,12 +416,12 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
          if (current_symbol == SYM_DOUBLE_QUOTE)
          {
             handle_string_char_const(line, fileBuffer,
-                                           '"', TOK_STR_CONST);
+                                     '"', TOK_STR_CONST, iter);
          }
          else if (current_symbol == SYM_SINGLE_QUOTE)
          {
             handle_string_char_const(line, fileBuffer,
-                                     '\'', TOK_CHAR_CONST);            
+                                     '\'', TOK_CHAR_CONST, iter);            
          }
          else
          {
@@ -482,10 +499,10 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
      
       if (token != NULL)
       {
-         mcc_AppendToken(token);
+         mcc_InsertToken(token, iter);
          token = NULL;
       }
-      handle_whitespace(line, fileBuffer);
+      handle_whitespace(line, fileBuffer, iter);
    }
 }
 

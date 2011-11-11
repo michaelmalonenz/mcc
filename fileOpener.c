@@ -40,7 +40,7 @@ FILE *mcc_OpenFile(const char *filename, char *flags, unsigned short *out_fileno
    file = fopen(filename, flags);
    if (file == NULL)
    {
-      mcc_Error("Couldn't open %s\n", filename);
+      mcc_Error("Couldn't open the file '%s'\n", filename);
    }
    newFile->fileno = current_file_number++; 
    *out_fileno = newFile->fileno;
