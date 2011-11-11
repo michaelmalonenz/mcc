@@ -126,7 +126,11 @@ HANDLER_LINKAGE void handleDefine(mcc_Token_t *currentToken,
    {
       currentToken = mcc_GetNextToken(tokenListIter);
    }
-   //everything to the end of the line (i.e. need end of line tokens)
+   while (currentToken->tokenType != TOK_EOL)
+   {
+      currentToken = mcc_GetNextToken(tokenListIter);
+      //need to save this string of tokens somehow and add them to the macro table
+   }
 }
 
 HANDLER_LINKAGE void handleUndef(mcc_Token_t UNUSED(*currentToken),
