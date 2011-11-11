@@ -323,7 +323,8 @@ static char handle_hex_integer_const(mcc_LogicalLine_t *line,
    return (char) number;
 }
                                        
-void mcc_TokeniseFile(const char *inFilename)
+void mcc_TokeniseFile(const char *inFilename, 
+                      mcc_TokenListIterator_t UNUSED(*iter))
 {
    mcc_FileBuffer_t *fileBuffer = mcc_CreateFileBuffer(inFilename);
    mcc_LogicalLine_t *logicalLine = NULL;

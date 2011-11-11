@@ -92,6 +92,10 @@ void mcc_DeleteTokenListIterator(mcc_TokenListIterator_t *iter)
 
 mcc_TokenListIterator_t *mcc_GetTokenListIterator(void)
 {
+   if (token_list == NULL)
+   {
+      token_list = mcc_ListCreate();
+   }
    return (mcc_TokenListIterator_t *) mcc_ListGetIterator(token_list);
 }
 

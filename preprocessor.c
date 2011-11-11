@@ -26,6 +26,7 @@
 #include "macro.h"
 #include "tokens.h"
 #include "tokenList.h"
+#include "toolChainCommands.h"
 
 #ifdef MCC_DEBUG
 #define HANDLER_LINKAGE extern
@@ -84,17 +85,15 @@ void mcc_PreprocessCurrentTokens(void)
    }
 }
 
-HANDLER_LINKAGE void handleInclude(mcc_Token_t *currentToken, mcc_TokenListIterator_t UNUSED(*tokenListIter))
+HANDLER_LINKAGE void handleInclude(mcc_Token_t *currentToken,
+                                   mcc_TokenListIterator_t UNUSED(*tokenListIter))
 {
-   mcc_TokeniseFile(currentToken->text);
-   {
-//	mcc_PreprocessFile(mcc_FindSystemInclude((const char *)mcc_StringBufferGetString(fileInclude)),
-//      outputFile);
-   }
+   mcc_TokeniseFile(currentToken->text, tokenListIter);
 }
 
 //currently doesn't handle function-like macros
-HANDLER_LINKAGE void handleDefine(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter) 
+HANDLER_LINKAGE void handleDefine(mcc_Token_t *currentToken,
+                                  mcc_TokenListIterator_t *tokenListIter) 
 {
    const char UNUSED(*macro_identifier);
    currentToken = mcc_GetNextToken(tokenListIter);
@@ -107,9 +106,11 @@ HANDLER_LINKAGE void handleDefine(mcc_Token_t *currentToken, mcc_TokenListIterat
    //everything to the end of the line (i.e. need end of line tokens)
 }
 
-HANDLER_LINKAGE void handleUndef(mcc_Token_t UNUSED(*currentToken), mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
+HANDLER_LINKAGE void handleUndef(mcc_Token_t UNUSED(*currentToken),
+                                 mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
 
-HANDLER_LINKAGE void handleError(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter)
+HANDLER_LINKAGE void handleError(mcc_Token_t *currentToken,
+                                 mcc_TokenListIterator_t *tokenListIter)
 {
    mcc_Token_t *temp = NULL;
    currentToken = mcc_GetNextToken(tokenListIter);
@@ -132,20 +133,28 @@ HANDLER_LINKAGE void handleError(mcc_Token_t *currentToken, mcc_TokenListIterato
                    "Error: %s\n", temp->text);
 }
 
-HANDLER_LINKAGE void handleIfdef(mcc_Token_t UNUSED(*currentToken), mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
+HANDLER_LINKAGE void handleIfdef(mcc_Token_t UNUSED(*currentToken),
+                                 mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
 
-HANDLER_LINKAGE void handleIfndef(mcc_Token_t UNUSED(*currentToken), mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
+HANDLER_LINKAGE void handleIfndef(mcc_Token_t UNUSED(*currentToken),
+                                  mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
 
-HANDLER_LINKAGE void handleIf(mcc_Token_t UNUSED(*currentToken), mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
+HANDLER_LINKAGE void handleIf(mcc_Token_t UNUSED(*currentToken),
+                              mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
 
-HANDLER_LINKAGE void handleEndif(mcc_Token_t UNUSED(*currentToken), mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
+HANDLER_LINKAGE void handleEndif(mcc_Token_t UNUSED(*currentToken),
+                                 mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
 
-HANDLER_LINKAGE void handleElse(mcc_Token_t UNUSED(*currentToken), mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
+HANDLER_LINKAGE void handleElse(mcc_Token_t UNUSED(*currentToken),
+                                mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
 
-HANDLER_LINKAGE void handleElif(mcc_Token_t UNUSED(*currentToken), mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
+HANDLER_LINKAGE void handleElif(mcc_Token_t UNUSED(*currentToken),
+                                mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
 
-HANDLER_LINKAGE void handleJoin(mcc_Token_t UNUSED(*currentToken), mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
+HANDLER_LINKAGE void handleJoin(mcc_Token_t UNUSED(*currentToken),
+                                mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
 
 //What shall I do with #pragmas???
-HANDLER_LINKAGE void handlePragma(mcc_Token_t UNUSED(*currentToken), mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
+HANDLER_LINKAGE void handlePragma(mcc_Token_t UNUSED(*currentToken),
+                                  mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
 

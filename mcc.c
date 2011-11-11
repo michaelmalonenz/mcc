@@ -23,6 +23,7 @@
 
 #include "mcc.h"
 #include "tokenList.h"
+#include "toolChainCommands.h"
 
 int main(int argc, char **argv)
 {
@@ -35,8 +36,10 @@ int main(int argc, char **argv)
    
    for(i = 1; i < argc; i++)
    {
+      mcc_TokenListIterator_t *tokenListIter = mcc_GetTokenListIterator();
       fprintf(stderr, "Tokenising %s...\n", argv[i]);
-      mcc_TokeniseFile(argv[i]);
+      mcc_TokeniseFile(argv[i], tokenListIter);
+      mcc_DeleteTokenListIterator(tokenListIter);
       fprintf(stderr, "Preprocessing %s...\n", argv[i]);
       mcc_PreprocessCurrentTokens();
       mcc_FreeTokens();

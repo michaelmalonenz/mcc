@@ -27,6 +27,7 @@
 #include "mcc.h"
 #include "tokens.h"
 #include "tokenList.h"
+#include "toolChainCommands.h"
 
 #define NUM_TEST_CASES 3
 const char *strings_to_tokenise[NUM_TEST_CASES] = { 
@@ -80,7 +81,9 @@ int main(int UNUSED(argc), char UNUSED(**argv))
 
       close(temp_fd);
 
-      mcc_TokeniseFile(tmp_filename);
+      tokenListIter = mcc_GetTokenListIterator();
+      mcc_TokeniseFile(tmp_filename, tokenListIter);
+      mcc_DeleteTokenListIterator(tokenListIter);
       tokenListIter = mcc_GetTokenListIterator();
 
       for (j = 0; j < expected_num_tokens[i]; j++)
