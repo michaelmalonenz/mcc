@@ -389,13 +389,6 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
          else
          {
             PREPROC_DIRECTIVE pp_dir = mcc_GetPreprocessorDirective(line);
-            if (pp_dir == PP_NONE)
-            {
-               mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
-                               mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                               "This is where it goes pear-shaped\n");
-
-            }
             MCC_ASSERT(pp_dir != PP_NONE);
             token = mcc_CreateToken(preprocessor_directives[pp_dir], 
                                     pp_strlens[pp_dir], TOK_PP_DIRECTIVE,
