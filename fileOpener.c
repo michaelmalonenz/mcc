@@ -17,6 +17,8 @@
 **/
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "mcc.h"
 #include "list.h"
@@ -37,6 +39,10 @@ void mcc_FileOpenerInitialise(void)
 {
    localIncludeDirList = mcc_ListCreate();
    systemIncludeDirList = mcc_ListCreate();
+
+   mcc_ListAppendData(systemIncludeDirList, "/usr/include");
+   // @todo also append all dirs in the env var C_INCLUDE_PATH
+
    fileList = mcc_ListCreate();
 }
 
@@ -115,7 +121,24 @@ char *mcc_FindLocalInclude(const char *filename)
 
 char *mcc_FindSystemInclude(const char *filename)
 {
-   char *result = (char *) malloc(strlen(filename) + 1);
-   strncpy(result, filename, strlen(filename) + 1);
-   return result;
+   mcc_ListIterator_t *iter = mcc_ListGetIterator(systemIncludeDirList);
+   char *currentDir = (char *) mcc_ListGetNextData(iter);
+   while (currentDir != NULL)
+   {
+      size_t dirLen = strlen(currentDir);
+      size_t filenameLen = strlen(filename);
+      //+1 for NUL and +1 for '/'
+      char *temp = (char *) malloc(filenameLen + dirLen + 2);
+      int fd;
+      strncpy(temp, currentDir, dirLen);
+      temp[dirLen] = '/';
+      strncpy(&temp[dirLen + 1], filename, filenameLen + 1);
+      fd = open(temp, O_RDONLY);
+      if (fd != -1)
+      {
+         close(fd);
+         return temp;
+      }
+   }
+   return NULL;
 }
