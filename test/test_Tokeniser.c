@@ -62,6 +62,7 @@ int main(int UNUSED(argc), char UNUSED(**argv))
       int temp_fd = 0;
       ssize_t bytes_written = 0;
       ssize_t tok_str_len = strlen(strings_to_tokenise[i]);
+      mcc_TokenListIterator_t *tokenListIter;
 
       strncpy(tmp_filename, "mcc_test_XXXXXX", L_tmpnam);
       MCC_ASSERT(mkstemp(tmp_filename) != -1);
@@ -79,10 +80,11 @@ int main(int UNUSED(argc), char UNUSED(**argv))
       close(temp_fd);
 
       mcc_TokeniseFile(tmp_filename);
+      tokenListIter = mcc_GetTokenListIterator();
 
       for (j = 0; j < expected_num_tokens[i]; j++)
       {
-         mcc_Token_t *token = mcc_GetNextToken();
+         mcc_Token_t *token = mcc_GetNextToken(tokenListIter);
          MCC_ASSERT(token != NULL);
          printf("Expected token type: %d, Actual token type: %d\n",
                 expected_token_types[i][j], token->tokenType);
@@ -90,7 +92,8 @@ int main(int UNUSED(argc), char UNUSED(**argv))
          MCC_ASSERT(token->tokenIndex == expected_token_indices[i][j]);
       }
 
-      MCC_ASSERT(mcc_GetNextToken() == NULL);
+      MCC_ASSERT(mcc_GetNextToken(tokenListIter) == NULL);
+      mcc_DeleteTokenListIterator(tokenListIter);
       mcc_FreeTokens();
 
       unlink(tmp_filename);

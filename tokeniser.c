@@ -144,7 +144,7 @@ static void handle_pp_include_filename(mcc_LogicalLine_t *line,
                             mcc_GetFileBufferCurrentLineNo(fileBuffer),
                             mcc_GetFileBufferFileNumber(fileBuffer));
    token->tokenType = type;
-   mcc_AddToken(token);
+   mcc_AppendToken(token);
    line->index += filenameLen + 1; //+1 for the delimiter
    handle_whitespace(line, fileBuffer);
    if (line->index != line->length)
@@ -248,7 +248,7 @@ static void handle_string_char_const(mcc_LogicalLine_t *line,
                            mcc_GetFileBufferFileNumber(fileBuffer));
    token->tokenType = type;
    line->index += strLen + 1;
-   mcc_AddToken(token);
+   mcc_AppendToken(token);
 }
 
 static char handle_octal_integer_const(mcc_LogicalLine_t *line,
@@ -364,7 +364,7 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
                                     mcc_GetFileBufferCurrentLineNo(fileBuffer),
                                     mcc_GetFileBufferFileNumber(fileBuffer));
             token->tokenIndex = PP_JOIN;
-            mcc_AddToken(token);
+            mcc_AppendToken(token);
             token = NULL;
          }
          else
@@ -379,7 +379,7 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
             line->index += pp_strlens[pp_dir];
             if (pp_dir == PP_INCLUDE)
             {
-               mcc_AddToken(token);
+               mcc_AppendToken(token);
                token = NULL;
                handle_pp_include_filename(line, fileBuffer);
             }
@@ -480,7 +480,7 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuff
      
       if (token != NULL)
       {
-         mcc_AddToken(token);
+         mcc_AppendToken(token);
          token = NULL;
       }
       handle_whitespace(line, fileBuffer);
