@@ -23,6 +23,9 @@ typedef struct list_node mcc_ListNode_t;
 typedef struct list mcc_List_t;
 typedef struct iterator mcc_ListIterator_t;
 
+
+typedef void (*mcc_NodeDestructor_fn)(void *);
+
 /**
  * Initialises an empty unordered, singly-linked list.
  * Any call to this must be matched with a call to mcc_ListDelete()
@@ -34,8 +37,9 @@ mcc_List_t *mcc_ListCreate(void);
 /**
  * Destroys the dynamic memory associated with both the list _AND_
  * all the items stored within it.
+ * The supplied destructor function is for an individual data item in the list.
  */
-void mcc_ListDelete(mcc_List_t *list);
+void mcc_ListDelete(mcc_List_t *list, mcc_NodeDestructor_fn destructorFn);
 
 /**
  * Adds an item to the end of the list

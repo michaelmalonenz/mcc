@@ -29,6 +29,11 @@ int basic_test_data[NUM_BASIC_TEST_ITEMS] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
 int insertion_test_data[NUM_ITEMS_TO_INSERT] = { 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };
 
+static void test_list_node_destructor(void *deathRow)
+{
+   free(deathRow);
+}
+
 static void test_BasicListFunctionality(void)
 {
    int i;
@@ -56,7 +61,7 @@ static void test_BasicListFunctionality(void)
 
    printf("Cleaning up basic test\n");
    mcc_ListDeleteIterator(iter);
-   mcc_ListDelete(list);
+   mcc_ListDelete(list, &test_list_node_destructor);
    printf("Finished basic test\n");
 }
 
@@ -74,7 +79,7 @@ static void test_NullList(void)
 
    printf("Cleaning up Null test\n");
    mcc_ListDeleteIterator(iter);
-   mcc_ListDelete(list);
+   mcc_ListDelete(list, &test_list_node_destructor);
 
    printf("Finished Null test\n");
 }
@@ -119,7 +124,7 @@ static void test_InsertionWithIterator(void)
 
    printf("Cleaning up insertion test\n");
    mcc_ListDeleteIterator(iter);
-   mcc_ListDelete(list);
+   mcc_ListDelete(list, &test_list_node_destructor);
 
    printf("Finished insertion test\n");
 }
@@ -175,7 +180,7 @@ static void test_CopyingIterator(void)
    printf("Cleaning up basic iterator test\n");
    mcc_ListDeleteIterator(iter);
    mcc_ListDeleteIterator(iter_copy);
-   mcc_ListDelete(list);
+   mcc_ListDelete(list, &test_list_node_destructor);
    printf("Finished basic iterator test\n");
 }
 
