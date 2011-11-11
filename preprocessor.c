@@ -82,13 +82,14 @@ void mcc_PreprocessCurrentTokens(void)
       }
       currentToken = mcc_GetNextToken(tokenListIter);
    }
+   mcc_DeleteTokenListIterator(tokenListIter);
 }
 
 HANDLER_LINKAGE void handleInclude(mcc_Token_t *currentToken,
                                    mcc_TokenListIterator_t *tokenListIter)
 {
    mcc_TokenListIterator_t *incIter = mcc_TokenListCopyIterator(tokenListIter);
-   const char *include_path;
+   char *include_path;
    currentToken = mcc_GetNextToken(tokenListIter);
    mcc_ExpectTokenType(currentToken, TOK_WHITESPACE);
    currentToken = mcc_GetNextToken(tokenListIter);
@@ -108,6 +109,7 @@ HANDLER_LINKAGE void handleInclude(mcc_Token_t *currentToken,
                       currentToken->text);      
    }
    mcc_TokeniseFile(include_path, incIter);
+   free(include_path);
    mcc_DeleteTokenListIterator(incIter);
 }
 
@@ -151,7 +153,7 @@ HANDLER_LINKAGE void handleUndef(mcc_Token_t *currentToken,
       mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
                       currentToken->lineno,
                       "Unexpected characters after #undef '%s'\n",
-                      currentToken->text);            
+                      currentToken->text);
    }
 }
 

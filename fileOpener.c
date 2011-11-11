@@ -19,23 +19,22 @@
 #include <string.h>
 
 #include "mcc.h"
+#include "list.h"
 
 //A list is probably fine here.  If we need to resolve the filename, it's probably an error condition
-//This is my second list, should I write a generic list yet?
-typedef struct file_list {
+typedef struct file_info {
    unsigned short fileno;
    char *filename;
-   struct file_list *next;
-} file_list_t;
+} file_info_t;
 
 static unsigned short current_file_number = 0;
-static file_list_t *list_head;
-static file_list_t *list_tail;
+static mcc_List_t *fileList = NULL;
 
-FILE *mcc_OpenFile(const char *filename, char *flags, unsigned short *out_fileno)
+FILE *mcc_OpenFile(const char *filename, const char *flags,
+                   unsigned short *out_fileno)
 {
    FILE *file = NULL;
-   file_list_t *newFile = (file_list_t *) malloc(sizeof(file_list_t));
+   file_info_t *newFile = (file_info_t *) malloc(sizeof(file_info_t));
    size_t filename_len = strlen(filename);
    file = fopen(filename, flags);
    if (file == NULL)
@@ -45,41 +44,65 @@ FILE *mcc_OpenFile(const char *filename, char *flags, unsigned short *out_fileno
    newFile->fileno = current_file_number++; 
    *out_fileno = newFile->fileno;
    newFile->filename = (char *) malloc((filename_len + 1) * sizeof(char));
-   memcpy(newFile->filename, filename, filename_len);
-   newFile->filename[filename_len] = '\0';
-   if (list_head == NULL)
+   strncpy(newFile->filename, filename, filename_len + 1);
+
+   if (fileList == NULL)
    {
-      list_head = newFile;
-      list_tail = newFile;
+      fileList = mcc_ListCreate();
    }
-   else
-   {
-      list_tail->next = newFile;
-      list_tail = newFile;
-   }
+   mcc_ListAppendData(fileList, newFile);
+   
    return file;
 }
 
-const char *mcc_ResolveFileNameFromNumber(const unsigned short UNUSED(fileno))
+static void DeleteFileInfo(void *deathRow)
 {
-   file_list_t *temp = list_head;
+   file_info_t *toDelete = (file_info_t *) deathRow;
+   free(toDelete->filename);
+   toDelete->filename = NULL;
+   free(toDelete);
+}
+
+void mcc_FileOpenerDelete(void)
+{
+   mcc_ListDelete(fileList, &DeleteFileInfo);
+}
+
+const char *mcc_ResolveFileNameFromNumber(const unsigned short fileno)
+{
+   mcc_ListIterator_t *iter = NULL;
+   file_info_t *temp = NULL;
+
+   if (fileList == NULL)
+      return NULL;
+
+   iter = mcc_ListGetIterator(fileList);
+   temp = (file_info_t *) mcc_ListGetNextData(iter);
    while (temp != NULL)
    {
       if (temp->fileno == fileno)
       {
+         mcc_ListDeleteIterator(iter);
          return temp->filename;
       }
-      temp = temp->next;
+      temp = (file_info_t *) mcc_ListGetNextData(iter);
    }
+
+   /* We couldn't find it, so free the iterator and return NULL */
+   mcc_ListDeleteIterator(iter);
    return NULL;
 }
 
-const char *mcc_FindLocalInclude(const char *filename)
+char *mcc_FindLocalInclude(const char *filename)
 {
-   return filename;
+   char *result = (char *) malloc(strlen(filename) + 1);
+   strncpy(result, filename, strlen(filename) + 1);
+   return result;
 }
 
-const char *mcc_FindSystemInclude(const char *filename)
+char *mcc_FindSystemInclude(const char *filename)
 {
-   return filename;
+   char *result = (char *) malloc(strlen(filename) + 1);
+   strncpy(result, filename, strlen(filename) + 1);
+   return result;
 }

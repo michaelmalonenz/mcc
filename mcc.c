@@ -45,5 +45,7 @@ int main(int argc, char **argv)
       mcc_FreeTokens();
    }
 
+   mcc_FileOpenerDelete();
+
    return 0;
 } 
