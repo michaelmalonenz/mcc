@@ -13,12 +13,17 @@ test_Preprocessor
 
 Should I also write some overall tests for the preprocessor section?
 
+List:
+Change the list to be doubly-linked
+Allow removal of items from the list (with an iterator)
+
 Preprocessor:
 Change to use the stream of tokens, instead of parsing the thing in place
 fix ifndef to work correctly
   - remove the file-scoped variables to handle conditionals (put them on the stack, for recursive goodness)
   - add in the "skip" variable to the logic deciding whether or not to ignore the conditional portion
 change the macro definitions to be a hash table?  It seems unnecessarily limiting to do it this way.
+macro defines should take a mcc_List_t of tokens
 Fix the b-tree after a macro deletion
 Fix the /**/ style comments to allow for more than one set per line 
   - I don't want to sink to GOTO statements!
@@ -30,10 +35,8 @@ support function macros
 Need to handle the ## operator
 
 Tokeniser:
-Need to correct the handle_string_char_const to parse strings and char const properly for literal integer escape sequences.
-Write a test for the tokeniser and fix the tokeniser
-handle hex constant character escape sequences.
 handle constant numbers better (floating point, decimal, octal and hex!)
+allow whitespace between the # and the preprocessor directive!
 
 Parser:
 Assert that the input file conforms to the c(99) standard
