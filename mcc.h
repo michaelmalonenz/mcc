@@ -83,6 +83,7 @@ typedef _Bool bool_t;
                            (d) == 'e' || (d) == 'E' || (d) == '.')
 
 FILE *mcc_OpenFile(const char *filename, const char *flags, unsigned short *out_fileno);
+void mcc_FileOpenerInitialise(void);
 void mcc_FileOpenerDelete(void);
 const char *mcc_ResolveFileNameFromNumber(const unsigned short fileno);
 

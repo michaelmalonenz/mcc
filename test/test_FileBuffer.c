@@ -47,11 +47,13 @@ static void SetupFileBufferTest(void)
    FILE *file = fopen(FILENAME, "w+");
    fwrite(FILE_CONTENTS, sizeof(char), strlen(FILE_CONTENTS), file);
    fclose(file);
+   mcc_FileOpenerInitialise();
 }
 
 static void TearDownFileBufferTest(void)
 {
    remove(FILENAME);
+   mcc_FileOpenerDelete();
 }
 
 

@@ -66,7 +66,10 @@ void mcc_ListDelete(mcc_List_t *list, mcc_NodeDestructor_fn destructorFn)
    while (current != NULL)
    {
       next = current->next;
-      destructorFn(current->data);
+      if (destructorFn != NULL)
+      {
+         destructorFn(current->data);
+      }
       current->data = NULL;
       free(current);
       list->nItems--;

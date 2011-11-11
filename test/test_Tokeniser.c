@@ -81,6 +81,8 @@ int main(int UNUSED(argc), char UNUSED(**argv))
 
       close(temp_fd);
 
+      mcc_FileOpenerInitialise();
+
       tokenListIter = mcc_GetTokenListIterator();
       mcc_TokeniseFile(tmp_filename, tokenListIter);
       mcc_DeleteTokenListIterator(tokenListIter);
@@ -100,6 +102,7 @@ int main(int UNUSED(argc), char UNUSED(**argv))
       MCC_ASSERT(mcc_GetNextToken(tokenListIter) == NULL);
       mcc_DeleteTokenListIterator(tokenListIter);
       mcc_FreeTokens();
+      mcc_FileOpenerDelete();
 
       unlink(tmp_filename);
    }

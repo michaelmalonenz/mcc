@@ -30,6 +30,36 @@ typedef struct file_info {
 static unsigned short current_file_number = 0;
 static mcc_List_t *fileList = NULL;
 
+static mcc_List_t *localIncludeDirList = NULL;
+static mcc_List_t *systemIncludeDirList = NULL;
+
+void mcc_FileOpenerInitialise(void)
+{
+   localIncludeDirList = mcc_ListCreate();
+   systemIncludeDirList = mcc_ListCreate();
+   fileList = mcc_ListCreate();
+}
+
+static void DeleteFileInfo(void *deathRow)
+{
+   file_info_t *toDelete = (file_info_t *) deathRow;
+   free(toDelete->filename);
+   toDelete->filename = NULL;
+   free(toDelete);
+}
+
+void mcc_FileOpenerDelete(void)
+{
+   mcc_ListDelete(fileList, &DeleteFileInfo);
+   mcc_ListDelete(localIncludeDirList, NULL);
+   mcc_ListDelete(systemIncludeDirList, NULL);
+}
+
+void mcc_FileOpenerLocalIncAppendDir(const char *dir)
+{
+   mcc_ListAppendData(localIncludeDirList, (void *) dir);
+}
+
 FILE *mcc_OpenFile(const char *filename, const char *flags,
                    unsigned short *out_fileno)
 {
@@ -46,26 +76,9 @@ FILE *mcc_OpenFile(const char *filename, const char *flags,
    newFile->filename = (char *) malloc((filename_len + 1) * sizeof(char));
    strncpy(newFile->filename, filename, filename_len + 1);
 
-   if (fileList == NULL)
-   {
-      fileList = mcc_ListCreate();
-   }
    mcc_ListAppendData(fileList, newFile);
    
    return file;
-}
-
-static void DeleteFileInfo(void *deathRow)
-{
-   file_info_t *toDelete = (file_info_t *) deathRow;
-   free(toDelete->filename);
-   toDelete->filename = NULL;
-   free(toDelete);
-}
-
-void mcc_FileOpenerDelete(void)
-{
-   mcc_ListDelete(fileList, &DeleteFileInfo);
 }
 
 const char *mcc_ResolveFileNameFromNumber(const unsigned short fileno)

@@ -34,6 +34,8 @@ int main(int argc, char **argv)
       mcc_Error("No input files\n");
    }
    
+   mcc_FileOpenerInitialise();
+
    for(i = 1; i < argc; i++)
    {
       mcc_TokenListIterator_t *tokenListIter = mcc_GetTokenListIterator();
