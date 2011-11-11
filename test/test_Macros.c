@@ -18,6 +18,9 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#define MCC_DEBUG 1
+#include "mcc.h"
 #include "macro.h"
 
 #define MACRO_NAME "EAT_ME"
@@ -42,7 +45,7 @@ static void test_Find(void)
 {	
    printf("Testing Find...");
    mcc_Macro_t *result = mcc_ResolveMacro(MACRO_NAME);
-   assert(result != NULL);
+   MCC_ASSERT(result != NULL);
    printf("ok\n");
 }
 

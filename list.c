@@ -37,6 +37,14 @@ struct iterator {
    mcc_List_t *list;
 };
 
+static mcc_ListNode_t *CreateListNode(void *data)
+{
+   mcc_ListNode_t *node = (mcc_ListNode_t *) malloc(sizeof(mcc_ListNode_t));
+   MCC_ASSERT(node != NULL);
+   node->next = NULL;
+   node->data = data;
+   return node;
+}
 
 mcc_List_t *mcc_ListCreate(void)
 {
@@ -74,10 +82,7 @@ void mcc_ListDelete(mcc_List_t *list)
 
 void mcc_ListAppendData(mcc_List_t *list, void *data)
 {
-   mcc_ListNode_t *node = (mcc_ListNode_t *) malloc(sizeof(mcc_ListNode_t));
-   MCC_ASSERT(node != NULL);
-   node->next = NULL;
-   node->data = data;
+   mcc_ListNode_t *node = CreateListNode(data);
 
    if (list->head == NULL)
    {
@@ -123,7 +128,30 @@ void mcc_ListDeleteIterator(mcc_ListIterator_t *iter)
    free(iter);
 }
 
-void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t UNUSED(*iter), void UNUSED(*data)) {}
+void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, void *data)
+{
+   mcc_ListNode_t *node = CreateListNode(data);
+   if (iter->current == NULL)
+   {
+      if (iter->list->head == NULL)
+      {
+         iter->list->head = node;
+         iter->list->tail = node;
+      }
+      else
+      {
+         node->next = iter->list->head;
+         iter->list->head = node;
+      }
+   }
+   else
+   {
+      node->next = iter->current->next;
+      iter->current->next = node;
+      iter->current = node;
+   }
+   iter->list->nItems++;
+}
 
 void *mcc_ListGetNextData(mcc_ListIterator_t *iter)
 {

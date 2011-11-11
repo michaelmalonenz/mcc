@@ -16,6 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include <string.h>
+
+#define MCC_DEBUG 1
 #include "mcc.h"
 #include "stringBuffer.h"
 
