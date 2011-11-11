@@ -2,8 +2,7 @@
  * Mike's C Compiler
  *
  * Written and Directed by Michael Malone
- */
-/**
+ *
     mcc a lightweight compiler for developers, not machines
     Copyright (C) 2011 Michael Malone
 
@@ -23,7 +22,7 @@
 #include <stdlib.h>
 
 #include "mcc.h"
-#include "tokens.h"
+#include "tokenList.h"
 
 int main(int argc, char **argv)
 {

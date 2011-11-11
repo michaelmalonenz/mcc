@@ -4,11 +4,12 @@
 #include <ctype.h>
 #include <math.h>
 
-#include "tokens.h"
+#include "config.h"
 #include "mcc.h"
 #include "fileBuffer.h"
 #include "stringBuffer.h"
 #include "tokens.h"
+#include "tokenList.h"
 
 static void mcc_TokeniseLine(mcc_LogicalLine_t *line, mcc_FileBuffer_t *fileBuffer);
 static void handle_string_char_const(mcc_LogicalLine_t *line,

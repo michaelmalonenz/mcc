@@ -62,11 +62,6 @@ typedef struct token {
    int line_index;
 } mcc_Token_t;
 
-/**
- * It hurts to have to expose this typedef in the header file
- * so please don't abuse it by calling the mcc_List* functions directly!
- */
-typedef mcc_ListIterator_t mcc_TokenListIterator_t;
 
 /* The following enums need to be kept in sync with the corresponding char *[] */
 typedef enum key_index { KEY_AUTO, KEY_BREAK, KEY_CASE, KEY_CHAR, KEY_CONST, 
@@ -129,39 +124,5 @@ MCC_OPERATOR mcc_GetOperator(mcc_LogicalLine_t *line);
 PREPROC_DIRECTIVE mcc_GetPreprocessorDirective(mcc_LogicalLine_t *line);
 MCC_KEYWORD mcc_GetKeyword(mcc_LogicalLine_t * line);
 
-
-/**
- * @param text      The physical text of the token as in the source file
- *
- * @param text_len  The length of the physical text
- *
- * @param type      The type of token to create
- *
- * @param lineno    The current line number of the file where the token was found
- */
-mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
-                             TOKEN_TYPE type, const int lineno,
-                             const unsigned short fileno);
-
-/**
- * @param lineno The line number in the file
- *
- * Creates a whitespace token and adds it in the current position.
- */
-void mcc_CreateAndAddWhitespaceToken(const int lineno, const unsigned short fileno);
-
-/**
- * @param lineno The line number in the file
- *
- * Creates an end of Line token and adds it in the current position.
- */
-void mcc_AddEndOfLineToken(const int lineno, const unsigned short fileno);
-
-void mcc_AppendToken(mcc_Token_t *token);
-void mcc_FreeTokens(void);
-mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, mcc_Token_t *second, TOKEN_TYPE newType);
-mcc_TokenListIterator_t *mcc_GetTokenListIterator(void);
-void mcc_DeleteTokenListIterator(mcc_TokenListIterator_t *iter);
-mcc_Token_t *mcc_GetNextToken(mcc_TokenListIterator_t *iter);
 
 #endif /* MCC_TOKENS_H_ */

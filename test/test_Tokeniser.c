@@ -26,6 +26,7 @@
 #include "config.h"
 #include "mcc.h"
 #include "tokens.h"
+#include "tokenList.h"
 
 #define NUM_TEST_CASES 3
 const char *strings_to_tokenise[NUM_TEST_CASES] = { 

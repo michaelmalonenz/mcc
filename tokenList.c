@@ -21,6 +21,7 @@
 
 #include "config.h"
 #include "tokens.h"
+#include "tokenList.h"
 #include "list.h"
 #include "mcc.h"
 

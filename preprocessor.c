@@ -19,11 +19,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "config.h"
 #include "mcc.h"
 #include "fileBuffer.h"
 #include "stringBuffer.h"
 #include "macro.h"
 #include "tokens.h"
+#include "tokenList.h"
 
 #ifdef MCC_DEBUG
 #define HANDLER_LINKAGE extern
