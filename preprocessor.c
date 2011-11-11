@@ -133,8 +133,27 @@ HANDLER_LINKAGE void handleDefine(mcc_Token_t *currentToken,
    }
 }
 
-HANDLER_LINKAGE void handleUndef(mcc_Token_t UNUSED(*currentToken),
-                                 mcc_TokenListIterator_t UNUSED(*tokenListIter)) {}
+HANDLER_LINKAGE void handleUndef(mcc_Token_t *currentToken,
+                                 mcc_TokenListIterator_t *tokenListIter)
+{
+   currentToken = mcc_GetNextToken(tokenListIter);
+   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE);
+   currentToken = mcc_GetNextToken(tokenListIter);
+   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER);
+   mcc_UndefineMacro(currentToken->text);
+   currentToken = mcc_GetNextToken(tokenListIter);
+   if (currentToken->tokenType == TOK_WHITESPACE)
+   {
+      currentToken = mcc_GetNextToken(tokenListIter);
+   }
+   if (currentToken->tokenType != TOK_EOL)
+   {
+      mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
+                      currentToken->lineno,
+                      "Unexpected characters after #undef '%s'\n",
+                      currentToken->text);            
+   }
+}
 
 HANDLER_LINKAGE void handleError(mcc_Token_t *currentToken,
                                  mcc_TokenListIterator_t *tokenListIter)

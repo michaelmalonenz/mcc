@@ -25,6 +25,7 @@ typedef struct macro {
    char *text;
    char *value;
    //char **args; ??
+   //mcc_List_t *tokens; ??
 #if MCC_USE_HASH_TABLE_FOR_MACROS
    struct macro *next;
 #elif MCC_USE_B_TREE_FOR_MACROS
