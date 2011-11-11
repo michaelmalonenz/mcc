@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "mcc.h"
 #include "list.h"
@@ -28,6 +29,7 @@ struct list_node {
 struct list {
    mcc_ListNode_t *head;
    mcc_ListNode_t *tail;
+   uint32_t nItems;
 };
 
 struct iterator {
@@ -42,15 +44,53 @@ mcc_List_t *mcc_ListCreate(void)
    MCC_ASSERT(result != NULL);
    result->head = NULL;
    result->tail = NULL;
+   result->nItems = 0;
    return result;
 }
 
-void mcc_ListDelete(mcc_List_t UNUSED(*list))
+void mcc_ListDelete(mcc_List_t *list)
 {
-   
+   mcc_ListNode_t *current = NULL;
+   mcc_ListNode_t *next = NULL;
+
+   current = list->head;
+
+   while (current != NULL)
+   {
+      next = current->next;
+      free(current->data);
+      current->data = NULL;
+      free(current);
+      list->nItems--;
+      current = next;
+   }
+
+   MCC_ASSERT(list->nItems == 0);
+   list->head = NULL;
+   list->tail = NULL;
+
+   free(list);
 }
 
-void mcc_ListAppendData(mcc_List_t UNUSED(*list), void UNUSED(*data)) {}
+void mcc_ListAppendData(mcc_List_t *list, void *data)
+{
+   mcc_ListNode_t *node = (mcc_ListNode_t *) malloc(sizeof(mcc_ListNode_t));
+   MCC_ASSERT(node != NULL);
+   node->next = NULL;
+   node->data = data;
+
+   if (list->head == NULL)
+   {
+      list->head = node;
+      list->tail = node;
+   }
+   else
+   {
+      list->tail->next = node;
+      list->tail = node;
+   }
+   list->nItems ++;
+}
 
 mcc_ListIterator_t *mcc_ListGetIterator(mcc_List_t *list)
 {
@@ -85,7 +125,7 @@ void mcc_ListDeleteIterator(mcc_ListIterator_t *iter)
 
 void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t UNUSED(*iter), void UNUSED(*data)) {}
 
-void *mcc_ListGetNext(mcc_ListIterator_t *iter)
+void *mcc_ListGetNextData(mcc_ListIterator_t *iter)
 {
    if (iter->current == iter->list->tail)
    {
