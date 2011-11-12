@@ -83,10 +83,10 @@ int main(int UNUSED(argc), char UNUSED(**argv))
 
       mcc_FileOpenerInitialise();
 
-      tokenListIter = mcc_GetTokenListIterator();
+      tokenListIter = mcc_TokenListGetIterator();
       mcc_TokeniseFile(tmp_filename, tokenListIter);
-      mcc_DeleteTokenListIterator(tokenListIter);
-      tokenListIter = mcc_GetTokenListIterator();
+      mcc_TokenListDeleteIterator(tokenListIter);
+      tokenListIter = mcc_TokenListGetIterator();
 
       for (j = 0; j < expected_num_tokens[i]; j++)
       {
@@ -100,7 +100,7 @@ int main(int UNUSED(argc), char UNUSED(**argv))
       }
 
       MCC_ASSERT(mcc_GetNextToken(tokenListIter) == NULL);
-      mcc_DeleteTokenListIterator(tokenListIter);
+      mcc_TokenListDeleteIterator(tokenListIter);
       mcc_FreeTokens();
       mcc_FileOpenerDelete();
 

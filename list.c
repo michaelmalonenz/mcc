@@ -204,6 +204,11 @@ void *mcc_ListRemoveDataAtCurrentPosition(mcc_ListIterator_t *iter)
    return result;
 }
 
+const void *mcc_ListPeekCurrentData(mcc_ListIterator_t *iter)
+{
+   return iter->current;
+}
+
 void *mcc_ListGetNextData(mcc_ListIterator_t *iter)
 {
    if (iter->current == iter->list->tail)

@@ -101,6 +101,15 @@ void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, void *data);
 void *mcc_ListRemoveDataAtCurrentPosition(mcc_ListIterator_t *iter);
 
 /**
+ * This shows what data the iterator is currently pointing at.
+ * It has no side-effects on the iterator and callers *must not*
+ * free the memory associated with the data returned.
+ *
+ * NULL is returned if the iterator isn't pointing at anything.
+ */
+const void *mcc_ListPeekCurrentData(mcc_ListIterator_t *iter);
+
+/**
  * Returns the next item in the list or NULL if we are at the end of the list
  */
 void *mcc_ListGetNextData(mcc_ListIterator_t *iter);

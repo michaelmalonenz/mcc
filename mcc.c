@@ -38,10 +38,10 @@ int main(int argc, char **argv)
 
    for(i = 1; i < argc; i++)
    {
-      mcc_TokenListIterator_t *tokenListIter = mcc_GetTokenListIterator();
+      mcc_TokenListIterator_t *tokenListIter = mcc_TokenListGetIterator();
       fprintf(stderr, "Tokenising %s...\n", argv[i]);
       mcc_TokeniseFile(argv[i], tokenListIter);
-      mcc_DeleteTokenListIterator(tokenListIter);
+      mcc_TokenListDeleteIterator(tokenListIter);
       fprintf(stderr, "Preprocessing %s...\n", argv[i]);
       mcc_PreprocessCurrentTokens();
       mcc_FreeTokens();

@@ -71,11 +71,21 @@ static void mcc_DeleteToken(void *token)
 
 void mcc_InsertToken(mcc_Token_t *token, mcc_TokenListIterator_t *iter)
 {
-   mcc_ListInsertDataAtCurrentPosition(iter, token);
+   mcc_ListInsertDataAtCurrentPosition((mcc_ListIterator_t *) iter, token);
 
 #if MCC_DEBUG
 //   printf("Got me a token '%s' of type %d\n", token->text, token->tokenType);
 #endif
+}
+
+mcc_Token_t *mcc_RemoveCurrentToken(mcc_TokenListIterator_t *iter)
+{
+   return (mcc_Token_t *) mcc_ListRemoveDataAtCurrentPosition((mcc_ListIterator_t *) iter);
+}
+
+const mcc_Token_t *mcc_TokenListPeekCurrentToken(mcc_TokenListIterator_t *iter)
+{
+   return (const mcc_Token_t *) mcc_ListPeekCurrentData((mcc_ListIterator_t *) iter);
 }
 
 void mcc_FreeTokens(void)
@@ -84,12 +94,12 @@ void mcc_FreeTokens(void)
    token_list = NULL;
 }
 
-void mcc_DeleteTokenListIterator(mcc_TokenListIterator_t *iter)
+void mcc_TokenListDeleteIterator(mcc_TokenListIterator_t *iter)
 {
    mcc_ListDeleteIterator((mcc_TokenListIterator_t *) iter);
 }
 
-mcc_TokenListIterator_t *mcc_GetTokenListIterator(void)
+mcc_TokenListIterator_t *mcc_TokenListGetIterator(void)
 {
    if (token_list == NULL)
    {

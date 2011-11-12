@@ -61,11 +61,14 @@ void mcc_AddEndOfLineToken(const int lineno, const unsigned short fileno,
                            mcc_TokenListIterator_t *iter);
 
 void mcc_InsertToken(mcc_Token_t *token, mcc_TokenListIterator_t *iter);
+mcc_Token_t *mcc_RemoveCurrentToken(mcc_TokenListIterator_t *iter);
+const mcc_Token_t *mcc_TokenListPeekCurrentToken(mcc_TokenListIterator_t *iter);
+
 void mcc_FreeTokens(void);
 mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, mcc_Token_t *second, TOKEN_TYPE newType);
 mcc_TokenListIterator_t *mcc_TokenListCopyIterator(mcc_TokenListIterator_t *iter);
-mcc_TokenListIterator_t *mcc_GetTokenListIterator(void);
-void mcc_DeleteTokenListIterator(mcc_TokenListIterator_t *iter);
+mcc_TokenListIterator_t *mcc_TokenListGetIterator(void);
+void mcc_TokenListDeleteIterator(mcc_TokenListIterator_t *iter);
 mcc_Token_t *mcc_GetNextToken(mcc_TokenListIterator_t *iter);
 
 
