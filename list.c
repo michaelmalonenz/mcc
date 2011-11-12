@@ -24,6 +24,7 @@
 struct list_node {
    void *data;
    struct list_node *next;
+   struct list_node *prev;
 };
 
 struct list {
@@ -42,6 +43,7 @@ static mcc_ListNode_t *CreateListNode(void *data)
    mcc_ListNode_t *node = (mcc_ListNode_t *) malloc(sizeof(mcc_ListNode_t));
    MCC_ASSERT(node != NULL);
    node->next = NULL;
+   node->prev = NULL;
    node->data = data;
    return node;
 }
@@ -95,6 +97,7 @@ void mcc_ListAppendData(mcc_List_t *list, void *data)
    else
    {
       list->tail->next = node;
+      node->prev = list->tail;
       list->tail = node;
    }
    list->nItems ++;
@@ -143,17 +146,24 @@ void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, void *data)
       }
       else
       {
-         MCC_ASSERT(FALSE);
+         node->next = iter->list->head;
+         node->next->prev = node;
+         iter->list->head = node;
       }
    }
    else
    {
       node->next = iter->current->next;
+      if (node->next != NULL)
+      {
+         node->next->prev = node;
+      }
+      node->prev = iter->current;
+      iter->current->next = node;
       if (iter->current == iter->list->tail)
       {
          iter->list->tail = node;
       }
-      iter->current->next = node;
    }
    iter->current = node;
    iter->list->nItems++;
@@ -163,6 +173,7 @@ void *mcc_ListGetNextData(mcc_ListIterator_t *iter)
 {
    if (iter->current == iter->list->tail)
    {
+      iter->current = NULL;
       return NULL;
    }
    
@@ -173,6 +184,25 @@ void *mcc_ListGetNextData(mcc_ListIterator_t *iter)
    else
    {
       iter->current = iter->current->next;
+   }
+   return iter->current->data;
+}
+
+void *mcc_ListGetPrevData(mcc_ListIterator_t *iter)
+{
+   if (iter->current == iter->list->head)
+   {
+      iter->current = NULL;
+      return NULL;
+   }
+   
+   if (iter->current == NULL)
+   {
+      iter->current = iter->list->tail;
+   }
+   else
+   {
+      iter->current = iter->current->prev;
    }
    return iter->current->data;
 }

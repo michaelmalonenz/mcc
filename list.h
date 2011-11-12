@@ -27,10 +27,8 @@ typedef struct iterator mcc_ListIterator_t;
 typedef void (*mcc_NodeDestructor_fn)(void *);
 
 /**
- * Initialises an empty unordered, singly-linked list.
+ * Initialises an empty unordered, doubly-linked list.
  * Any call to this must be matched with a call to mcc_ListDelete()
- * As it is singly-linked, this should only be a forward-referencing list.
- * Iterators will not pick up changes if items are added behind their current position.
  */
 mcc_List_t *mcc_ListCreate(void);
 
@@ -47,7 +45,15 @@ void mcc_ListDelete(mcc_List_t *list, mcc_NodeDestructor_fn destructorFn);
 void mcc_ListAppendData(mcc_List_t *list, void *data);
 
 /**
- * Gets an iterator pointing to the beginning of the list.
+ * Gets an iterator pointing nowhere in the list.
+ * The next call to mcc_ListGetXXXXData determines whereabouts in the list we start.
+ * If mcc_ListGetNextData() is called first, we start at the beginning,
+ * conversely if mcc_ListGetPrevData() is called first, we start at the end.
+ * After this, any amount of Next or Prev may be called on any iterator, but if insertions
+ * are made to the list (with another iterator) this may give unexpected results.
+ * So long as there is nothing removed, the iterator is guaranteed to be valid,
+ * but valid for the new version of the list.
+ *
  * Any calls to this function should be matched with a call
  * to mcc_ListDeleteIterator()
  */
@@ -79,5 +85,9 @@ void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, void *data);
  */
 void *mcc_ListGetNextData(mcc_ListIterator_t *iter);
 
+/**
+ * Returns the previous item in the list or NULL if we are at the start of the list
+ */
+void *mcc_ListGetPrevData(mcc_ListIterator_t *iter);
 
 #endif /* _MCC_LIST_H_ */
