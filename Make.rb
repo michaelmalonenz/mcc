@@ -30,7 +30,7 @@ TEMP_STDERR_FILE = 'stderr'
 CFLAGS = "-Wall -Wextra -Werror -g -ggdb3 -O0"
 LINKER_FLAGS = "-lm"
 
-CC = "/usr/bin/gcc"
+$cc = "/usr/bin/gcc"
 
 MAIN_OBJECT_FILE = "mcc.o"
 MAIN_EXE_NAME = "mcc"
@@ -156,7 +156,7 @@ def compile_a_directory(input_dir, out_dir)
       Dir.glob("*.c").each do |file|
          o_file = c_to_o(file)
          o_files << o_file
-         run_command("#{CC} #{CFLAGS} -I#{SRC_DIR} -c #{file} -o #{out_dir}/#{o_file}", 
+         run_command("#{$cc} #{CFLAGS} -I#{SRC_DIR} -c #{file} -o #{out_dir}/#{o_file}", 
                      "Compilation of #{input_dir}/#{file} failed...")
       end
    end
@@ -167,6 +167,7 @@ if $0 == __FILE__ then
 
    tests = []
    $log_file = SimpleLogger.new("#{MAIN_EXE_NAME}.log")
+   dog_food = false
 
    ARGV.each do |arg|
       if arg =~ %r{--?c(?:l(?:e(?:a(?:n)?)?)?)?}ix
@@ -174,6 +175,8 @@ if $0 == __FILE__ then
          exit(0)
       elsif arg =~ %r{--?t(?:e(?:s(?:t(?:[-_](?:o(?:n(?:ly)?)?)?)?)?)?)?=(.+)}ix
          tests << $1
+      elsif arg =~ %r{--d(?:o(?:g(?:f(?:o(?:od)?)?)?)?)?}ix
+         dog_food = true
       end
    end
 
@@ -199,7 +202,7 @@ if $0 == __FILE__ then
       Dir.chdir(BIN_DIR) do
          dependencies = linker.discover_required_files(MAIN_OBJECT_FILE)
          $log_file.note("Linking main program...")
-         run_command("#{CC} #{dependencies.join(' ')} #{LINKER_FLAGS} -o #{MAIN_EXE_NAME}", "Linking #{MAIN_EXE_NAME} Failed...")
+         run_command("#{$cc} #{dependencies.join(' ')} #{LINKER_FLAGS} -o #{MAIN_EXE_NAME}", "Linking #{MAIN_EXE_NAME} Failed...")
       end
 
       Dir.chdir(TEST_BIN_DIR) do
@@ -207,7 +210,7 @@ if $0 == __FILE__ then
          Dir.glob("test_*.o").each do |test_exe_o|
             test_exe = test_exe_o.gsub(/\.o$/, '')
             dependencies = linker.discover_required_files(test_exe_o)
-            run_command("#{CC} #{dependencies.join(' ')} #{LINKER_FLAGS} -o #{test_exe}", 
+            run_command("#{$cc} #{dependencies.join(' ')} #{LINKER_FLAGS} -o #{test_exe}", 
                         "Linking #{test_exe} Failed...")
          end
 
@@ -226,6 +229,14 @@ if $0 == __FILE__ then
             end
          end
       end
+
+      if dog_food
+         $log_file.note("Eating My Own Dog Food...")
+         $cc = "#{BIN_DIR}/#{MAIN_EXE_NAME}"
+         compile_a_directory(SRC_DIR, BIN_DIR)
+         compile_a_directory(TEST_SRC_DIR, TEST_BIN_DIR)
+      end
+
    rescue Exception => error
       $log_file.error(error.to_s)         
       $log_file.close()

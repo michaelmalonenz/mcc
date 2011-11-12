@@ -14,11 +14,12 @@ test_Preprocessor
 Should I also write some overall tests for the preprocessor section?
 
 List:
-Change the list to be doubly-linked
 Allow removal of items from the list (with an iterator)
 
+Config:
+Create a config module and parse the basic config options (at least throw away options with a '-')
+
 Preprocessor:
-Change to use the stream of tokens, instead of parsing the thing in place
 change the macro definitions to be a hash table?  It seems unnecessarily limiting to do it this way.
 macro defines should take a mcc_List_t of tokens
 Fix the b-tree after a macro deletion
