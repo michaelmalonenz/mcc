@@ -197,7 +197,7 @@ void *mcc_ListRemoveDataAtCurrentPosition(mcc_ListIterator_t *iter)
 
    result = iter->current->data;
    free(iter->current);
-   iter->current = prev;
+   iter->current = next;
 
    iter->list->nItems--;
 

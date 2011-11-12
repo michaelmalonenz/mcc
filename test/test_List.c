@@ -319,10 +319,12 @@ static void test_Remove(void)
    result = (int *) mcc_ListGetNextData(iter);
    MCC_ASSERT(result == NULL);
 
+   //Move the iterator to the correct item as insertions happen 'after' the current item
+   (void) mcc_ListGetNextData(removal_iter);
+   
    printf("Removing Items\n");
    for (i = 0; i < NUM_ITEMS_TO_INSERT; i++)
    {
-      (void) mcc_ListGetNextData(removal_iter);
       int *data = mcc_ListRemoveDataAtCurrentPosition(removal_iter);
       printf("Expected: %X, Actual: %X\n", insertion_test_data[i], *data);
       MCC_ASSERT(insertion_test_data[i] == *data);

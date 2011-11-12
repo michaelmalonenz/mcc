@@ -89,10 +89,11 @@ void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, void *data);
  * with the return data, if it is necessary to do so.
  *
  * After removing the item currently pointed to by the iterator, the iterator will be
- * moved back one position, such that calls to mcc_ListGetNextData() will still return
- * the same value as prior to the remove, however, mcc_ListGetPrevData() will "skip" one
+ * forward to the "next" item, such that immediate calls to mcc_ListGetNextData() will "skip" one
  * and return the item that would have been returned on the _second_ consecutive call 
- * to mcc_ListGetPrevData().
+ * to mcc_ListGetNextData().  This is so that consecutive calls to this function act
+ * like calls to mcc_ListGetNextData() with the side effect of removing the item from
+ * the list.  Calls to mcc_ListGetPrevData() will still behave as expected.
  *
  * This function potentially invalidates other iterators (not necessarily under your 
  * immediate control).  Use this function with care.
