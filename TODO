@@ -13,9 +13,6 @@ test_Preprocessor
 
 Should I also write some overall tests for the preprocessor section?
 
-List:
-Allow removal of items from the list (with an iterator)
-
 Config:
 Create a config module and parse the basic config options (at least throw away options with a '-')
 
