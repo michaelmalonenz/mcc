@@ -81,6 +81,25 @@ mcc_ListIterator_t *mcc_ListCopyIterator(mcc_ListIterator_t *iter);
 void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, void *data);
 
 /**
+ * Removes the item currently pointed at by the iterator from the list and returns it.
+ * If the iterator isn't pointing to anything in the list, then NULL is returned.
+ *  i.e. mcc_ListGetXXXXData has to have been called at least once in order to set the
+ *       iterator to be pointing at something.
+ * The caller of this function becomes responsible for freeing the memory associated
+ * with the return data, if it is necessary to do so.
+ *
+ * After removing the item currently pointed to by the iterator, the iterator will be
+ * moved back one position, such that calls to mcc_ListGetNextData() will still return
+ * the same value as prior to the remove, however, mcc_ListGetPrevData() will "skip" one
+ * and return the item that would have been returned on the _second_ consecutive call 
+ * to mcc_ListGetPrevData().
+ *
+ * This function potentially invalidates other iterators (not necessarily under your 
+ * immediate control).  Use this function with care.
+ */
+void *mcc_ListRemoveDataAtCurrentPosition(mcc_ListIterator_t *iter);
+
+/**
  * Returns the next item in the list or NULL if we are at the end of the list
  */
 void *mcc_ListGetNextData(mcc_ListIterator_t *iter);
