@@ -15,36 +15,29 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#ifndef _MCC_OPTIONS_H_
-#define _MCC_OPTIONS_H_
+#include <stdio.h>
+#include <string.h>
 
-#include <stdint.h>
-
+#define MCC_DEBUG 1
+#include "config.h"
 #include "mcc.h"
-#include "list.h"
+#include "options.h"
 
-enum { PREPROCESS = 1,
-       COMPILE    = (1 << 1),
-       LINK       = (1 << 2)};
+char *options[] = {__FILE__, "-o", "outputFilename", "--ignore"};
+const int numOptions = 4;
 
-typedef struct {
-   uint32_t stages;
-   mcc_List_t *filenames;
-   const char *outputFilename;
-}mcc_Options_t;
+static void test_BasicOptions(void)
+{
+   mcc_ParseOptions(numOptions, options);
+   MCC_ASSERT(strncmp(mcc_global_options.outputFilename,
+                      options[2],
+                      strlen(options[2])) == 0);
+   mcc_TearDownOptions();
+}
 
-extern mcc_Options_t mcc_global_options;
+int main(void)
+{
+   test_BasicOptions();
 
-void mcc_ParseOptions(int argc, char **argv);
-
-mcc_ListIterator_t *mcc_OptionsFileListGetIterator(void);
-
-/**
- * A method mainly for unit testing.  It destroys the dynamic memory associated
- * with the option parameters, which in the real world, need to be in use for
- * the lifetime of the program.
- */ 
-void mcc_TearDownOptions(void);
-
-#endif /* _MCC_OPTIONS_H_ */
-
+   return 0;
+}

@@ -24,30 +24,40 @@
 #include "mcc.h"
 #include "tokenList.h"
 #include "toolChainCommands.h"
+#include "options.h"
 
 int main(int argc, char **argv)
 {
-   int i;
+   mcc_TokenListIterator_t *tokenListIter;
+   mcc_ListIterator_t *fileIter;
+   char *currentFile;
    
    if (argc <= 1)
    {
       mcc_Error("No input files\n");
    }
-   
+
+   mcc_ParseOptions(argc, argv);
+
    mcc_FileOpenerInitialise();
 
-   for(i = 1; i < argc; i++)
+   fileIter = mcc_OptionsFileListGetIterator();
+   currentFile = (char *) mcc_ListGetNextData(fileIter);
+   while (currentFile != NULL)
    {
-      mcc_TokenListIterator_t *tokenListIter = mcc_TokenListGetIterator();
-      fprintf(stderr, "Tokenising %s...\n", argv[i]);
-      mcc_TokeniseFile(argv[i], tokenListIter);
+      tokenListIter = mcc_TokenListGetIterator();
+      fprintf(stderr, "Tokenising %s...\n", currentFile);
+      mcc_TokeniseFile(currentFile, tokenListIter);
       mcc_TokenListDeleteIterator(tokenListIter);
-      fprintf(stderr, "Preprocessing %s...\n", argv[i]);
+      fprintf(stderr, "Preprocessing %s...\n", currentFile);
       mcc_PreprocessCurrentTokens();
       mcc_FreeTokens();
+      currentFile = (char *) mcc_ListGetNextData(fileIter);
    }
 
    mcc_FileOpenerDelete();
+
+   mcc_TearDownOptions();
 
    return 0;
 } 
