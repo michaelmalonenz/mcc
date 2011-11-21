@@ -353,6 +353,38 @@ static void test_Remove(void)
    printf("*** Finished removal test ***\n\n");
 }
 
+static void test_RemoveThenInsert(void)
+{
+   int i;
+   int *result;
+   mcc_ListIterator_t *iter = NULL;
+   mcc_List_t *list = mcc_ListCreate();
+
+   printf("*** Setting up Remove Then Insert test data ***\n");
+   
+   for (i = 0; i < NUM_BASIC_TEST_ITEMS; i++)
+   {
+      int *data = (int *) malloc(sizeof(int));
+      *data = basic_test_data[i];
+      mcc_ListAppendData(list, data);
+   }
+
+   printf("*** About to Start removing ***\n");
+
+   iter = mcc_ListGetIterator(list);
+   result = (int *) mcc_ListGetNextData(iter);
+   MCC_ASSERT(*result == basic_test_data[0]);
+   result = (int *) mcc_ListRemoveDataAtCurrentPosition(iter);
+   MCC_ASSERT(*result == basic_test_data[0]);
+   mcc_ListInsertDataAtCurrentPosition(iter, result);
+   result = (int *) mcc_ListGetNextData(iter);
+   MCC_ASSERT(*result == basic_test_data[2]);   
+
+   printf("*** Finished Remove then Insert Test ***\n");
+   mcc_ListDeleteIterator(iter);
+   mcc_ListDelete(list, &test_list_node_destructor);
+}
+
 int main(void)
 {
    printf("Beginning %s\n", __FILE__);
@@ -368,6 +400,8 @@ int main(void)
    test_InsertionIteratingBackwards();
 
    test_Remove();
+
+   test_RemoveThenInsert();
 
    printf("Finished %s\n", __FILE__);
    return 0;

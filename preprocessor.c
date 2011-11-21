@@ -89,11 +89,11 @@ void mcc_PreprocessCurrentTokens(void)
 HANDLER_LINKAGE void handleInclude(mcc_Token_t *currentToken,
                                    mcc_TokenListIterator_t *tokenListIter)
 {
-   mcc_TokenListIterator_t *incIter = mcc_TokenListCopyIterator(tokenListIter);
+   mcc_TokenListIterator_t *incIter;
    char *include_path;
-   currentToken = mcc_GetNextToken(tokenListIter);
+   currentToken = mcc_RemoveCurrentToken(tokenListIter);
    mcc_ExpectTokenType(currentToken, TOK_WHITESPACE);
-   currentToken = mcc_GetNextToken(tokenListIter);
+   currentToken = mcc_RemoveCurrentToken(tokenListIter);
    if (currentToken->tokenType == TOK_LOCAL_FILE_INC)
    {
       include_path = mcc_FindLocalInclude(currentToken->text);
@@ -109,6 +109,7 @@ HANDLER_LINKAGE void handleInclude(mcc_Token_t *currentToken,
                       "Expected a filename to include, got '%s'\n",
                       currentToken->text);      
    }
+   incIter = mcc_TokenListCopyIterator(tokenListIter);
    mcc_TokeniseFile(include_path, incIter);
    free(include_path);
    mcc_TokenListDeleteIterator(incIter);
@@ -116,7 +117,7 @@ HANDLER_LINKAGE void handleInclude(mcc_Token_t *currentToken,
 
 //currently doesn't handle function-like macros
 HANDLER_LINKAGE void handleDefine(mcc_Token_t *currentToken,
-                                  mcc_TokenListIterator_t *tokenListIter) 
+                                  mcc_TokenListIterator_t *tokenListIter)
 {
    const char UNUSED(*macro_identifier);
    currentToken = mcc_RemoveCurrentToken(tokenListIter);

@@ -196,6 +196,16 @@ void *mcc_ListRemoveDataAtCurrentPosition(mcc_ListIterator_t *iter)
    }   
 
    result = iter->current->data;
+   if (iter->current == iter->list->head)
+   {
+      iter->list->head = next;
+   }
+   //deliberately not an else if
+   if (iter->current == iter->list->tail)
+   {
+      iter->list->tail = prev;
+   }
+   
    free(iter->current);
    iter->current = next;
 
