@@ -109,6 +109,14 @@ HANDLER_LINKAGE void handleInclude(mcc_Token_t *currentToken,
                       "Expected a filename to include, got '%s'\n",
                       currentToken->text);      
    }
+   if (include_path == NULL)
+   {
+      mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
+                      currentToken->lineno,
+                      "Couldn't locate file '%s' for inclusion\n",
+                      currentToken->text);      
+   }
+
    incIter = mcc_TokenListCopyIterator(tokenListIter);
    mcc_TokeniseFile(include_path, incIter);
    free(include_path);

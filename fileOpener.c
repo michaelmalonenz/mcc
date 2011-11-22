@@ -139,6 +139,7 @@ char *mcc_FindSystemInclude(const char *filename)
          close(fd);
          return temp;
       }
+      currentDir = (char *) mcc_ListGetNextData(iter);
    }
    return NULL;
 }
