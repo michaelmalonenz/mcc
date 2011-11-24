@@ -40,8 +40,13 @@ void mcc_FileOpenerInitialise(void)
    localIncludeDirList = mcc_ListCreate();
    systemIncludeDirList = mcc_ListCreate();
 
+// @todo also append all dirs in the env var C_INCLUDE_PATH
    mcc_ListAppendData(systemIncludeDirList, "/usr/include");
-   // @todo also append all dirs in the env var C_INCLUDE_PATH
+#if defined(__i386) && defined(__linux)
+   mcc_ListAppendData(systemIncludeDirList, "/usr/include/i386-linux-gnu");
+#elif  defined(__x86_64) && defined(__linux)
+   mcc_ListAppendData(systemIncludeDirList, "/usr/include/x86_64-linux-gnu");
+#endif
 
    fileList = mcc_ListCreate();
 }
