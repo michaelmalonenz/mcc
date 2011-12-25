@@ -214,29 +214,14 @@ static void mcc_Defined(mcc_Token_t *currentToken,
    do
    {
       currentToken = mcc_GetNextToken(tokenListIter);
-      if (currentToken->tokenType == TOK_PP_DIRECTIVE)
+      if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
+          currentToken->tokenIndex != PP_ENDIF)
       {
          currentToken = mcc_RemoveCurrentToken(tokenListIter);         
          ppHandlers[currentToken->tokenIndex](currentToken, tokenListIter, (macroDefined && positive));
       }
    } while (currentToken->tokenType != TOK_PP_DIRECTIVE && 
-            (currentToken->tokenIndex != PP_ENDIF || 
-             currentToken->tokenIndex != PP_ELSE));
-   
-   if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
-       currentToken->tokenIndex == PP_ENDIF)
-   {
-      do
-      {
-         currentToken = mcc_GetNextToken(tokenListIter);
-         if (currentToken->tokenType == TOK_PP_DIRECTIVE)
-         {
-            currentToken = mcc_RemoveCurrentToken(tokenListIter);         
-            ppHandlers[currentToken->tokenIndex](currentToken, tokenListIter, (!macroDefined && positive));
-         }
-      } while (currentToken->tokenType != TOK_PP_DIRECTIVE && 
-               currentToken->tokenIndex != PP_ENDIF);
-   }
+            currentToken->tokenIndex != PP_ENDIF);
 }
 
 HANDLER_LINKAGE void handleIfdef(mcc_Token_t *currentToken,
@@ -257,17 +242,41 @@ HANDLER_LINKAGE void handleIf(mcc_Token_t UNUSED(*currentToken),
                               mcc_TokenListIterator_t UNUSED(*tokenListIter),
                               bool_t UNUSED(ignore)) {}
 
-HANDLER_LINKAGE void handleEndif(mcc_Token_t UNUSED(*currentToken),
+HANDLER_LINKAGE void handleEndif(mcc_Token_t *currentToken,
                                  mcc_TokenListIterator_t UNUSED(*tokenListIter),
-                                 bool_t UNUSED(ignore)) {}
+                                 bool_t ignore)
+{
+   if (!ignore)
+   {
+      mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
+                      currentToken->lineno,
+                      "endif without if\n");
+   }
+}
 
-HANDLER_LINKAGE void handleElse(mcc_Token_t UNUSED(*currentToken),
+HANDLER_LINKAGE void handleElse(mcc_Token_t *currentToken,
                                 mcc_TokenListIterator_t UNUSED(*tokenListIter),
-                                bool_t UNUSED(ignore)) {}
+                                bool_t ignore)
+{
+   if (!ignore)
+   {
+      mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
+                      currentToken->lineno,
+                      "else without if\n");
+   }
+}
 
-HANDLER_LINKAGE void handleElif(mcc_Token_t UNUSED(*currentToken),
+HANDLER_LINKAGE void handleElif(mcc_Token_t *currentToken,
                                 mcc_TokenListIterator_t UNUSED(*tokenListIter),
-                                bool_t UNUSED(ignore)) {}
+                                bool_t ignore)
+{
+   if (!ignore)
+   {
+      mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
+                      currentToken->lineno,
+                      "elif without if\n");
+   }
+}
 
 HANDLER_LINKAGE void handleJoin(mcc_Token_t UNUSED(*currentToken),
                                 mcc_TokenListIterator_t UNUSED(*tokenListIter),
