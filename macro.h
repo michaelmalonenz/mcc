@@ -40,6 +40,8 @@ void mcc_DefineMacro(const char *text, mcc_TokenList_t *tokens);
 
 void mcc_UndefineMacro(const char *text);
 
+bool_t mcc_IsMacroDefined(const char *text);
+
 mcc_Macro_t *mcc_ResolveMacro(const char *text);
 
 void mcc_DoMacroReplacement(mcc_LogicalLine_t *line);
