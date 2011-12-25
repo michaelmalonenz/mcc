@@ -32,6 +32,15 @@ typedef mcc_ListIterator_t mcc_TokenListIterator_t;
 typedef mcc_List_t mcc_TokenList_t;
 
 /**
+ * These next functions can't be used with a Standalone token list.
+ */
+void mcc_FreeTokens(void);
+mcc_TokenListIterator_t *mcc_TokenListGetIterator(void);
+#if MCC_DEBUG
+mcc_TokenList_t *mcc_DebugGetTokenList(void);
+#endif
+
+/**
  * @param text      The physical text of the token as in the source file
  *
  * @param text_len  The length of the physical text
@@ -67,17 +76,16 @@ void mcc_InsertToken(mcc_Token_t *token, mcc_TokenListIterator_t *iter);
 mcc_Token_t *mcc_RemoveCurrentToken(mcc_TokenListIterator_t *iter);
 const mcc_Token_t *mcc_TokenListPeekCurrentToken(mcc_TokenListIterator_t *iter);
 
-void mcc_FreeTokens(void);
+
+mcc_TokenList_t *mcc_TokenListCreateStandalone(void);
+void mcc_TokenListDeleteStandalone(mcc_TokenList_t *list);
+mcc_TokenListIterator_t *mcc_TokenListStandaloneGetIterator(mcc_TokenList_t *list);
+
 mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, mcc_Token_t *second, TOKEN_TYPE newType);
 mcc_TokenListIterator_t *mcc_TokenListCopyIterator(mcc_TokenListIterator_t *iter);
-mcc_TokenListIterator_t *mcc_TokenListGetIterator(void);
 void mcc_TokenListDeleteIterator(mcc_TokenListIterator_t *iter);
 mcc_Token_t *mcc_GetNextToken(mcc_TokenListIterator_t *iter);
 
-
-#if MCC_DEBUG
-mcc_TokenList_t *mcc_DebugGetTokenList(void);
-#endif
 
 #endif /* _MCC_TOKEN_LIST_H_ */
 

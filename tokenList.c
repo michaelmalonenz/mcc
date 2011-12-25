@@ -108,6 +108,11 @@ mcc_TokenListIterator_t *mcc_TokenListGetIterator(void)
    return (mcc_TokenListIterator_t *) mcc_ListGetIterator(token_list);
 }
 
+mcc_TokenListIterator_t *mcc_TokenListStandaloneGetIterator(mcc_TokenList_t *list)
+{
+   return (mcc_TokenListIterator_t *) mcc_ListGetIterator(list);
+}
+
 mcc_TokenListIterator_t *mcc_TokenListCopyIterator(mcc_TokenListIterator_t *iter)
 {
    return (mcc_TokenListIterator_t *) mcc_ListCopyIterator((mcc_ListIterator_t *) iter);
@@ -131,6 +136,16 @@ mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, mcc_Token_t *second, TOKEN_TYP
           first->text, first->tokenType);
 #endif
    return first;
+}
+
+mcc_TokenList_t *mcc_TokenListCreateStandalone(void)
+{
+   return (mcc_TokenList_t*) mcc_ListCreate();
+}
+
+void mcc_TokenListDeleteStandalone(mcc_TokenList_t *list)
+{
+   mcc_ListDelete(list, &mcc_DeleteToken);
 }
 
 #if MCC_DEBUG

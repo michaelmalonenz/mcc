@@ -127,7 +127,9 @@ HANDLER_LINKAGE void handleInclude(mcc_Token_t *currentToken,
 HANDLER_LINKAGE void handleDefine(mcc_Token_t *currentToken,
                                   mcc_TokenListIterator_t *tokenListIter)
 {
-   const char UNUSED(*macro_identifier);
+   const char *macro_identifier;
+   mcc_TokenList_t *tokens = mcc_TokenListCreateStandalone();
+   mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(tokens);
    currentToken = mcc_RemoveCurrentToken(tokenListIter);
    mcc_ExpectTokenType(currentToken, TOK_WHITESPACE);
    currentToken = mcc_RemoveCurrentToken(tokenListIter);
@@ -140,9 +142,11 @@ HANDLER_LINKAGE void handleDefine(mcc_Token_t *currentToken,
    }
    while (currentToken->tokenType != TOK_EOL)
    {
+      mcc_InsertToken(currentToken, iter);
       currentToken = mcc_RemoveCurrentToken(tokenListIter);
-      //need to save this string of tokens somehow and add them to the macro table
    }
+   mcc_TokenListDeleteIterator(iter);
+   mcc_DefineMacro(macro_identifier, tokens);
 }
 
 HANDLER_LINKAGE void handleUndef(mcc_Token_t *currentToken,
