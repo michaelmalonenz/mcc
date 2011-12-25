@@ -11,9 +11,11 @@
 #include "tokens.h"
 #include "tokenList.h"
 
+
 static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
                              mcc_FileBuffer_t *fileBuffer,
                              mcc_TokenListIterator_t *iter);
+
 static void handle_string_char_const(mcc_LogicalLine_t *line,
                                      mcc_FileBuffer_t *fileBuffer,
                                      const char delimiter,

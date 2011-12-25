@@ -25,7 +25,7 @@
 #include "list.h"
 #include "mcc.h"
 
-static mcc_List_t *token_list = NULL;
+static mcc_TokenList_t *token_list = NULL;
 
 static const char whitespaceText = ' ';
 
@@ -62,7 +62,7 @@ void mcc_CreateAndAddWhitespaceToken(const int lineno,
    mcc_InsertToken(token, iter);
 }
 
-static void mcc_DeleteToken(void *token)
+void mcc_DeleteToken(void *token)
 {
    mcc_Token_t *temp = (mcc_Token_t *) token;
    free(temp->text);
@@ -132,3 +132,10 @@ mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, mcc_Token_t *second, TOKEN_TYP
 #endif
    return first;
 }
+
+#if MCC_DEBUG
+mcc_TokenList_t *mcc_DebugGetTokenList(void)
+{
+   return token_list;
+}
+#endif

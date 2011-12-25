@@ -172,8 +172,6 @@ HANDLER_LINKAGE void handleError(mcc_Token_t *currentToken,
 {
    mcc_Token_t *temp = NULL;
    currentToken = mcc_GetNextToken(tokenListIter);
-   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE);
-   currentToken = mcc_GetNextToken(tokenListIter);
    while (currentToken->tokenType != TOK_EOL)
    {
       if (temp == NULL)

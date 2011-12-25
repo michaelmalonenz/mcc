@@ -17,10 +17,9 @@
 **/
 #include <stdlib.h>
 #include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
 #include <string.h>
 #include <stdint.h>
+#include <unistd.h>
 
 #define MCC_DEBUG 1
 #include "config.h"
@@ -28,6 +27,7 @@
 #include "tokens.h"
 #include "tokenList.h"
 #include "toolChainCommands.h"
+#include "TestUtils.h"
 
 #define NUM_TEST_CASES 3
 const char *strings_to_tokenise[NUM_TEST_CASES] = { 
@@ -54,32 +54,15 @@ const int expected_token_indices[NUM_TEST_CASES][LARGEST_NUM_TOKENS] = {
 };
 
 
-char tmp_filename[L_tmpnam];
-
 int main(int UNUSED(argc), char UNUSED(**argv))
 {
    int i, j;
    for (i = 0; i < NUM_TEST_CASES; i++)
    {
-      int temp_fd = 0;
-      ssize_t bytes_written = 0;
       ssize_t tok_str_len = strlen(strings_to_tokenise[i]);
       mcc_TokenListIterator_t *tokenListIter;
-
-      strncpy(tmp_filename, "mcc_test_XXXXXX", L_tmpnam);
-      MCC_ASSERT(mkstemp(tmp_filename) != -1);
-
-      temp_fd = open(tmp_filename, O_CREAT | O_WRONLY, S_IWUSR);
-      MCC_ASSERT(temp_fd != -1);
-
-      bytes_written = write(temp_fd, strings_to_tokenise[i], tok_str_len);
-      while (bytes_written != tok_str_len)
-      {
-         bytes_written += write(temp_fd, &strings_to_tokenise[i][bytes_written],
-                                tok_str_len - bytes_written);
-      }
-
-      close(temp_fd);
+      const char *tmp_filename = mcc_TestUtils_DumpStringToTempFile(
+         strings_to_tokenise[i], tok_str_len);
 
       mcc_FileOpenerInitialise();
 

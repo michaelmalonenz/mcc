@@ -29,6 +29,7 @@
  * so please don't abuse it by calling the mcc_List* functions directly!
  */
 typedef mcc_ListIterator_t mcc_TokenListIterator_t;
+typedef mcc_List_t mcc_TokenList_t;
 
 /**
  * @param text      The physical text of the token as in the source file
@@ -42,6 +43,8 @@ typedef mcc_ListIterator_t mcc_TokenListIterator_t;
 mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
                              TOKEN_TYPE type, const int lineno,
                              const unsigned short fileno);
+
+void mcc_DeleteToken(void *token);
 
 /**
  * @param lineno The line number in the file
@@ -71,6 +74,10 @@ mcc_TokenListIterator_t *mcc_TokenListGetIterator(void);
 void mcc_TokenListDeleteIterator(mcc_TokenListIterator_t *iter);
 mcc_Token_t *mcc_GetNextToken(mcc_TokenListIterator_t *iter);
 
+
+#if MCC_DEBUG
+mcc_TokenList_t *mcc_DebugGetTokenList(void);
+#endif
 
 #endif /* _MCC_TOKEN_LIST_H_ */
 

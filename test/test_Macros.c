@@ -18,10 +18,16 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 
 #define MCC_DEBUG 1
 #include "mcc.h"
 #include "macro.h"
+#include "tokenList.h"
+#include "toolChainCommands.h"
+
+#include "TestUtils.h"
 
 #define MACRO_NAME "EAT_ME"
 
@@ -36,9 +42,13 @@ char *test_MacroValues[NUM_BULK_MACROS] = { "1", "two", "1+2", "(FIRST_MACRO) + 
 
 static void test_Define(void)
 {
+   mcc_TokenList_t *tokens = mcc_ListCreate();
+   mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, 1, 1);
    printf("Testing Define...");
-   mcc_DefineMacro(MACRO_NAME, "(1)");
+   mcc_ListAppendData(tokens, tok);
+   mcc_DefineMacro(MACRO_NAME, tokens);
    printf("ok\n");
+   mcc_ListDelete(tokens, &mcc_DeleteToken);
 }
 
 static void test_Find(void)
@@ -64,7 +74,22 @@ static void test_BulkMacros(void)
    printf("Testing Bulk Macro Definitions...");
    for(i = 0; i < NUM_BULK_MACROS; i++)
    {
-      mcc_DefineMacro(test_Macros[i], test_MacroValues[i]);
+      mcc_TokenListIterator_t *tokenListIter;
+      const char *tempFilename = mcc_TestUtils_DumpStringToTempFile(
+         test_MacroValues[i],
+         strlen(test_MacroValues[i]));
+
+      mcc_FileOpenerInitialise();
+
+      tokenListIter = mcc_TokenListGetIterator();
+      mcc_TokeniseFile(tempFilename, tokenListIter);
+      mcc_TokenListDeleteIterator(tokenListIter);
+
+      mcc_DefineMacro(test_Macros[i], mcc_DebugGetTokenList());
+
+      unlink(tempFilename);
+      mcc_FreeTokens();
+      mcc_FileOpenerDelete();
    }
    mcc_DeleteAllMacros();
    printf("ok\n");

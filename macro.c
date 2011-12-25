@@ -45,13 +45,14 @@ void delete_macro(mcc_Macro_t *macro)
 // would yield the same result as YET_ANOTHER_MACRO, which is bad!
 //
 // To make life better, I also need to evaluate constant expressions here
-mcc_Macro_t *create_macro(const char *text, const char UNUSED(*value))
+mcc_Macro_t *create_macro(const char *text, mcc_TokenList_t *value)
 {
    mcc_Macro_t *result = (mcc_Macro_t *) malloc(sizeof(mcc_Macro_t));
    result->text = (char *) malloc(sizeof(char) * (strlen(text) + 1));
    MCC_ASSERT(result != NULL);
    MCC_ASSERT(result->text != NULL);
    strncpy(result->text, text, strlen(text) + 1);
+   result->tokens = value;
 #if MCC_USE_HASH_TABLE_FOR_MACROS
    result->next = NULL;
 #elif MCC_USE_B_TREE_FOR_MACROS

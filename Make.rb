@@ -206,6 +206,7 @@ if $0 == __FILE__ then
       end
 
       Dir.chdir(TEST_BIN_DIR) do
+         linker.add_bin_dir(TEST_BIN_DIR)
          $log_file.note("Linking Tests...")
          Dir.glob("test_*.o").each do |test_exe_o|
             test_exe = test_exe_o.gsub(/\.o$/, '')
@@ -232,6 +233,7 @@ if $0 == __FILE__ then
 
       if dog_food
          $log_file.note("Eating My Own Dog Food...")
+         # use vlagrind...
          $cc = "#{BIN_DIR}/#{MAIN_EXE_NAME}"
          compile_a_directory(SRC_DIR, BIN_DIR)
          compile_a_directory(TEST_SRC_DIR, TEST_BIN_DIR)

@@ -18,8 +18,10 @@
 #ifndef _MCC_MACRO_PRIVATE_H_
 #define _MCC_MACRO_PRIVATE_H_
 
+#include "tokenList.h"
+
 void delete_macro(mcc_Macro_t *macro);
 
-mcc_Macro_t *create_macro(const char *text, const char *value);
+mcc_Macro_t *create_macro(const char *text, mcc_TokenList_t *value);
 
 #endif /* _MCC_MACRO_PRIVATE_H_ */

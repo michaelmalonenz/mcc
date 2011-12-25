@@ -54,12 +54,12 @@ void mcc_DeleteAllMacros(void)
 
 // I should really refactor these next couple of functions
 // because they're somewhat similar
-void mcc_DefineMacro(const char *text, char *value)
+void mcc_DefineMacro(const char *text, mcc_TokenList_t *tokens)
 {
    mcc_Macro_t *current = root;
    if (root == NULL)
    {
-      root = create_macro(text, value);
+      root = create_macro(text, tokens);
       return;
    }
 
@@ -71,7 +71,7 @@ void mcc_DefineMacro(const char *text, char *value)
       {
          if (current->right == NULL)
          {
-            current->right = create_macro(text, value);
+            current->right = create_macro(text, tokens);
             return;
          }
          else
@@ -88,7 +88,7 @@ void mcc_DefineMacro(const char *text, char *value)
       {
          if (current->left == NULL)
          {
-            current->left = create_macro(text, value);
+            current->left = create_macro(text, tokens);
             return;
          }
          else

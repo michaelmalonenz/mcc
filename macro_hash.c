@@ -70,7 +70,7 @@ void mcc_DeleteAllMacros(void)
    }
 }
 
-void mcc_DefineMacro(const char *text, char *value)
+void mcc_DefineMacro(const char *text, mcc_TokenList_t *value)
 {
    uint32_t hash = elf_hash(text, strlen(text));
    mcc_Macro_t *temp;
