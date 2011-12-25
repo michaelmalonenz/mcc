@@ -213,17 +213,30 @@ static void mcc_Defined(mcc_Token_t *currentToken,
 
    do
    {
-      if (macroDefined && positive)
+      currentToken = mcc_GetNextToken(tokenListIter);
+      if (currentToken->tokenType == TOK_PP_DIRECTIVE)
       {
-         currentToken = mcc_RemoveCurrentToken(tokenListIter);
-      }
-      else
-      {
-         currentToken = mcc_GetNextToken(tokenListIter);
+         currentToken = mcc_RemoveCurrentToken(tokenListIter);         
+         ppHandlers[currentToken->tokenIndex](currentToken, tokenListIter, (macroDefined && positive));
       }
    } while (currentToken->tokenType != TOK_PP_DIRECTIVE && 
             (currentToken->tokenIndex != PP_ENDIF || 
              currentToken->tokenIndex != PP_ELSE));
+   
+   if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
+       currentToken->tokenIndex == PP_ENDIF)
+   {
+      do
+      {
+         currentToken = mcc_GetNextToken(tokenListIter);
+         if (currentToken->tokenType == TOK_PP_DIRECTIVE)
+         {
+            currentToken = mcc_RemoveCurrentToken(tokenListIter);         
+            ppHandlers[currentToken->tokenIndex](currentToken, tokenListIter, (!macroDefined && positive));
+         }
+      } while (currentToken->tokenType != TOK_PP_DIRECTIVE && 
+               currentToken->tokenIndex != PP_ENDIF);
+   }
 }
 
 HANDLER_LINKAGE void handleIfdef(mcc_Token_t *currentToken,
