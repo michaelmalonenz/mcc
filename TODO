@@ -3,7 +3,6 @@ write a ruby script to replace all tri-graphs in c code OR
 add in a compile-time switched ability to handle tri-graphs (so I can eventually claim full c99 compliance)
 options
 Use stopper for the unit tests??
-As soon as possible, start eating my own dog food -> alongside gcc?
 
 Unit Tests I really should write:
 test_Tokeniser //extend and make more complex situations
@@ -11,32 +10,29 @@ test_Macros // I still need to write a test which deletes a macro in the middle 
             // and maintains the integrity.  Perhaps I should write a function that asserts the invariant.
 test_Preprocessor
 
-Should I also write some overall tests for the preprocessor section?
-
 Config:
-Create a config module and parse the basic config options (at least throw away options with a '-')
+Start adding some more options and potentially make (with some macro magic?) a better way to add new options
 
 Preprocessor:
 change the macro definitions to be a hash table?  It seems unnecessarily limiting to do it this way.
-macro defines should take a mcc_List_t of tokens
 Fix the b-tree after a macro deletion
-Fix the /**/ style comments to allow for more than one set per line 
-  - I don't want to sink to GOTO statements!
-  - might need to rework the algorithm entirely??
-  - Also need to allow for // style comments to come after a /**/ comment on a line
-  - Maybe I should just handle the comments in line with the tokens?
+ - Maybe just dump the b-tree implementation altogether?  It's slower for search and insert.
 macro replacement
 evaluate macro expressions (like #if etc)
+ - Create an Integer Constant Expression parser/evaluator module?
 support function macros
 Need to handle the ## operator
+handle if-like constructs
 
 Tokeniser:
 handle constant numbers better (floating point, decimal, octal and hex!)
+ - suffixes, etc
 
 Parser:
 Assert that the input file conforms to the c(99) standard
 create an AST
 walk the tree
+output an intermediate representation
 
 Assembler
 output ELF files and DWARF (4?)
