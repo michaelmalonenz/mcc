@@ -32,53 +32,6 @@ static void handle_whitespace(mcc_LogicalLine_t *line,
                               mcc_FileBuffer_t *fileBuffer,
                               mcc_TokenListIterator_t *iter);
 
-static mcc_LogicalLine_t *DealWithComments(mcc_LogicalLine_t* line, mcc_FileBuffer_t *fileBuffer)
-{
-   unsigned int tempIndex;
-   SkipWhiteSpace(line);
-   for(tempIndex = line->index; tempIndex < line->length; tempIndex++)
-   {
-      if (line->string[tempIndex] == '"')
-      {
-         //need to loop until we find a second " 
-      }
-      if (line->string[tempIndex] == '/')
-      {
-         if (line->string[tempIndex+1] == '/')
-         {
-            while(tempIndex < line->length)
-            {
-               line->string[tempIndex++] = ' ';
-            }
-         }
-         else if (line->string[tempIndex+1] == '*')
-         {
-            line->string[tempIndex] = ' ';
-            line->string[tempIndex+1] = ' ';
-            while(!mcc_FileBufferEOFReached(fileBuffer))
-            {
-               while(tempIndex < line->length)
-               {
-                  if(line->string[tempIndex] == '*' &&
-                     line->string[tempIndex+1] == '/')
-                  {
-                     line->string[tempIndex++] = ' ';
-                     line->string[tempIndex] = ' ';
-                     SkipWhiteSpace(line);
-                     return line;
-                  }
-                  line->string[tempIndex++] = ' ';
-               }
-               tempIndex = 0;
-               line = mcc_FileBufferGetNextLogicalLine(fileBuffer);
-            }
-         }
-      }
-   }
-   SkipWhiteSpace(line);
-   return line;
-}
-
 static void handle_whitespace(mcc_LogicalLine_t *line,
                               mcc_FileBuffer_t *fileBuffer,
                               mcc_TokenListIterator_t *iter)
@@ -163,12 +116,6 @@ static void handle_pp_include_filename(mcc_LogicalLine_t *line,
    mcc_InsertToken(token, iter);
    line->index += filenameLen + 1; //+1 for the delimiter
    handle_whitespace(line, fileBuffer, iter);
-   if (line->index != line->length)
-   {
-      mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
-                      mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                      "Found extra characters after file include\n");
-   }
 }
 
 static void handle_string_char_const(mcc_LogicalLine_t *line,
@@ -348,13 +295,8 @@ void mcc_TokeniseFile(const char *inFilename,
    while(!mcc_FileBufferEOFReached(fileBuffer))
    {
       logicalLine = mcc_FileBufferGetNextLogicalLine(fileBuffer);
-      if (logicalLine->length > 0)
+      if ((logicalLine->length > 0) && (logicalLine->index < logicalLine->length))
       {
-         logicalLine = DealWithComments(logicalLine, fileBuffer);
-         if (logicalLine->index == logicalLine->length)
-         {
-            continue;
-         }
          mcc_TokeniseLine(logicalLine, fileBuffer, iter);
          mcc_AddEndOfLineToken(mcc_GetFileBufferCurrentLineNo(fileBuffer),
                                mcc_GetFileBufferFileNumber(fileBuffer),
@@ -372,11 +314,38 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
    MCC_OPERATOR current_operator = OP_NONE;
    MCC_SYMBOL current_symbol = SYM_NONE;
    mcc_Token_t *token = NULL;
+   static bool_t insideMultiLineComment = FALSE;
 
    handle_whitespace(line, fileBuffer, iter);
    while(line->index < line->length)
    {
-      if (line->string[line->index] == '#')
+      if ((line->string[line->index] == '/' &&
+           line->string[line->index+1] == '*') || insideMultiLineComment)
+      {
+         //If this is the first line/opening part of the comment, handle it.
+         if (!insideMultiLineComment)
+         {
+            insideMultiLineComment = TRUE;
+            line->index += 2;
+         }
+         if (line->string[line->index] == '*' && line->string[line->index+1] == '/')
+         {
+            line->index += 2;
+            insideMultiLineComment = FALSE;
+         }
+         else
+         {
+            line->index++;
+         }
+      }
+      else if (line->string[line->index] == '/' &&
+               line->string[line->index+1] == '/')
+      {
+         //consider creating a token for the comment, such that we can preserve them in preprocessed output
+         while(line->index < line->length)
+            line->index++;
+      }
+      else if (line->string[line->index] == '#')
       {
          line->index++;
          if (line->string[line->index] == '#')
