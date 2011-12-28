@@ -28,7 +28,7 @@ TEST_SRC_DIR = "#{SRC_DIR}/test"
 TEMP_STDERR_FILE = 'stderr'
 
 CFLAGS = "-Wall -Wextra -Werror -g -ggdb3 -O0"
-LINKER_FLAGS = "-lm"
+LINKER_FLAGS = "-lm -W -Wall"
 
 $cc = "/usr/bin/gcc"
 
@@ -168,15 +168,20 @@ if $0 == __FILE__ then
    tests = []
    $log_file = SimpleLogger.new("#{MAIN_EXE_NAME}.log")
    dog_food = false
+   coverage = false
 
    ARGV.each do |arg|
-      if arg =~ %r{--?c(?:l(?:e(?:a(?:n)?)?)?)?}ix
+      if arg =~ %r{--?cl(?:e(?:a(?:n)?)?)?}ix
          clean()
          exit(0)
       elsif arg =~ %r{--?t(?:e(?:s(?:t(?:[-_](?:o(?:n(?:ly)?)?)?)?)?)?)?=(.+)}ix
          tests << $1
       elsif arg =~ %r{--?d(?:o(?:g(?:f(?:o(?:od)?)?)?)?)?}ix
          dog_food = true
+      elsif arg =~ %r{--?co(?:v(?:e(?:r(?:a(?:ge)?)?)?)?)?}ix
+         coverage = true
+         CFLAGS << " --coverage -fprofile-arcs -ftest-coverage"
+         LINKER_FLAGS << " --coverage"
       end
    end
 
@@ -205,6 +210,20 @@ if $0 == __FILE__ then
          run_command("#{$cc} #{dependencies.join(' ')} #{LINKER_FLAGS} -o #{MAIN_EXE_NAME}", "Linking #{MAIN_EXE_NAME} Failed...")
       end
 
+      if coverage
+         $log_file.note("Cleaning out old coverage results")
+         Dir.chdir(BIN_DIR) do
+            Dir.new(BIN_DIR).each do |file|
+               if file =~ %r{\.gcda$}i
+                  FileUtils.rm(file)
+               end
+            end
+            run_command("lcov -c -i -b #{SRC_DIR} -d #{SRC_DIR} -o mcc_baseline.info --ignore-errors source",
+                        "Couldn't create coverage baseline")
+         end
+      end
+
+
       Dir.chdir(TEST_BIN_DIR) do
          linker.add_bin_dir(TEST_BIN_DIR)
          $log_file.note("Linking Tests...")
@@ -228,6 +247,25 @@ if $0 == __FILE__ then
                   run_command("#{VALGRIND_COMMAND} ./#{test}", "#{File.basename(test)} failed to run correctly!")
                end               
             end
+         end
+      end
+
+      if coverage
+         Dir.chdir(BIN_DIR) do
+            run_command("lcov -d #{SRC_DIR} -b #{SRC_DIR} -c -o mcc_test_results.info --ignore-errors source",
+                        "Failed to measure test coverage")
+            run_command("lcov -r mcc_test_results.info test_*.c -o mcc_test_results.info",
+                        "Failed to remove test results from coverage results")
+            run_command("lcov -r mcc_test_results.info TestUtils.c -o mcc_test_results.info",
+                        "Failed to remove test results from coverage results")
+            run_command("lcov -r mcc_baseline.info test_*.c -o mcc_baseline.info",
+                        "Failed to remove test results from coverage results")
+            run_command("lcov -r mcc_baseline.info TestUtils.c -o mcc_baseline.info",
+                        "Failed to remove test results from coverage results")
+            run_command("lcov -a mcc_baseline.info -a mcc_test_results.info -o total.info",
+                        "Failed to generate coverage html")
+            run_command("genhtml total.info -o coverage",
+                        "Failed to generate coverage html")
          end
       end
 
