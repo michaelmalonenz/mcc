@@ -156,7 +156,7 @@ def compile_a_directory(input_dir, out_dir)
       Dir.glob("*.c").each do |file|
          o_file = c_to_o(file)
          o_files << o_file
-         run_command("#{$cc} #{CFLAGS} -I#{SRC_DIR} -c #{file} -o #{out_dir}/#{o_file}", 
+         run_command("#{$cc} #{CFLAGS} -I#{SRC_DIR} -c #{file} -o #{out_dir}/#{o_file}",
                      "Compilation of #{input_dir}/#{file} failed...")
       end
    end
@@ -230,7 +230,7 @@ if $0 == __FILE__ then
          Dir.glob("test_*.o").each do |test_exe_o|
             test_exe = test_exe_o.gsub(/\.o$/, '')
             dependencies = linker.discover_required_files(test_exe_o)
-            run_command("#{$cc} #{dependencies.join(' ')} #{LINKER_FLAGS} -o #{test_exe}", 
+            run_command("#{$cc} #{dependencies.join(' ')} #{LINKER_FLAGS} -o #{test_exe}",
                         "Linking #{test_exe} Failed...")
          end
 
@@ -245,7 +245,7 @@ if $0 == __FILE__ then
             tests.each do |test|
                if !FileTest.directory?(test) && FileTest.executable?(test)
                   run_command("#{VALGRIND_COMMAND} ./#{test}", "#{File.basename(test)} failed to run correctly!")
-               end               
+               end
             end
          end
       end
@@ -278,7 +278,7 @@ if $0 == __FILE__ then
       end
 
    rescue Exception => error
-      $log_file.error(error.to_s)         
+      $log_file.error(error.to_s)
       $log_file.close()
       exit(1)
    end
