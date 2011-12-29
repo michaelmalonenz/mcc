@@ -146,7 +146,7 @@ MCC_SYMBOL mcc_GetSymbol(mcc_LogicalLine_t *line)
    }
 }
 
-MCC_OPERATOR mcc_GetOperator(mcc_LogicalLine_t UNUSED(*line))
+MCC_OPERATOR mcc_GetOperator(mcc_LogicalLine_t *line)
 {
    int op;
 
@@ -162,7 +162,7 @@ MCC_OPERATOR mcc_GetOperator(mcc_LogicalLine_t UNUSED(*line))
    }
 }
 
-MCC_KEYWORD mcc_GetKeyword(mcc_LogicalLine_t UNUSED(* line))
+MCC_KEYWORD mcc_GetKeyword(mcc_LogicalLine_t *line)
 {
    int key;
 
