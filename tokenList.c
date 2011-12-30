@@ -57,9 +57,13 @@ void mcc_CreateAndAddWhitespaceToken(const int lineno,
                                      const unsigned short fileno,
                                      mcc_TokenListIterator_t *iter)
 {
-   mcc_Token_t *token = mcc_CreateToken(&whitespaceText, sizeof(whitespaceText),
-                                        TOK_WHITESPACE, lineno, fileno);
-   mcc_InsertToken(token, iter);
+   const mcc_Token_t *temp = mcc_TokenListPeekCurrentToken(iter);
+   if (temp != NULL && temp->tokenType != TOK_WHITESPACE)
+   {
+      mcc_Token_t *token = mcc_CreateToken(&whitespaceText, sizeof(whitespaceText),
+                                           TOK_WHITESPACE, lineno, fileno);
+      mcc_InsertToken(token, iter);
+   }
 }
 
 void mcc_DeleteToken(void *token)
@@ -152,5 +156,19 @@ void mcc_TokenListDeleteStandalone(mcc_TokenList_t *list)
 mcc_TokenList_t *mcc_DebugGetTokenList(void)
 {
    return token_list;
+}
+
+void mcc_DebugPrintToken(const mcc_Token_t *token)
+{
+   if (token != NULL)
+   {
+      printf("-----Token -----\n\tText: %s\n\tType: %s\n\tIndex: %d\n\tPosition: %s:%d\n",
+             token->text, token_types[token->tokenType], token->tokenIndex,
+             mcc_ResolveFileNameFromNumber(token->fileno), token->lineno);
+   }
+   else
+   {
+      printf("Token was NULL\n");
+   }
 }
 #endif

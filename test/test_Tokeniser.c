@@ -32,8 +32,8 @@
 #define NUM_TEST_CASES 3
 const char *strings_to_tokenise[NUM_TEST_CASES] = { 
    "#include \"12/some_header.h\"\n",
-   "char a = '\\0377';\n",
-   "char a = '\\xFF';\n"
+   "char /*embedded comment*/ a = /*second embedded comment*/'\\0377';\n",
+   "char a = '\\xF8';\n"
 };
 
 const int32_t expected_num_tokens[NUM_TEST_CASES] = {

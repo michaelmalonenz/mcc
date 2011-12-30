@@ -36,8 +36,14 @@ typedef mcc_List_t mcc_TokenList_t;
  */
 void mcc_FreeTokens(void);
 mcc_TokenListIterator_t *mcc_TokenListGetIterator(void);
+
 #if MCC_DEBUG
 mcc_TokenList_t *mcc_DebugGetTokenList(void);
+#endif
+
+// This one can... ish
+#if MCC_DEBUG
+void mcc_DebugPrintToken(const mcc_Token_t *token);
 #endif
 
 /**

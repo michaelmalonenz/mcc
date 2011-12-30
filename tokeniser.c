@@ -328,14 +328,19 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
             insideMultiLineComment = TRUE;
             line->index += 2;
          }
-         if (line->string[line->index] == '*' && line->string[line->index+1] == '/')
+         while(line->index < line->length)
          {
-            line->index += 2;
-            insideMultiLineComment = FALSE;
-         }
-         else
-         {
-            line->index++;
+            if (line->index < (line->length-1) &&
+                (line->string[line->index] == '*' && line->string[line->index+1] == '/'))
+            {
+               line->index += 2;
+               insideMultiLineComment = FALSE;
+               break;
+            }
+            else
+            {
+               line->index++;
+            }
          }
       }
       else if (line->string[line->index] == '/' &&

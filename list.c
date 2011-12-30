@@ -216,7 +216,7 @@ void *mcc_ListRemoveDataAtCurrentPosition(mcc_ListIterator_t *iter)
 
 const void *mcc_ListPeekCurrentData(mcc_ListIterator_t *iter)
 {
-   return iter->current;
+   return iter->current->data;
 }
 
 void *mcc_ListGetNextData(mcc_ListIterator_t *iter)
