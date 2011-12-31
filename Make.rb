@@ -132,6 +132,8 @@ def c_to_o(file)
    return file.gsub(%r{ \.c$ }x,".o")
 end
 
+
+
 def run_command(cmd, failure_message)
    $log_file.note(cmd)
    result = `#{cmd}  2>#{TEMP_STDERR_FILE}`
@@ -159,6 +161,10 @@ def compile_a_directory(input_dir, out_dir)
          run_command("#{$cc} #{CFLAGS} -I#{SRC_DIR} -c #{file} -o #{out_dir}/#{o_file}",
                      "Compilation of #{input_dir}/#{file} failed...")
       end
+   end
+   Dir.chdir(out_dir) do
+      o_files_to_delete = Dir.glob('*.o') - o_files
+      FileUtils.rm(o_files_to_delete)
    end
 end
 
