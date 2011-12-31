@@ -126,7 +126,7 @@ static void handle_string_char_const(mcc_LogicalLine_t *line,
 {
    int strLen = 0;
    mcc_Token_t *token = NULL;
-   char *type_name;
+   const char *type_name;
 
    if (type == TOK_STR_CONST)
    {

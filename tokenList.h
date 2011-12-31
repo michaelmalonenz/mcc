@@ -37,9 +37,7 @@ typedef mcc_List_t mcc_TokenList_t;
 void mcc_FreeTokens(void);
 mcc_TokenListIterator_t *mcc_TokenListGetIterator(void);
 
-#if MCC_DEBUG
-mcc_TokenList_t *mcc_DebugGetTokenList(void);
-#endif
+mcc_TokenList_t *mcc_GetTokenList(void);
 
 // This one can... ish
 #if MCC_DEBUG
@@ -92,6 +90,7 @@ mcc_TokenListIterator_t *mcc_TokenListCopyIterator(mcc_TokenListIterator_t *iter
 void mcc_TokenListDeleteIterator(mcc_TokenListIterator_t *iter);
 mcc_Token_t *mcc_GetNextToken(mcc_TokenListIterator_t *iter);
 
+void mcc_WriteTokensToOutputFile(mcc_TokenList_t *tokens);
 
 #endif /* _MCC_TOKEN_LIST_H_ */
 

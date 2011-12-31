@@ -25,6 +25,9 @@ void mcc_ParseOptions(int argc, char **argv)
 {
    int i;
    mcc_global_options.filenames = mcc_ListCreate();
+   mcc_global_options.stages = (PREPROCESS &
+                                COMPILE &
+                                LINK);
 
    for (i = 1; i < argc; i++)
    {
@@ -36,6 +39,10 @@ void mcc_ParseOptions(int argc, char **argv)
             mcc_Error("The -o flag requires an output file argument\n");
          }
          mcc_global_options.outputFilename = argv[i];
+      }
+      else if (strncmp(argv[i], "-E", strlen(argv[i])) == 0)
+      {
+         mcc_global_options.stages = PREPROCESS;
       }
       else if (argv[i][0] == '-')
       {

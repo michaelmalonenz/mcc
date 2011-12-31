@@ -3,6 +3,7 @@ write a ruby script to replace all tri-graphs in c code OR
 add in a compile-time switched ability to handle tri-graphs (so I can eventually claim full c99 compliance)
 options
 Use stopper for the unit tests??
+See if I can unit test for an assertion being hit (hopefully without the complcated jmpbuf thingy at work)
 
 Unit Tests I really should write:
 test_Tokeniser //extend and make more complex situations

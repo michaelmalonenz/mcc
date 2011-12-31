@@ -85,7 +85,7 @@ static void test_BulkMacros(void)
       mcc_TokeniseFile(tempFilename, tokenListIter);
       mcc_TokenListDeleteIterator(tokenListIter);
 
-      mcc_DefineMacro(test_Macros[i], mcc_DebugGetTokenList());
+      mcc_DefineMacro(test_Macros[i], mcc_GetTokenList());
 
       unlink(tempFilename);
       mcc_FreeTokens();

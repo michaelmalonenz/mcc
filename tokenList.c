@@ -20,6 +20,7 @@
 #include <stdio.h>
 
 #include "config.h"
+#include "options.h"
 #include "tokens.h"
 #include "tokenList.h"
 #include "list.h"
@@ -152,12 +153,57 @@ void mcc_TokenListDeleteStandalone(mcc_TokenList_t *list)
    mcc_ListDelete(list, &mcc_DeleteToken);
 }
 
-#if MCC_DEBUG
-mcc_TokenList_t *mcc_DebugGetTokenList(void)
+mcc_TokenList_t *mcc_GetTokenList(void)
 {
    return token_list;
 }
 
+void mcc_WriteTokensToOutputFile(mcc_TokenList_t *tokens)
+{
+   FILE *outf = fopen(mcc_global_options.outputFilename, "w+");
+   mcc_TokenListIterator_t *iter = NULL;
+   mcc_Token_t *tok = NULL;
+   if (outf == NULL)
+   {
+      mcc_Error("Couldn't open output file '%s' for writing\n", 
+                mcc_global_options.outputFilename);
+   }
+   iter = mcc_TokenListStandaloneGetIterator(tokens);
+   tok = mcc_GetNextToken(iter);
+   while (tok != NULL)
+   {
+      switch (tok->tokenType)
+      {
+         case TOK_PP_DIRECTIVE:
+            fprintf(outf, "#%s", tok->text);
+            break;
+         case TOK_IDENTIFIER:
+         case TOK_KEYWORD:
+         case TOK_SYMBOL:
+         case TOK_OPERATOR:
+         case TOK_STR_CONST:
+         case TOK_CHAR_CONST:
+         case TOK_NUMBER:
+         case TOK_WHITESPACE:
+            fprintf(outf, "%s", tok->text);
+            break;
+         case TOK_SYS_FILE_INC:
+            fprintf(outf, "<%s>", tok->text);
+            break;
+         case TOK_LOCAL_FILE_INC:
+            fprintf(outf, "\"%s\"", tok->text);
+            break;
+         case TOK_EOL:
+            fprintf(outf, "EOL\n");
+         default:
+            break;
+      }
+      tok = mcc_GetNextToken(iter);
+   }
+   fclose(outf);
+}
+
+#if MCC_DEBUG
 void mcc_DebugPrintToken(const mcc_Token_t *token)
 {
    if (token != NULL)
