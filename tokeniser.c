@@ -298,10 +298,10 @@ void mcc_TokeniseFile(const char *inFilename,
       if ((logicalLine->length > 0) && (logicalLine->index < logicalLine->length))
       {
          mcc_TokeniseLine(logicalLine, fileBuffer, iter);
-         mcc_AddEndOfLineToken(mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                               mcc_GetFileBufferFileNumber(fileBuffer),
-                               iter);
       }
+      mcc_AddEndOfLineToken(mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                            mcc_GetFileBufferFileNumber(fileBuffer),
+                            iter);
    }
    mcc_DeleteFileBuffer(fileBuffer);
 }
@@ -316,7 +316,11 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
    mcc_Token_t *token = NULL;
    static bool_t insideMultiLineComment = FALSE;
 
-   handle_whitespace(line, fileBuffer, iter);
+   if (!insideMultiLineComment)
+   {
+      handle_whitespace(line, fileBuffer, iter);
+   }
+
    while(line->index < line->length)
    {
       if ((line->string[line->index] == '/' &&

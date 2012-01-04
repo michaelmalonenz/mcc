@@ -37,20 +37,20 @@ const char *strings_to_tokenise[NUM_TEST_CASES] = {
 };
 
 const int32_t expected_num_tokens[NUM_TEST_CASES] = {
-   4, 9, 9
+   5, 10, 10
 };
-#define LARGEST_NUM_TOKENS 9
+#define LARGEST_NUM_TOKENS 10
 
 const uint32_t expected_token_types[NUM_TEST_CASES][LARGEST_NUM_TOKENS] = {
-   { TOK_PP_DIRECTIVE, TOK_WHITESPACE, TOK_LOCAL_FILE_INC, TOK_EOL },
-   { TOK_KEYWORD, TOK_WHITESPACE, TOK_IDENTIFIER, TOK_WHITESPACE, TOK_OPERATOR, TOK_WHITESPACE, TOK_CHAR_CONST, TOK_SYMBOL, TOK_EOL},
-   { TOK_KEYWORD, TOK_WHITESPACE, TOK_IDENTIFIER, TOK_WHITESPACE, TOK_OPERATOR, TOK_WHITESPACE, TOK_CHAR_CONST, TOK_SYMBOL, TOK_EOL}
+   { TOK_PP_DIRECTIVE, TOK_WHITESPACE, TOK_LOCAL_FILE_INC, TOK_EOL, TOK_EOL },
+   { TOK_KEYWORD, TOK_WHITESPACE, TOK_IDENTIFIER, TOK_WHITESPACE, TOK_OPERATOR, TOK_WHITESPACE, TOK_CHAR_CONST, TOK_SYMBOL, TOK_EOL, TOK_EOL},
+   { TOK_KEYWORD, TOK_WHITESPACE, TOK_IDENTIFIER, TOK_WHITESPACE, TOK_OPERATOR, TOK_WHITESPACE, TOK_CHAR_CONST, TOK_SYMBOL, TOK_EOL, TOK_EOL}
 };
 
 const int expected_token_indices[NUM_TEST_CASES][LARGEST_NUM_TOKENS] = {
-   { PP_INCLUDE, 0, 0, 0},
-   { KEY_CHAR, 0, 0, 0, OP_EQUALS_ASSIGN, 0, 0, SYM_SEMI_COLON, 0},
-   { KEY_CHAR, 0, 0, 0, OP_EQUALS_ASSIGN, 0, 0, SYM_SEMI_COLON, 0}
+   { PP_INCLUDE, 0, 0, 0, 0},
+   { KEY_CHAR, 0, 0, 0, OP_EQUALS_ASSIGN, 0, 0, SYM_SEMI_COLON, 0, 0},
+   { KEY_CHAR, 0, 0, 0, OP_EQUALS_ASSIGN, 0, 0, SYM_SEMI_COLON, 0, 0}
 };
 
 
@@ -81,7 +81,7 @@ int main(int UNUSED(argc), char UNUSED(**argv))
          MCC_ASSERT(token->tokenType == expected_token_types[i][j]);
          MCC_ASSERT(token->tokenIndex == expected_token_indices[i][j]);
       }
-
+      
       MCC_ASSERT(mcc_GetNextToken(tokenListIter) == NULL);
       mcc_TokenListDeleteIterator(tokenListIter);
       mcc_FreeTokens();

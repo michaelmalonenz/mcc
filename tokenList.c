@@ -194,7 +194,7 @@ void mcc_WriteTokensToOutputFile(mcc_TokenList_t *tokens)
             fprintf(outf, "\"%s\"", tok->text);
             break;
          case TOK_EOL:
-            fprintf(outf, "EOL\n");
+            fprintf(outf, "\n");
          default:
             break;
       }
