@@ -203,7 +203,7 @@ void mcc_ShiftLineLeftAndShrink(mcc_LogicalLine_t *line,
 #if MCC_DEBUG
 void printFileBuffer(mcc_FileBuffer_t *buffer)
 {
-   printf("----- FileBuffer ----- \nfilename:\t%s\nline_no:\t%u\nbufferIndex:\t%u\nchars_read:\t%ld\n",
+   printf("----- FileBuffer ----- \nfilename:\t%s\nline_no:\t%u\nbufferIndex:\t%u\nchars_read:\t%u\n",
           buffer->filename, buffer->line_no, buffer->bufferIndex, buffer->chars_read);
    printf("Current Char:\t%d\n", buffer->buffer[buffer->bufferIndex]);
 }

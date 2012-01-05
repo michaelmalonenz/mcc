@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include <string.h>
+#include <unistd.h>
 
 #include "mcc.h"
 #include "TestUtils.h"
@@ -41,5 +42,7 @@ int main(void)
 
    mcc_FreeTokens();
    mcc_FileOpenerDelete();
+   unlink(file);
+
    return 0;
 }
