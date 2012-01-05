@@ -264,9 +264,13 @@ if $0 == __FILE__ then
                         "Failed to remove test results from coverage results")
             run_command("lcov -r mcc_test_results.info TestUtils.c -o mcc_test_results.info",
                         "Failed to remove test results from coverage results")
+            run_command("lcov -r mcc_test_results.info mcc.c -o mcc_test_results.info",
+                        "Failed to remove test results from coverage results")
             run_command("lcov -r mcc_baseline.info test_*.c -o mcc_baseline.info",
                         "Failed to remove test results from coverage results")
             run_command("lcov -r mcc_baseline.info TestUtils.c -o mcc_baseline.info",
+                        "Failed to remove test results from coverage results")
+            run_command("lcov -r mcc_baseline.info mcc.c -o mcc_baseline.info",
                         "Failed to remove test results from coverage results")
             run_command("lcov -a mcc_baseline.info -a mcc_test_results.info -o total.info",
                         "Failed to generate coverage html")
