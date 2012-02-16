@@ -42,19 +42,19 @@ void mcc_FileOpenerInitialise(void)
 
 // @todo also append all dirs in the env var C_INCLUDE_PATH
 #if defined(__linux)
-   mcc_ListAppendData(systemIncludeDirList, "/usr/include");
-   mcc_ListAppendData(systemIncludeDirList, "/usr/include/linux");
+   mcc_ListAppendData(systemIncludeDirList, (uintptr_t) "/usr/include");
+   mcc_ListAppendData(systemIncludeDirList, (uintptr_t) "/usr/include/linux");
 # if defined(__i386__)
-   mcc_ListAppendData(systemIncludeDirList, "/usr/include/i386-linux-gnu");
+   mcc_ListAppendData(systemIncludeDirList, (uintptr_t) "/usr/include/i386-linux-gnu");
 # elif  defined(__x86_64__)
-   mcc_ListAppendData(systemIncludeDirList, "/usr/include/x86_64-linux-gnu");
+   mcc_ListAppendData(systemIncludeDirList, (uintptr_t) "/usr/include/x86_64-linux-gnu");
 # endif
 #endif
 
    fileList = mcc_ListCreate();
 }
 
-static void DeleteFileInfo(void *deathRow)
+static void DeleteFileInfo(uintptr_t deathRow)
 {
    file_info_t *toDelete = (file_info_t *) deathRow;
    free(toDelete->filename);
@@ -71,7 +71,7 @@ void mcc_FileOpenerDelete(void)
 
 void mcc_FileOpenerLocalIncAppendDir(const char *dir)
 {
-   mcc_ListAppendData(localIncludeDirList, (void *) dir);
+   mcc_ListAppendData(localIncludeDirList, (uintptr_t) dir);
 }
 
 FILE *mcc_OpenFile(const char *filename, const char *flags,
@@ -90,7 +90,7 @@ FILE *mcc_OpenFile(const char *filename, const char *flags,
    newFile->filename = (char *) malloc((filename_len + 1) * sizeof(char));
    strncpy(newFile->filename, filename, filename_len + 1);
 
-   mcc_ListAppendData(fileList, newFile);
+   mcc_ListAppendData(fileList, (uintptr_t) newFile);
    
    return file;
 }

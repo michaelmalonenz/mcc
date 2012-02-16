@@ -67,7 +67,7 @@ void mcc_CreateAndAddWhitespaceToken(const int lineno,
    }
 }
 
-void mcc_DeleteToken(void *token)
+void mcc_DeleteToken(uintptr_t token)
 {
    mcc_Token_t *temp = (mcc_Token_t *) token;
    free(temp->text);
@@ -76,7 +76,7 @@ void mcc_DeleteToken(void *token)
 
 void mcc_InsertToken(mcc_Token_t *token, mcc_TokenListIterator_t *iter)
 {
-   mcc_ListInsertDataAtCurrentPosition((mcc_ListIterator_t *) iter, token);
+   mcc_ListInsertDataAtCurrentPosition((mcc_ListIterator_t *) iter, (uintptr_t) token);
 
 #if MCC_DEBUG
 //   printf("Got me a token '%s' of type %d\n", token->text, token->tokenType);

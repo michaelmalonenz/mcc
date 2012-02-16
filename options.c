@@ -50,7 +50,7 @@ void mcc_ParseOptions(int argc, char **argv)
       }
       else
       {
-         mcc_ListAppendData(mcc_global_options.filenames, (void *) argv[i]);
+         mcc_ListAppendData(mcc_global_options.filenames, (uintptr_t) argv[i]);
       }
    }
 }

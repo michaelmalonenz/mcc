@@ -57,7 +57,7 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
                              TOKEN_TYPE type, const int lineno,
                              const unsigned short fileno);
 
-void mcc_DeleteToken(void *token);
+void mcc_DeleteToken(uintptr_t token);
 
 /**
  * @param lineno The line number in the file

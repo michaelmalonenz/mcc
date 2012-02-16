@@ -18,13 +18,17 @@
 #ifndef _MCC_LIST_H_
 #define _MCC_LIST_H_
 
+#include <stdint.h>
+
 /* Forward declarations of the opaque list types */
 typedef struct list_node mcc_ListNode_t;
 typedef struct list mcc_List_t;
 typedef struct iterator mcc_ListIterator_t;
 
 
-typedef void (*mcc_NodeDestructor_fn)(void *);
+typedef void (*mcc_NodeDestructor_fn)(uintptr_t);
+
+#define NULL_DATA 0
 
 /**
  * Initialises an empty unordered, doubly-linked list.
@@ -42,7 +46,7 @@ void mcc_ListDelete(mcc_List_t *list, mcc_NodeDestructor_fn destructorFn);
 /**
  * Adds an item to the end of the list
  */
-void mcc_ListAppendData(mcc_List_t *list, void *data);
+void mcc_ListAppendData(mcc_List_t *list, uintptr_t data);
 
 /**
  * Gets an iterator pointing nowhere in the list.
@@ -78,7 +82,7 @@ mcc_ListIterator_t *mcc_ListCopyIterator(mcc_ListIterator_t *iter);
  * mcc_ListGetNextData() will not return the new item, but the item which would
  * have been next in the list prior to a call to this function.
  */
-void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, void *data);
+void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, uintptr_t data);
 
 /**
  * Removes the item currently pointed at by the iterator from the list and returns it.
@@ -98,7 +102,7 @@ void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, void *data);
  * This function potentially invalidates other iterators (not necessarily under your 
  * immediate control).  Use this function with care.
  */
-void *mcc_ListRemoveDataAtCurrentPosition(mcc_ListIterator_t *iter);
+uintptr_t mcc_ListRemoveDataAtCurrentPosition(mcc_ListIterator_t *iter);
 
 /**
  * This shows what data the iterator is currently pointing at.
@@ -107,16 +111,16 @@ void *mcc_ListRemoveDataAtCurrentPosition(mcc_ListIterator_t *iter);
  *
  * NULL is returned if the iterator isn't pointing at anything.
  */
-const void *mcc_ListPeekCurrentData(mcc_ListIterator_t *iter);
+uintptr_t mcc_ListPeekCurrentData(mcc_ListIterator_t *iter);
 
 /**
  * Returns the next item in the list or NULL if we are at the end of the list
  */
-void *mcc_ListGetNextData(mcc_ListIterator_t *iter);
+uintptr_t mcc_ListGetNextData(mcc_ListIterator_t *iter);
 
 /**
  * Returns the previous item in the list or NULL if we are at the start of the list
  */
-void *mcc_ListGetPrevData(mcc_ListIterator_t *iter);
+uintptr_t mcc_ListGetPrevData(mcc_ListIterator_t *iter);
 
 #endif /* _MCC_LIST_H_ */

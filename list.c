@@ -22,7 +22,7 @@
 #include "list.h"
 
 struct list_node {
-   void *data;
+   uintptr_t data;
    struct list_node *next;
    struct list_node *prev;
 };
@@ -38,7 +38,7 @@ struct iterator {
    mcc_List_t *list;
 };
 
-static mcc_ListNode_t *CreateListNode(void *data)
+static mcc_ListNode_t *CreateListNode(uintptr_t data)
 {
    mcc_ListNode_t *node = (mcc_ListNode_t *) malloc(sizeof(mcc_ListNode_t));
    MCC_ASSERT(node != NULL);
@@ -72,7 +72,7 @@ void mcc_ListDelete(mcc_List_t *list, mcc_NodeDestructor_fn destructorFn)
       {
          destructorFn(current->data);
       }
-      current->data = NULL;
+      current->data = NULL_DATA;
       free(current);
       list->nItems--;
       current = next;
@@ -85,7 +85,7 @@ void mcc_ListDelete(mcc_List_t *list, mcc_NodeDestructor_fn destructorFn)
    free(list);
 }
 
-void mcc_ListAppendData(mcc_List_t *list, void *data)
+void mcc_ListAppendData(mcc_List_t *list, uintptr_t data)
 {
    mcc_ListNode_t *node = CreateListNode(data);
 
@@ -134,7 +134,7 @@ void mcc_ListDeleteIterator(mcc_ListIterator_t *iter)
    free(iter);
 }
 
-void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, void *data)
+void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, uintptr_t data)
 {
    mcc_ListNode_t *node = CreateListNode(data);
    if (iter->current == NULL)
@@ -172,14 +172,14 @@ void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, void *data)
 
 // I could probably do this with fewer temporary variables, but this
 // is clearer and it's easier to know what's happening.
-void *mcc_ListRemoveDataAtCurrentPosition(mcc_ListIterator_t *iter)
+uintptr_t mcc_ListRemoveDataAtCurrentPosition(mcc_ListIterator_t *iter)
 {
-   void *result = NULL;
+   uintptr_t result = NULL_DATA;
    mcc_ListNode_t *prev, *next;
 
    if (iter->current == NULL)
    {
-      return NULL;
+      return NULL_DATA;
    }
 
    prev = iter->current->prev;
@@ -214,17 +214,17 @@ void *mcc_ListRemoveDataAtCurrentPosition(mcc_ListIterator_t *iter)
    return result;
 }
 
-const void *mcc_ListPeekCurrentData(mcc_ListIterator_t *iter)
+uintptr_t mcc_ListPeekCurrentData(mcc_ListIterator_t *iter)
 {
    return iter->current->data;
 }
 
-void *mcc_ListGetNextData(mcc_ListIterator_t *iter)
+uintptr_t mcc_ListGetNextData(mcc_ListIterator_t *iter)
 {
    if (iter->current == iter->list->tail)
    {
       iter->current = NULL;
-      return NULL;
+      return NULL_DATA;
    }
    
    if (iter->current == NULL)
@@ -238,12 +238,12 @@ void *mcc_ListGetNextData(mcc_ListIterator_t *iter)
    return iter->current->data;
 }
 
-void *mcc_ListGetPrevData(mcc_ListIterator_t *iter)
+uintptr_t mcc_ListGetPrevData(mcc_ListIterator_t *iter)
 {
    if (iter->current == iter->list->head)
    {
       iter->current = NULL;
-      return NULL;
+      return NULL_DATA;
    }
    
    if (iter->current == NULL)

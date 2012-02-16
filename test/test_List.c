@@ -25,19 +25,14 @@
 #define NUM_BASIC_TEST_ITEMS 10
 #define NUM_ITEMS_TO_INSERT 6
 
-int basic_test_data[NUM_BASIC_TEST_ITEMS] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+int basic_test_data[NUM_BASIC_TEST_ITEMS] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
 int insertion_test_data[NUM_ITEMS_TO_INSERT] = { 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };
-
-static void test_list_node_destructor(void *deathRow)
-{
-   free(deathRow);
-}
 
 static void test_BasicListFunctionality(void)
 {
    int i;
-   int *result;
+   int result;
    mcc_ListIterator_t *iter = NULL;
    mcc_List_t *list = mcc_ListCreate();
 
@@ -45,9 +40,7 @@ static void test_BasicListFunctionality(void)
    
    for (i = 0; i < NUM_BASIC_TEST_ITEMS; i++)
    {
-      int *data = (int *) malloc(sizeof(int));
-      *data = basic_test_data[i];
-      mcc_ListAppendData(list, data);
+      mcc_ListAppendData(list, basic_test_data[i]);
    }
 
    printf("Getting Iterator\n");
@@ -55,25 +48,25 @@ static void test_BasicListFunctionality(void)
 
    for (i = 0; i < NUM_BASIC_TEST_ITEMS; i++)
    {
-      result = (int *) mcc_ListGetNextData(iter);
-      MCC_ASSERT(result != NULL);
-      MCC_ASSERT(basic_test_data[i] == *result);
+      result = (int) mcc_ListGetNextData(iter);
+      MCC_ASSERT(result != NULL_DATA);
+      MCC_ASSERT(basic_test_data[i] == result);
    }
 
-   result = (int *) mcc_ListGetNextData(iter);
-   MCC_ASSERT(result == NULL);
+   result = (int) mcc_ListGetNextData(iter);
+   MCC_ASSERT(result == NULL_DATA);
 
    printf("Testing referential integrity going backwards, too!\n");
    for (i = NUM_BASIC_TEST_ITEMS-1; i >= 0; i--)
    {
-      result = (int *) mcc_ListGetPrevData(iter);
-      MCC_ASSERT(result != NULL);
-      MCC_ASSERT(basic_test_data[i] == *result);
+      result = (int) mcc_ListGetPrevData(iter);
+      MCC_ASSERT(result != NULL_DATA);
+      MCC_ASSERT(basic_test_data[i] == result);
    }
 
    printf("Cleaning up basic test\n");
    mcc_ListDeleteIterator(iter);
-   mcc_ListDelete(list, &test_list_node_destructor);
+   mcc_ListDelete(list, NULL);
    printf("*** Finished basic test ***\n\n");
 }
 
@@ -87,11 +80,11 @@ static void test_NullList(void)
    printf("Getting Iterator\n");
    iter = mcc_ListGetIterator(list);
 
-   MCC_ASSERT(mcc_ListGetNextData(iter) == NULL);
+   MCC_ASSERT(mcc_ListGetNextData(iter) == NULL_DATA);
 
    printf("Cleaning up Null test\n");
    mcc_ListDeleteIterator(iter);
-   mcc_ListDelete(list, &test_list_node_destructor);
+   mcc_ListDelete(list, NULL);
 
    printf("*** Finished Null test ***\n\n");
 }
@@ -99,16 +92,14 @@ static void test_NullList(void)
 static void test_InsertionWithIterator(void)
 {
    int i;
-   int *result;
+   int result = NULL_DATA;
    mcc_ListIterator_t *iter = NULL;
    mcc_List_t *list = mcc_ListCreate();
 
    printf("*** Starting insertion test ***\n");
    for (i = 0; i < NUM_BASIC_TEST_ITEMS; i++)
    {
-      int *data = (int *) malloc(sizeof(int));
-      *data = basic_test_data[i];
-      mcc_ListAppendData(list, data);
+      mcc_ListAppendData(list, basic_test_data[i]);
    }
 
    printf("Getting Iterator\n");
@@ -116,31 +107,29 @@ static void test_InsertionWithIterator(void)
 
    for (i = 0; i < (NUM_BASIC_TEST_ITEMS/2); i++)
    {
-      result = (int *) mcc_ListGetNextData(iter);
-      MCC_ASSERT(result != NULL);
-      MCC_ASSERT(basic_test_data[i] == *result);
+      result = (int) mcc_ListGetNextData(iter);
+      MCC_ASSERT(result != NULL_DATA);
+      MCC_ASSERT(basic_test_data[i] == result);
    }
 
    for (i = 0; i < NUM_ITEMS_TO_INSERT; i++)
    {
-      int *data = (int *) malloc(sizeof(int));
-      *data = insertion_test_data[i];
-      mcc_ListInsertDataAtCurrentPosition(iter, data);
+      mcc_ListInsertDataAtCurrentPosition(iter, insertion_test_data[i]);
    }
 
    for (i = (NUM_BASIC_TEST_ITEMS/2); i < NUM_BASIC_TEST_ITEMS; i++)
    {
-      result = (int *) mcc_ListGetNextData(iter);
-      MCC_ASSERT(result != NULL);
-      MCC_ASSERT(basic_test_data[i] == *result);
+      result = (int) mcc_ListGetNextData(iter);
+      MCC_ASSERT(result != NULL_DATA);
+      MCC_ASSERT(basic_test_data[i] == result);
    }
 
-   result = (int *) mcc_ListGetNextData(iter);
-   MCC_ASSERT(result == NULL);
+   result = (int) mcc_ListGetNextData(iter);
+   MCC_ASSERT(result == NULL_DATA);
 
    printf("Cleaning up insertion test\n");
    mcc_ListDeleteIterator(iter);
-   mcc_ListDelete(list, &test_list_node_destructor);
+   mcc_ListDelete(list, NULL);
 
    printf("*** Finished insertion test ***\n\n");
 }
@@ -151,15 +140,13 @@ static void test_CopyingIterator(void)
    mcc_ListIterator_t *iter = NULL;
    mcc_ListIterator_t *iter_copy = NULL;
    mcc_List_t *list = mcc_ListCreate();
-   int *result = NULL;
+   int result = NULL_DATA;
 
    printf("*** Setting up basic iterator test data ***\n");
    
    for (i = 0; i < NUM_BASIC_TEST_ITEMS; i++)
    {
-      int *data = (int *) malloc(sizeof(int));
-      *data = basic_test_data[i];
-      mcc_ListAppendData(list, data);
+      mcc_ListAppendData(list, basic_test_data[i]);
    }
 
    printf("Getting initial Iterator\n");
@@ -167,9 +154,9 @@ static void test_CopyingIterator(void)
 
    for (i = 0; i < NUM_BASIC_TEST_ITEMS/2; i++)
    {
-      result = (int *) mcc_ListGetNextData(iter);
-      MCC_ASSERT(result != NULL);
-      MCC_ASSERT(basic_test_data[i] == *result);
+      result = (int) mcc_ListGetNextData(iter);
+      MCC_ASSERT(result != NULL_DATA);
+      MCC_ASSERT(basic_test_data[i] == result);
    }
 
    printf("Copying Iterator\n");
@@ -177,26 +164,26 @@ static void test_CopyingIterator(void)
 
    for (i = NUM_BASIC_TEST_ITEMS/2; i < NUM_BASIC_TEST_ITEMS; i++)
    {
-      result = (int *) mcc_ListGetNextData(iter);
-      MCC_ASSERT(result != NULL);
-      MCC_ASSERT(basic_test_data[i] == *result);
+      result = (int) mcc_ListGetNextData(iter);
+      MCC_ASSERT(result != NULL_DATA);
+      MCC_ASSERT(basic_test_data[i] == result);
    }
-   result = (int *) mcc_ListGetNextData(iter);
-   MCC_ASSERT(result == NULL);
+   result = (int) mcc_ListGetNextData(iter);
+   MCC_ASSERT(result == NULL_DATA);
 
    for (i = NUM_BASIC_TEST_ITEMS/2; i < NUM_BASIC_TEST_ITEMS; i++)
    {
-      result = (int *) mcc_ListGetNextData(iter_copy);
-      MCC_ASSERT(result != NULL);
-      MCC_ASSERT(basic_test_data[i] == *result);
+      result = (int) mcc_ListGetNextData(iter_copy);
+      MCC_ASSERT(result != NULL_DATA);
+      MCC_ASSERT(basic_test_data[i] == result);
    }
-   result = (int *) mcc_ListGetNextData(iter_copy);
-   MCC_ASSERT(result == NULL);
+   result = (int) mcc_ListGetNextData(iter_copy);
+   MCC_ASSERT(result == NULL_DATA);
 
    printf("Cleaning up basic iterator test\n");
    mcc_ListDeleteIterator(iter);
    mcc_ListDeleteIterator(iter_copy);
-   mcc_ListDelete(list, &test_list_node_destructor);
+   mcc_ListDelete(list, NULL);
    printf("*** Finished basic iterator test ***\n\n");
 }
 
@@ -205,14 +192,12 @@ static void test_InsertionIteratingBackwards(void)
    int i;
    mcc_ListIterator_t *iter = NULL;
    mcc_List_t *list = mcc_ListCreate();
-   int *result;
+   int result;
 
    printf("*** Starting backwards insertion test ***\n");
    for (i = 0; i < NUM_BASIC_TEST_ITEMS; i++)
    {
-      int *data = (int *) malloc(sizeof(int));
-      *data = basic_test_data[i];
-      mcc_ListAppendData(list, data);
+      mcc_ListAppendData(list, basic_test_data[i]);
    }
 
    printf("Getting Iterator\n");
@@ -220,55 +205,53 @@ static void test_InsertionIteratingBackwards(void)
 
    for (i = 0; i < (NUM_BASIC_TEST_ITEMS/2); i++)
    {
-      result = (int *) mcc_ListGetNextData(iter);
-      MCC_ASSERT(result != NULL);
-      MCC_ASSERT(basic_test_data[i] == *result);
+      result = (int) mcc_ListGetNextData(iter);
+      MCC_ASSERT(result != NULL_DATA);
+      MCC_ASSERT(basic_test_data[i] == result);
    }
 
    for (i = 0; i < NUM_ITEMS_TO_INSERT; i++)
    {
-      int *data = (int *) malloc(sizeof(int));
-      *data = insertion_test_data[i];
-      mcc_ListInsertDataAtCurrentPosition(iter, data);
+      mcc_ListInsertDataAtCurrentPosition(iter, insertion_test_data[i]);
    }
 
    for (i = (NUM_BASIC_TEST_ITEMS/2); i < NUM_BASIC_TEST_ITEMS; i++)
    {
-      result = (int *) mcc_ListGetNextData(iter);
-      MCC_ASSERT(result != NULL);
-      MCC_ASSERT(basic_test_data[i] == *result);
+      result = (int) mcc_ListGetNextData(iter);
+      MCC_ASSERT(result != NULL_DATA);
+      MCC_ASSERT(basic_test_data[i] == result);
    }
 
-   result = (int *) mcc_ListGetNextData(iter);
-   MCC_ASSERT(result == NULL);
+   result = (int) mcc_ListGetNextData(iter);
+   MCC_ASSERT(result == NULL_DATA);
       
    printf("Turning around and testing backwards\n");
    for (i = NUM_BASIC_TEST_ITEMS-1; i >= (NUM_BASIC_TEST_ITEMS/2); i--)
    {
-      result = (int *) mcc_ListGetPrevData(iter);
-      MCC_ASSERT(result != NULL);
-      printf("Expected: %d, Actual: %d\n", basic_test_data[i], *result);
-      MCC_ASSERT(basic_test_data[i] == *result);
+      result = (int) mcc_ListGetPrevData(iter);
+      MCC_ASSERT(result != NULL_DATA);
+      printf("Expected: %d, Actual: %d\n", basic_test_data[i], result);
+      MCC_ASSERT(basic_test_data[i] == result);
    }
 
    for (i = NUM_ITEMS_TO_INSERT-1; i >= 0; i--)
    {
-      result = (int *) mcc_ListGetPrevData(iter);
-      MCC_ASSERT(result != NULL);
-      printf("Expected: %d, Actual: %d\n", insertion_test_data[i], *result);
-      MCC_ASSERT(insertion_test_data[i] == *result);
+      result = (int) mcc_ListGetPrevData(iter);
+      MCC_ASSERT(result != NULL_DATA);
+      printf("Expected: %d, Actual: %d\n", insertion_test_data[i], result);
+      MCC_ASSERT(insertion_test_data[i] == result);
    }
 
    for (i = (NUM_BASIC_TEST_ITEMS/2)-1; i >= 0; i--)
    {
-      result = (int *) mcc_ListGetPrevData(iter);
-      MCC_ASSERT(result != NULL);
-      MCC_ASSERT(basic_test_data[i] == *result);
+      result = (int) mcc_ListGetPrevData(iter);
+      MCC_ASSERT(result != NULL_DATA);
+      MCC_ASSERT(basic_test_data[i] == result);
    }
 
    printf("Cleaning up backwards insertion test\n");
    mcc_ListDeleteIterator(iter);
-   mcc_ListDelete(list, &test_list_node_destructor);
+   mcc_ListDelete(list, NULL);
 
    printf("*** Finished backwards insertion test ***\n\n");
 }
@@ -276,7 +259,7 @@ static void test_InsertionIteratingBackwards(void)
 static void test_Remove(void)
 {
    int i;
-   int *result;
+   int result;
    mcc_ListIterator_t *iter = NULL;
    mcc_ListIterator_t *removal_iter = NULL;
    mcc_List_t *list = mcc_ListCreate();
@@ -284,9 +267,7 @@ static void test_Remove(void)
    printf("*** Starting removal test ***\n");
    for (i = 0; i < NUM_BASIC_TEST_ITEMS; i++)
    {
-      int *data = (int *) malloc(sizeof(int));
-      *data = basic_test_data[i];
-      mcc_ListAppendData(list, data);
+      mcc_ListAppendData(list, basic_test_data[i]);
    }
 
    printf("Getting Iterator\n");
@@ -294,9 +275,9 @@ static void test_Remove(void)
 
    for (i = 0; i < (NUM_BASIC_TEST_ITEMS/2); i++)
    {
-      result = (int *) mcc_ListGetNextData(iter);
-      MCC_ASSERT(result != NULL);
-      MCC_ASSERT(basic_test_data[i] == *result);
+      result = (int) mcc_ListGetNextData(iter);
+      MCC_ASSERT(result != NULL_DATA);
+      MCC_ASSERT(basic_test_data[i] == result);
    }
 
    removal_iter = mcc_ListCopyIterator(iter);
@@ -304,20 +285,18 @@ static void test_Remove(void)
    printf("Inserting Items\n");
    for (i = 0; i < NUM_ITEMS_TO_INSERT; i++)
    {
-      int *data = (int *) malloc(sizeof(int));
-      *data = insertion_test_data[i];
-      mcc_ListInsertDataAtCurrentPosition(iter, data);
+      mcc_ListInsertDataAtCurrentPosition(iter, insertion_test_data[i]);
    }
 
    for (i = (NUM_BASIC_TEST_ITEMS/2); i < NUM_BASIC_TEST_ITEMS; i++)
    {
-      result = (int *) mcc_ListGetNextData(iter);
-      MCC_ASSERT(result != NULL);
-      MCC_ASSERT(basic_test_data[i] == *result);
+      result = (int) mcc_ListGetNextData(iter);
+      MCC_ASSERT(result != NULL_DATA);
+      MCC_ASSERT(basic_test_data[i] == result);
    }
 
-   result = (int *) mcc_ListGetNextData(iter);
-   MCC_ASSERT(result == NULL);
+   result = (int) mcc_ListGetNextData(iter);
+   MCC_ASSERT(result == NULL_DATA);
 
    //Move the iterator to the correct item as insertions happen 'after' the current item
    (void) mcc_ListGetNextData(removal_iter);
@@ -325,10 +304,9 @@ static void test_Remove(void)
    printf("Removing Items\n");
    for (i = 0; i < NUM_ITEMS_TO_INSERT; i++)
    {
-      int *data = mcc_ListRemoveDataAtCurrentPosition(removal_iter);
-      printf("Expected: %X, Actual: %X\n", insertion_test_data[i], *data);
-      MCC_ASSERT(insertion_test_data[i] == *data);
-      free(data);
+      int data = mcc_ListRemoveDataAtCurrentPosition(removal_iter);
+      printf("Expected: %X, Actual: %X\n", insertion_test_data[i], data);
+      MCC_ASSERT(insertion_test_data[i] == data);
    }
 
    mcc_ListDeleteIterator(iter);
@@ -337,18 +315,18 @@ static void test_Remove(void)
    printf("Asserting the remaining list is still intact\n");
    for (i = 0; i < NUM_BASIC_TEST_ITEMS; i++)
    {
-      result = (int *) mcc_ListGetNextData(iter);
-      MCC_ASSERT(result != NULL);
-      MCC_ASSERT(basic_test_data[i] == *result);
+      result = (int) mcc_ListGetNextData(iter);
+      MCC_ASSERT(result != NULL_DATA);
+      MCC_ASSERT(basic_test_data[i] == result);
    }
 
-   result = (int *) mcc_ListGetNextData(iter);
-   MCC_ASSERT(result == NULL);
+   result = (int) mcc_ListGetNextData(iter);
+   MCC_ASSERT(result == NULL_DATA);
 
    printf("Cleaning up removal test\n");
    mcc_ListDeleteIterator(iter);
    mcc_ListDeleteIterator(removal_iter);
-   mcc_ListDelete(list, &test_list_node_destructor);
+   mcc_ListDelete(list, NULL);
 
    printf("*** Finished removal test ***\n\n");
 }
@@ -356,7 +334,7 @@ static void test_Remove(void)
 static void test_RemoveThenInsert(void)
 {
    int i;
-   int *result;
+   int result;
    mcc_ListIterator_t *iter = NULL;
    mcc_List_t *list = mcc_ListCreate();
 
@@ -364,25 +342,23 @@ static void test_RemoveThenInsert(void)
    
    for (i = 0; i < NUM_BASIC_TEST_ITEMS; i++)
    {
-      int *data = (int *) malloc(sizeof(int));
-      *data = basic_test_data[i];
-      mcc_ListAppendData(list, data);
+      mcc_ListAppendData(list, basic_test_data[i]);
    }
 
    printf("*** About to Start removing ***\n");
 
    iter = mcc_ListGetIterator(list);
-   result = (int *) mcc_ListGetNextData(iter);
-   MCC_ASSERT(*result == basic_test_data[0]);
-   result = (int *) mcc_ListRemoveDataAtCurrentPosition(iter);
-   MCC_ASSERT(*result == basic_test_data[0]);
+   result = (int) mcc_ListGetNextData(iter);
+   MCC_ASSERT(result == basic_test_data[0]);
+   result = (int) mcc_ListRemoveDataAtCurrentPosition(iter);
+   MCC_ASSERT(result == basic_test_data[0]);
    mcc_ListInsertDataAtCurrentPosition(iter, result);
-   result = (int *) mcc_ListGetNextData(iter);
-   MCC_ASSERT(*result == basic_test_data[2]);   
+   result = (int) mcc_ListGetNextData(iter);
+   MCC_ASSERT(result == basic_test_data[2]);   
 
    printf("*** Finished Remove then Insert Test ***\n");
    mcc_ListDeleteIterator(iter);
-   mcc_ListDelete(list, &test_list_node_destructor);
+   mcc_ListDelete(list, NULL);
 }
 
 int main(void)
