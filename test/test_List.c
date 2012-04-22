@@ -361,6 +361,32 @@ static void test_RemoveThenInsert(void)
    mcc_ListDelete(list, NULL);
 }
 
+static void test_AppendThenRemove(void)
+{
+   int i;
+   mcc_List_t *list = mcc_ListCreate();
+   printf("*** Beginning Append Then Remove Test ***\n");
+
+   printf("*** About to Start Appending! ***\n");
+   for (i = 0; i < NUM_BASIC_TEST_ITEMS; i++)
+   {
+      mcc_ListAppendData(list, basic_test_data[i]);
+   }
+
+   printf("*** About to Start removing ***\n");
+   for (i = NUM_BASIC_TEST_ITEMS-1; i >= 0; i--)
+   {
+      int result = (int) mcc_ListRemoveTailData(list);
+      printf("Got '%d'\n", result);
+      MCC_ASSERT(result == basic_test_data[i]);
+   }
+
+   MCC_ASSERT(NULL == (void *) mcc_ListRemoveTailData(list));
+
+   mcc_ListDelete(list, NULL);
+   printf("*** Finished Append Then Remove Test ***\n");
+}
+
 int main(void)
 {
    printf("Beginning %s\n", __FILE__);
@@ -378,6 +404,8 @@ int main(void)
    test_Remove();
 
    test_RemoveThenInsert();
+
+   test_AppendThenRemove();
 
    printf("Finished %s\n", __FILE__);
    return 0;

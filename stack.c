@@ -17,6 +17,7 @@
 **/
 #include <stdlib.h>
 
+#include "mcc.h"
 #include "stack.h"
 #include "list.h"
 
@@ -31,19 +32,23 @@ mcc_Stack_t *mcc_StackCreate(void)
    return result;
 }
 
-void mcc_StackDelete(mcc_Stack_t *stack, mcc_NodeDestructor_fn destructorFn);
+void mcc_StackDelete(mcc_Stack_t *stack, mcc_NodeDestructor_fn destructorFn)
+{
+   mcc_ListDelete(stack->list, destructorFn);
+   free(stack);
+}
 
 void mcc_StackPush(mcc_Stack_t *stack, uintptr_t data)
 {
    mcc_ListAppendData(stack->list, data);
 }
 
-uintptr_t mcc_StackPop(void)
+uintptr_t mcc_StackPop(mcc_Stack_t *stack)
 {
-   return (uintptr_t) 0;
+   return mcc_ListRemoveTailData(stack->list);
 }
 
-uintptr_t mcc_StackPeek(void)
+uintptr_t mcc_StackPeek(mcc_Stack_t UNUSED(*stack))
 {
    return (uintptr_t) 0;
 }

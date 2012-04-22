@@ -103,6 +103,37 @@ void mcc_ListAppendData(mcc_List_t *list, uintptr_t data)
    list->nItems ++;
 }
 
+uintptr_t mcc_ListRemoveTailData(mcc_List_t *list)
+{
+   if (list->tail != NULL)
+   {
+      mcc_ListNode_t *result_node = list->tail;
+      uintptr_t result = list->tail->data;
+      if (list->head == list->tail)
+      {
+         list->head = NULL;
+         list->tail = NULL;
+      }
+      else
+      {
+         list->tail = list->tail->prev;
+      }
+      free(result_node);
+      list->nItems--;
+      return result;
+   }
+   return NULL_DATA;
+}
+
+uintptr_t mcc_ListPeekTailData(mcc_List_t *list)
+{
+   if (list->tail != NULL)
+   {
+      return list->tail->data;
+   }
+   return NULL_DATA;
+}
+
 mcc_ListIterator_t *mcc_ListGetIterator(mcc_List_t *list)
 {
    mcc_ListIterator_t *iter = (mcc_ListIterator_t *) malloc(sizeof(mcc_ListIterator_t));

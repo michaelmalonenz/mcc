@@ -19,6 +19,7 @@
 #define _MCC_LIST_H_
 
 #include <stdint.h>
+#include <limits.h>
 
 /* Forward declarations of the opaque list types */
 typedef struct list_node mcc_ListNode_t;
@@ -47,6 +48,13 @@ void mcc_ListDelete(mcc_List_t *list, mcc_NodeDestructor_fn destructorFn);
  * Adds an item to the end of the list
  */
 void mcc_ListAppendData(mcc_List_t *list, uintptr_t data);
+
+/**
+ * Removes the item at the head (most recently appended) of the list.
+ * The item removed is no longer part of the list and responsibility
+ * for freeing any memory associated with the item is transferred to the client
+ */
+uintptr_t mcc_ListRemoveTailData(mcc_List_t *list);
 
 /**
  * Gets an iterator pointing nowhere in the list.
