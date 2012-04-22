@@ -29,4 +29,4 @@ uintptr_t mcc_StackPop(mcc_Stack_t *stack);
 
 uintptr_t mcc_StackPeek(mcc_Stack_t *stack);
 
-
+bool_t mcc_StackEmpty(mcc_Stack_t *stack);

@@ -53,3 +53,7 @@ uintptr_t mcc_StackPeek(mcc_Stack_t UNUSED(*stack))
    return (uintptr_t) 0;
 }
 
+bool_t mcc_StackEmpty(mcc_Stack_t *stack)
+{
+   return mcc_ListEmpty(stack->list);
+}

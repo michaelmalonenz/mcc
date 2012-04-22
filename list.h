@@ -57,6 +57,11 @@ void mcc_ListAppendData(mcc_List_t *list, uintptr_t data);
 uintptr_t mcc_ListRemoveTailData(mcc_List_t *list);
 
 /**
+ * Returns True if the list has no items in it, otherwise false
+ */
+bool_t mcc_ListEmpty(mcc_List_t *list);
+
+/**
  * Gets an iterator pointing nowhere in the list.
  * The next call to mcc_ListGetXXXXData determines whereabouts in the list we start.
  * If mcc_ListGetNextData() is called first, we start at the beginning,

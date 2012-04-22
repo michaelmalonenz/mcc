@@ -16,9 +16,28 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include "ICE.h"
+#include "stack.h"
 
-int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t UNUSED(*iter))
+int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
 {
+   mcc_Stack_t *operators = mcc_StackCreate();
+   mcc_Stack_t *operands = mcc_StackCreate();
+   const mcc_Token_t *token = mcc_GetNextToken(iter);
+   while (token->tokenType != TOK_EOL)
+   {
+      if (token->tokenType == TOK_OPERATOR)
+      {
+         mcc_StackPush(operators, (uintptr_t) token);
+      }
+      else if (token->tokenType == TOK_NUMBER)
+      {
+         mcc_StackPush(operands, (uintptr_t) token);
+      }
+      token = mcc_GetNextToken(iter);
+   }
+
+   mcc_StackDelete(operators, NULL);
+   mcc_StackDelete(operands, NULL);
    //BEDMAS
    return 0;
 }

@@ -245,6 +245,11 @@ uintptr_t mcc_ListRemoveDataAtCurrentPosition(mcc_ListIterator_t *iter)
    return result;
 }
 
+bool_t mcc_ListEmpty(mcc_List_t *list)
+{
+   return list->nItems == 0;
+}
+
 uintptr_t mcc_ListPeekCurrentData(mcc_ListIterator_t *iter)
 {
    return iter->current->data;
