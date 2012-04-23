@@ -429,6 +429,21 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
          token->tokenIndex = current_operator;
          line->index += operator_strlens[current_operator];
       }
+      else if (isNumber(line->string[line->index]))
+      {
+         int numLen = 1;
+         while (isNumericChar(line->string[line->index + numLen]) &&
+                 line->index + numLen < line->length)
+         {
+            numLen++;
+         }
+         //check for u, f, d suffixes
+         token = mcc_CreateToken(&line->string[line->index], numLen,
+                                 TOK_NUMBER,
+                                 mcc_GetFileBufferCurrentLineNo(fileBuffer),
+                                 mcc_GetFileBufferFileNumber(fileBuffer));
+         line->index += numLen;
+      }
       else if (isWordChar(line->string[line->index]))
       {
          MCC_KEYWORD keyword = mcc_GetKeyword(line);
@@ -456,21 +471,6 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
                                     mcc_GetFileBufferFileNumber(fileBuffer));
             line->index += identLen;
          }
-      }
-      else if (isNumber(line->string[line->index]))
-      {
-         int numLen = 1;
-         while (isNumericChar(line->string[line->index + numLen]) &&
-                 line->index + numLen < line->length)
-         {
-            numLen++;
-         }
-         //check for u, f, d suffixes
-         token = mcc_CreateToken(&line->string[line->index], numLen,
-                                 TOK_NUMBER,
-                                 mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                                 mcc_GetFileBufferFileNumber(fileBuffer));
-         line->index += numLen;
       }
       else
       {
