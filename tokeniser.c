@@ -457,17 +457,56 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
       }
       else if (isNumber(line->string[line->index]))
       {
+         bool_t isUnsigned = FALSE;
+         bool_t isDouble = FALSE;
          int numLen = 1;
-         while (isNumericChar(line->string[line->index + numLen]) &&
+         while (isNumber(line->string[line->index + numLen]) &&
                  line->index + numLen < line->length)
          {
             numLen++;
          }
-         //check for u, f, d suffixes
+         if (toupper(line->string[line->index + numLen]) == 'E')
+         {
+            while (isNumber(line->string[line->index + numLen]) &&
+                   line->index + numLen < line->length)
+            {
+               numLen++;
+            }
+         }
+         if (toupper(line->string[line->index + numLen]) == 'U')
+         {
+            isUnsigned = TRUE;
+         }
+         else if (line->string[line->index + numLen] == '.')
+         {
+            while (isNumber(line->string[line->index + numLen]) &&
+                   line->index + numLen < line->length)
+            {
+               numLen++;
+            }
+            if (toupper(line->string[line->index + numLen]) == 'F' ||
+                toupper(line->string[line->index + numLen]) == 'D')
+            {
+               isDouble = TRUE;
+            }
+         }
+         
          token = mcc_CreateToken(&line->string[line->index], numLen,
                                  TOK_NUMBER,
                                  mcc_GetFileBufferCurrentLineNo(fileBuffer),
                                  mcc_GetFileBufferFileNumber(fileBuffer));
+         if (isDouble)
+         {
+            token->numberContainer.floatingPointNum = strtod(token->text, NULL);
+         }
+         else if (isUnsigned)
+         {
+            token->numberContainer.uint32 = strtoul(token->text, NULL, 10);
+         }
+         else 
+         {
+            token->numberContainer.int32 = strtol(token->text, NULL, 10);
+         }
          line->index += numLen;
       }
       else if (isWordChar(line->string[line->index]))

@@ -56,6 +56,12 @@
 #include "list.h"
 #include "fileBuffer.h"
 
+typedef union {
+   uint32_t uint32;
+   double floatingPointNum;
+   int32_t int32;
+} mcc_numberContainer_t;
+
 typedef enum TYPE { TOK_PP_DIRECTIVE, TOK_IDENTIFIER, TOK_KEYWORD, TOK_SYMBOL,
                     TOK_OPERATOR, TOK_NUMBER, TOK_STR_CONST, TOK_CHAR_CONST,
                     TOK_SYS_FILE_INC, TOK_LOCAL_FILE_INC, TOK_WHITESPACE, TOK_EOL,
@@ -69,6 +75,7 @@ typedef struct token {
    unsigned short fileno;
    int lineno;
    int line_index;
+   mcc_numberContainer_t numberContainer;
 } mcc_Token_t;
 
 
