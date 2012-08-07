@@ -34,8 +34,8 @@ void mcc_StackDelete(mcc_Stack_t *stack, mcc_NodeDestructor_fn destructorFn);
 
 void mcc_StackPush(mcc_Stack_t *stack, uintptr_t data);
 
-uintptr_t mcc_StackPop(mcc_Stack_t *stack);
+uintptr_t mcc_StackPop(const mcc_Stack_t *stack);
 
-uintptr_t mcc_StackPeek(mcc_Stack_t *stack);
+uintptr_t mcc_StackPeek(const mcc_Stack_t *stack);
 
-bool_t mcc_StackEmpty(mcc_Stack_t *stack);
+bool_t mcc_StackEmpty(const mcc_Stack_t *stack);
