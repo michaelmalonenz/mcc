@@ -52,17 +52,17 @@ void mcc_StackPush(mcc_Stack_t *stack, uintptr_t data)
    mcc_ListAppendData(stack->list, data);
 }
 
-uintptr_t mcc_StackPop(mcc_Stack_t *stack)
+uintptr_t mcc_StackPop(const mcc_Stack_t *stack)
 {
    return mcc_ListRemoveTailData(stack->list);
 }
 
-uintptr_t mcc_StackPeek(mcc_Stack_t UNUSED(*stack))
+uintptr_t mcc_StackPeek(const mcc_Stack_t UNUSED(*stack))
 {
    return (uintptr_t) 0;
 }
 
-bool_t mcc_StackEmpty(mcc_Stack_t *stack)
+bool_t mcc_StackEmpty(const mcc_Stack_t *stack)
 {
    return mcc_ListEmpty(stack->list);
 }
