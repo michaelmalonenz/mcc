@@ -44,6 +44,13 @@ int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
       {
          mcc_StackPush(operands, (uintptr_t) token);
       }
+/*
+      else if (token->tokenType != TOK_WHITESPACE &&
+               token->tokenType != TOK_EOL)
+      {
+         MCC_ASSERT(FALSE);
+      }
+*/
       token = mcc_GetNextToken(iter);
    }
 

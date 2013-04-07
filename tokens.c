@@ -155,6 +155,7 @@ MCC_SYMBOL mcc_GetSymbol(mcc_LogicalLine_t *line)
    }
 }
 
+
 MCC_OPERATOR mcc_GetOperator(mcc_LogicalLine_t *line)
 {
    int op;

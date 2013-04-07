@@ -441,8 +441,6 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
                                     mcc_GetFileBufferFileNumber(fileBuffer));
             token->tokenIndex = current_symbol;
             line->index += symbol_strlens[current_symbol];
-            //addressof and logical and need to be differentiated by the parser
-            //based on context _and_ corrected
          }
       }
       else if ((current_operator = mcc_GetOperator(line)) != OP_NONE)
