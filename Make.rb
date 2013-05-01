@@ -101,7 +101,6 @@ class Linker
 
    def discover_required_files(o_file)
       o_file = File.expand_path(o_file)
-      needed_symbols = find_required_symbols(o_file)
       required_files = Set.new
       unsearched_files = [o_file]
       while(unsearched_files.size > 0) do
