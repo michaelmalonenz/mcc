@@ -57,9 +57,9 @@ uintptr_t mcc_StackPop(const mcc_Stack_t *stack)
    return mcc_ListRemoveTailData(stack->list);
 }
 
-uintptr_t mcc_StackPeek(const mcc_Stack_t UNUSED(*stack))
+uintptr_t mcc_StackPeek(const mcc_Stack_t *stack)
 {
-   return (uintptr_t) 0;
+   return mcc_ListPeekHead(stack->list);
 }
 
 bool_t mcc_StackEmpty(const mcc_Stack_t *stack)

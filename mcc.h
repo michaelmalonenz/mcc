@@ -91,9 +91,6 @@ typedef _Bool bool_t;
 
 #define isHexChar(x) ( isNumber(x) || (toupper(x) >= 'A' && toupper(x) <= 'F') )
 
-#define isNumericChar(d) ( (((d) >= '0') && ((d) <= '9')) || \
-                           (d) == 'e' || (d) == 'E' || (d) == '.')
-
 FILE *mcc_OpenFile(const char *filename, const char *flags, unsigned short *out_fileno);
 void mcc_FileOpenerInitialise(void);
 void mcc_FileOpenerDelete(void);

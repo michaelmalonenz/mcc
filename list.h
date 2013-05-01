@@ -136,6 +136,12 @@ uintptr_t mcc_ListRemoveDataAtCurrentPosition(mcc_ListIterator_t *iter);
 uintptr_t mcc_ListPeekCurrentData(mcc_ListIterator_t *iter);
 
 /**
+ * This returns a copy of the head data. This differs from the
+ * Peek Current Data, 
+ */
+uintptr_t mcc_ListPeekHead(mcc_List_t *list);
+
+/**
  * Returns the next item in the list or NULL if we are at the end of the list
  */
 uintptr_t mcc_ListGetNextData(mcc_ListIterator_t *iter);

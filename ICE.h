@@ -28,6 +28,7 @@
 #define _MCC_ICE_H_
 
 #include "tokenList.h"
+#include "tokens.h"
 
 /**
  * @brief An Integer Constant Expression is a compile-time expression which
@@ -43,5 +44,6 @@
  *          error and terminate execution of the program.
  */
 int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter);
+
 
 #endif /* _MCC_ICE_H_ */

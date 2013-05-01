@@ -301,3 +301,8 @@ uintptr_t mcc_ListGetPrevData(mcc_ListIterator_t *iter)
    }
    return iter->current->data;
 }
+
+uintptr_t mcc_ListPeekHead(mcc_List_t *list)
+{
+   return list->head->data;
+}
