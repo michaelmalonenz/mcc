@@ -1,5 +1,5 @@
 /**
- Copyright (c) 2012, Michael Malone
+ Copyright (c) 2013, Michael Malone
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -16,7 +16,7 @@
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ DISCLAIMED. IN NO EVENT SHALL Michael Malone BE LIABLE FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,57 +24,43 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
+#include <stdio.h>
 #include <stdlib.h>
 
+#define MCC_DEBUG 1
+#include "config.h"
 #include "mcc.h"
 #include "stack.h"
-#include "list.h"
 
-struct stack {
-   mcc_List_t *list;
-};
+#define NUM_TEST_DATA 10
+static int basicTestData[NUM_TEST_DATA] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
-mcc_Stack_t *mcc_StackCreate(void)
+static void stackItemPrinter(uintptr_t item)
 {
-   mcc_Stack_t *result = (mcc_Stack_t *) malloc(sizeof(mcc_Stack_t));
-   result->list = mcc_ListCreate();
-   return result;
+   printf("Stack Item: %lu\n", item);
 }
 
-void mcc_StackDelete(mcc_Stack_t *stack, mcc_NodeDestructor_fn destructorFn)
+int main(void)
 {
-   mcc_ListDelete(stack->list, destructorFn);
-   free(stack);
-}
+   int i;
+   mcc_Stack_t *stack = mcc_StackCreate();
 
-void mcc_StackPush(mcc_Stack_t *stack, uintptr_t data)
-{
-   mcc_ListAppendData(stack->list, data);
-}
-
-uintptr_t mcc_StackPop(const mcc_Stack_t *stack)
-{
-   return mcc_ListRemoveTailData(stack->list);
-}
-
-uintptr_t mcc_StackPeek(const mcc_Stack_t *stack)
-{
-   return mcc_ListPeekTailData(stack->list);
-}
-
-bool_t mcc_StackEmpty(const mcc_Stack_t *stack)
-{
-   return mcc_ListEmpty(stack->list);
-}
-
-void mcc_DebugPrintStack(const mcc_Stack_t *stack, stackItemPrinter_t itemPrinterFn)
-{
-   mcc_ListIterator_t *iter = mcc_ListGetIterator(stack->list);
-   uintptr_t item = mcc_ListGetPrevData(iter);
-   printf("Number of Items: %d\n", mcc_ListGetLength(stack->list));
-   while(item != NULL_DATA)
+   for (i = 0; i < NUM_TEST_DATA; i++)
    {
-      itemPrinterFn(item);
-      item = mcc_ListGetPrevData(iter);
+      printf("Pushing %d\n", basicTestData[i]);
+      mcc_StackPush(stack, basicTestData[i]);
    }
+   
+   mcc_DebugPrintStack(stack, stackItemPrinter);
+
+   for (i = NUM_TEST_DATA-1; i >= 0; i--)
+   {
+      int result = mcc_StackPop(stack);
+      printf("Popped %d\n", result);
+      MCC_ASSERT(result == basicTestData[i]);
+   }
+
+   mcc_StackDelete(stack, NULL);
+
+   return EXIT_SUCCESS;
 }

@@ -59,22 +59,26 @@ void mcc_ListDelete(mcc_List_t *list, mcc_NodeDestructor_fn destructorFn);
 void mcc_ListAppendData(mcc_List_t *list, uintptr_t data);
 
 /**
- * Removes the item at the head (most recently appended) of the list.
+ * Removes the item at the tail (most recently appended) of the list.
  * The item removed is no longer part of the list and responsibility
  * for freeing any memory associated with the item is transferred to the client
  */
 uintptr_t mcc_ListRemoveTailData(mcc_List_t *list);
+
+uintptr_t mcc_ListPeekTailData(mcc_List_t *list);
 
 /**
  * Returns True if the list has no items in it, otherwise false
  */
 bool_t mcc_ListEmpty(mcc_List_t *list);
 
+uint32_t mcc_ListGetLength(mcc_List_t *list);
+
 /**
  * Gets an iterator pointing nowhere in the list.
  * The next call to mcc_ListGetXXXXData determines whereabouts in the list we start.
- * If mcc_ListGetNextData() is called first, we start at the beginning,
- * conversely if mcc_ListGetPrevData() is called first, we start at the end.
+ * If mcc_ListGetNextData() is called first, we start at the beginning (head),
+ * conversely if mcc_ListGetPrevData() is called first, we start at the end (tail).
  * After this, any amount of Next or Prev may be called on any iterator, but if insertions
  * are made to the list (with another iterator) this may give unexpected results.
  * So long as there is nothing removed, the iterator is guaranteed to be valid,
@@ -139,7 +143,7 @@ uintptr_t mcc_ListPeekCurrentData(mcc_ListIterator_t *iter);
  * This returns a copy of the head data. This differs from the
  * Peek Current Data, 
  */
-uintptr_t mcc_ListPeekHead(mcc_List_t *list);
+uintptr_t mcc_ListPeekTailData(mcc_List_t *list);
 
 /**
  * Returns the next item in the list or NULL if we are at the end of the list

@@ -39,3 +39,8 @@ uintptr_t mcc_StackPop(const mcc_Stack_t *stack);
 uintptr_t mcc_StackPeek(const mcc_Stack_t *stack);
 
 bool_t mcc_StackEmpty(const mcc_Stack_t *stack);
+
+#if MCC_DEBUG
+typedef void (*stackItemPrinter_t)(uintptr_t item);
+void mcc_DebugPrintStack(const mcc_Stack_t *stack, stackItemPrinter_t);
+#endif

@@ -259,6 +259,11 @@ bool_t mcc_ListEmpty(mcc_List_t *list)
    return list->nItems == 0;
 }
 
+uint32_t mcc_ListGetLength(mcc_List_t *list)
+{
+   return list->nItems;
+}
+
 uintptr_t mcc_ListPeekCurrentData(mcc_ListIterator_t *iter)
 {
    return iter->current->data;
@@ -302,7 +307,3 @@ uintptr_t mcc_ListGetPrevData(mcc_ListIterator_t *iter)
    return iter->current->data;
 }
 
-uintptr_t mcc_ListPeekHead(mcc_List_t *list)
-{
-   return list->head->data;
-}
