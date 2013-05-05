@@ -16,7 +16,7 @@
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ DISCLAIMED. IN NO EVENT SHALL Michael Malone BE LIABLE FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -49,6 +49,7 @@ void mcc_StackDelete(mcc_Stack_t *stack, mcc_NodeDestructor_fn destructorFn)
 
 void mcc_StackPush(mcc_Stack_t *stack, uintptr_t data)
 {
+   MCC_ASSERT(data != NULL_DATA);
    mcc_ListAppendData(stack->list, data);
 }
 
@@ -77,4 +78,5 @@ void mcc_DebugPrintStack(const mcc_Stack_t *stack, stackItemPrinter_t itemPrinte
       itemPrinterFn(item);
       item = mcc_ListGetPrevData(iter);
    }
+   mcc_ListDeleteIterator(iter);
 }

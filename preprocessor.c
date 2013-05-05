@@ -36,6 +36,7 @@
 #include "tokens.h"
 #include "tokenList.h"
 #include "toolChainCommands.h"
+#include "ICE.h"
 
 #ifdef MCC_DEBUG
 #define HANDLER_LINKAGE extern
@@ -248,8 +249,15 @@ HANDLER_LINKAGE void handleIfndef(mcc_Token_t *currentToken,
 }
 
 HANDLER_LINKAGE void handleIf(mcc_Token_t UNUSED(*currentToken),
-                              mcc_TokenListIterator_t UNUSED(*tokenListIter),
-                              bool_t UNUSED(ignore)) {}
+                              mcc_TokenListIterator_t *tokenListIter,
+                              bool_t UNUSED(ignore)) 
+{
+   //Get values for the identifier tokens.
+   int result = mcc_ICE_EvaluateTokenString(tokenListIter);
+   if (result)
+   {
+   }
+}
 
 HANDLER_LINKAGE void handleEndif(mcc_Token_t *currentToken,
                                  mcc_TokenListIterator_t UNUSED(*tokenListIter),

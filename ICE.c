@@ -28,8 +28,12 @@
 #include "stack.h"
 #include "tokens.h"
 
+static void mcc_SimpleTokenPrinter(uintptr_t item)
+{
+   mcc_Token_t *token = (mcc_Token_t *) item;
+   printf("%s ", token->text);
+}
 
-/*
 static int getRelativeOperatorPrecedence(MCC_OPERATOR op)
 {
    static const int priorities[NUM_OPERATORS] = {
@@ -54,29 +58,10 @@ static int getRelativeOperatorPrecedence(MCC_OPERATOR op)
    return priorities[op];
 }
 
-
-static bool_t shouldPlaceOnOutputQueue(const mcc_Stack_t *operators, const mcc_Token_t *current)
-{
-   if (current->tokenType == TOK_NUMBER || current->tokenType == TOK_IDENTIFIER ||
-       (current->tokenType == TOK_OPERATOR && mcc_StackEmpty(operators)))
-   {
-      return TRUE;
-   }
-   if (current->tokenType == TOK_OPERATOR)
-   { 
-      mcc_Token_t *top_operator = (mcc_Token_t *) mcc_StackPeek(operators);
-      return ((getRelativeOperatorPrecedence(top_operator->tokenType) < 
-               getRelativeOperatorPrecedence(current->tokenType)));
-   }
-   MCC_ASSERT(current->tokenType != TOK_OPERATOR); //we have something in an arithmetic expression I wasn't expecting
-   return FALSE;
-}
-*/
-
 int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
 {
-   mcc_Stack_t *operators = mcc_StackCreate();
    mcc_Stack_t *output = mcc_StackCreate();
+   mcc_Stack_t *operator_stack = mcc_StackCreate();
    const mcc_Token_t *token = mcc_GetNextToken(iter);
    const mcc_Token_t *temp = NULL;
 /*
@@ -109,24 +94,86 @@ Exit.
    {
       if (token->tokenType == TOK_NUMBER)
       {
+         printf("Pushing a number to the output: %s\n", token->text);
          mcc_StackPush(output, (uintptr_t) token);
       }
       else if (token->tokenType == TOK_OPERATOR)
       {
-         temp = (mcc_Token_t *) mcc_StackPeek(operators);
-         if (temp != NULL && )
+         printf("Found an operator: %s\n", token->text);
+         temp = (mcc_Token_t *) mcc_StackPeek(operator_stack);
+         if (temp != NULL)
          {
-            mcc_StackPush(operators, (uintptr_t) token);
+            if (temp->tokenType == TOK_OPERATOR &&
+                (getRelativeOperatorPrecedence(temp->tokenIndex) > 
+                 getRelativeOperatorPrecedence(token->tokenIndex)))
+            {
+               printf("Pushing an operator to operator stack: %s\n", token->text);
+               mcc_DebugPrintToken(temp);
+               mcc_StackPush(operator_stack, (uintptr_t) token);
+            }
+            else if (temp->tokenType == TOK_OPERATOR)
+            {
+               mcc_StackPush(output, mcc_StackPop(operator_stack));
+            }
+         }
+         mcc_StackPush(operator_stack, (uintptr_t) token);
+      }
+      else if (token->tokenType == TOK_SYMBOL)
+      {
+         if (token->tokenIndex == SYM_OPEN_PAREN)
+         {
+            mcc_StackPush(operator_stack, (uintptr_t) token);
+         }
+         else if (token->tokenIndex == SYM_CLOSE_PAREN)
+         {
+            temp = (mcc_Token_t *) mcc_StackPop(operator_stack);
+            while(!mcc_StackEmpty(operator_stack))
+            {
+               if (temp->tokenType == TOK_SYMBOL &&
+                   temp->tokenIndex == SYM_OPEN_PAREN)
+               {
+                  break;
+               }
+               mcc_StackPush(output, (uintptr_t) temp);
+               temp = (mcc_Token_t *) mcc_StackPop(operator_stack);
+            }
+            if (temp == NULL)
+            {
+               mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
+                               token->lineno,
+                               "Unmatched Parentheses\n");
+            }
+         }
+         else
+         {
+            mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
+                            token->lineno,
+                            "Unexpected symbol in arithmetic statement: %s\n",
+                            symbols[token->tokenIndex]);
          }
       }
       else
       {
+#if MCC_DEBUG
+         if (token->tokenType != TOK_WHITESPACE)
+         {
+            mcc_DebugPrintToken(token);
+         }
+#endif
          //something's gone wrong?
       }
       token = mcc_GetNextToken(iter);
    }
 
-   mcc_StackDelete(operators, NULL);
+   while(!mcc_StackEmpty(operator_stack))
+   {
+      mcc_StackPush(output, mcc_StackPop(operator_stack));
+   }
+
+   mcc_DebugPrintStack(output, mcc_SimpleTokenPrinter);
+   printf("\n");
+
+   mcc_StackDelete(operator_stack, NULL);
    mcc_StackDelete(output, NULL);
    return 0;
 }
