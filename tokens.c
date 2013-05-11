@@ -16,7 +16,7 @@
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ DISCLAIMED. IN NO EVENT SHALL Michael Malone BE LIABLE FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -63,7 +63,7 @@ const char *keywords[NUM_KEYWORDS] = { "auto", "break", "case", "char", "const",
 size_t keyword_strlens[NUM_KEYWORDS];
 
 const char *operators[NUM_OPERATORS] = { "--", "++", "*=", "/=", "%=", "+=",
-                                         "-=", "<<=", ">=", "&=", "^=", "|=",
+                                         "-=", "<<=", ">>=", "&=", "^=", "|=",
                                          "==", "!=", ">", "<", ">=", "<=", "&&",
                                          "||", "!", "&", "|", "^", "<<", ">>",
                                          "~", "sizeof", "&", "*", "?", ":", ".",
