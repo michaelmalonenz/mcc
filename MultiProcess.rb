@@ -2,11 +2,13 @@
 
 class ProcessPool
 
-   def initilize(max_procs=10)
+   @@num_cores = `cat /proc/cpuinfo | grep processor | wc -l`.to_i
+
+   def initilize(max_procs=@@num_cores+1)
    end
 
    def run_command(cmd, args)
-      return 1
+      return spawn(cmd + " " + args.join(" "))
    end
 
 end
@@ -21,6 +23,7 @@ require 'test/unit'
          pool = ProcessPool.new
          pid = pool.run_command("ls", ['-l'])
          assert(pid != nil)
+         return Process.waitpid(pid)
       end
 
    end

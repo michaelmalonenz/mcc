@@ -127,11 +127,36 @@ class Linker
 
 end
 
+class CompileJob
+
+   @@files_to_cleanup = []
+
+   def initialize(command, failure_message=nil, cleanup_file=nil)
+      @command = command
+      @failure_message = failure_message
+      @@files_to_cleanup << cleanup_file unless cleanup_file.nil?
+   end
+
+   def CompileJob.clean_up_files
+      FileUtils.rm(@@files_to_cleanup)
+   end
+
+   def CompileJob.clean_unused_o_files(out_dir)
+      Dir.chdir(out_dir) do
+         o_files_to_delete = Dir.glob('*.o') - @@files_to_cleanup
+         FileUtils.rm(o_files_to_delete)
+      end
+   end
+
+   def compile!
+      run_command(@command, @failure_message)
+   end
+
+end
+
 def c_to_o(file)
    return file.gsub(%r{ \.c$ }x,".o")
 end
-
-
 
 def run_command(cmd, failure_message)
    $log_file.note(cmd)
@@ -151,20 +176,22 @@ def clean()
    FileUtils.rm_rf(BIN_DIR)
 end
 
+
+
 def compile_a_directory(input_dir, out_dir)
-   o_files = []
+   jobs = []
    Dir.chdir(input_dir) do
       Dir.glob("*.c").each do |file|
          o_file = c_to_o(file)
-         o_files << o_file
-         run_command("#{$cc} #{CFLAGS} -I#{SRC_DIR} -c #{file} -o #{out_dir}/#{o_file}",
-                     "Compilation of #{input_dir}/#{file} failed...")
+         jobs << CompileJob.new( "#{$cc} #{CFLAGS} -I#{SRC_DIR} -c #{file} -o #{out_dir}/#{o_file}",
+                                 "Compilation of #{input_dir}/#{file} failed...",
+                                 o_file)
+      end
+      jobs.each do |job|
+         job.compile!
       end
    end
-   Dir.chdir(out_dir) do
-      o_files_to_delete = Dir.glob('*.o') - o_files
-      FileUtils.rm(o_files_to_delete)
-   end
+   CompileJob.clean_unused_o_files(out_dir)
 end
 
 
