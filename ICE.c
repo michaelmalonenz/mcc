@@ -90,12 +90,24 @@ static int getRelativeOperatorPrecedence(MCC_OPERATOR op)
    return precedents[op];
 }
 
+static int mcc_EvaluateRPN(mcc_Stack_t UNUSED(*input))
+{
+   int result;
+   mcc_Stack_t *output = mcc_StackCreate();
+
+   result = 0;
+
+   mcc_StackDelete(output, NULL);
+   return result;
+}
+
 int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
 {
    mcc_Stack_t *output = mcc_StackCreate();
    mcc_Stack_t *operator_stack = mcc_StackCreate();
    const mcc_Token_t *token = mcc_GetNextToken(iter);
    const mcc_Token_t *temp = NULL;
+   int result;
    
    while (token->tokenType != TOK_EOL)
    {
@@ -169,8 +181,11 @@ int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
    }
 
    mcc_StackDelete(operator_stack, NULL);
+
+   result = mcc_EvaluateRPN(output);
+
    mcc_StackDelete(output, NULL);
 
-   return 0;
+   return result;
 }
 

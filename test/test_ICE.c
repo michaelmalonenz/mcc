@@ -26,6 +26,7 @@
 **/
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include "mcc.h"
 #include "TestUtils.h"
@@ -33,26 +34,33 @@
 #include "tokenList.h"
 #include "ICE.h"
 
-//const char *ice_is_zero = "10 * (1 + 1 - 2)\n";
-//const char *ice_is_nonzero_twenty = "10 * (1 + 3 - 2)\n";
+const char *ice_is_zero = "10 * (1 + 1 - 2)\n";
+const char *ice_is_nonzero_twenty = "10 * (1 + 3 - 2)\n";
 static const char *ice_shunting_yard_wiki_example = "3 + 4 * 2 / ( 1 - 5 ) ^ 2 ^ 3\n";
 
-int main(void)
+static void test_Implementation(const char *token_string, int expected_result)
 {
-   const char *file = mcc_TestUtils_DumpStringToTempFile(ice_shunting_yard_wiki_example,
-                                                         strlen(ice_shunting_yard_wiki_example));
+   const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
+                                                         strlen(token_string));
    mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator();
    mcc_FileOpenerInitialise();
    mcc_TokeniseFile(file, iter);
    mcc_TokenListDeleteIterator(iter);
 
    iter = mcc_TokenListGetIterator();
-   MCC_ASSERT(mcc_ICE_EvaluateTokenString(iter) == 0);
+   MCC_ASSERT(mcc_ICE_EvaluateTokenString(iter) == expected_result);
    mcc_TokenListDeleteIterator(iter);
 
    mcc_FreeTokens();
    mcc_FileOpenerDelete();
    unlink(file);
+}
 
-   return 0;
+int main(void)
+{
+   test_Implementation(ice_shunting_yard_wiki_example, 0);
+   test_Implementation(ice_is_zero, 0);
+   test_Implementation(ice_is_nonzero_twenty, 20);
+
+   return EXIT_SUCCESS;
 }
