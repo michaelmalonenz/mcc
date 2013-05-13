@@ -68,6 +68,11 @@ bool_t mcc_StackEmpty(const mcc_Stack_t *stack)
    return mcc_ListEmpty(stack->list);
 }
 
+uint32_t mcc_StackNumItems(const mcc_Stack_t *stack)
+{
+   return mcc_ListGetLength(stack->list);
+}
+
 void mcc_DebugPrintStack(const mcc_Stack_t *stack, stackItemPrinter_t itemPrinterFn)
 {
    mcc_ListIterator_t *iter = mcc_ListGetIterator(stack->list);

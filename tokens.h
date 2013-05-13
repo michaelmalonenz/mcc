@@ -56,12 +56,6 @@
 #include "list.h"
 #include "fileBuffer.h"
 
-typedef union {
-   uint32_t uint32;
-   double floatingPointNum;
-   int32_t int32;
-} mcc_numberContainer_t;
-
 typedef enum TYPE { TOK_PP_DIRECTIVE, TOK_IDENTIFIER, TOK_KEYWORD, TOK_SYMBOL,
                     TOK_OPERATOR, TOK_NUMBER, TOK_STR_CONST, TOK_CHAR_CONST,
                     TOK_SYS_FILE_INC, TOK_LOCAL_FILE_INC, TOK_WHITESPACE, TOK_EOL,
@@ -75,7 +69,7 @@ typedef struct token {
    unsigned short fileno;
    int lineno;
    int line_index;
-   mcc_numberContainer_t numberContainer;
+   mcc_Number_t number;
 } mcc_Token_t;
 
 
@@ -134,11 +128,15 @@ typedef enum pp_directives { PP_INCLUDE, PP_DEFINE, PP_IFDEF, PP_IFNDEF,
 extern const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES];
 extern size_t pp_strlens[NUM_PREPROCESSOR_DIRECTIVES];
 
+extern const char *number_types[NUMBER_OF_NUMBER_TYPES];
 
 MCC_SYMBOL mcc_GetSymbol(mcc_LogicalLine_t *line);
 MCC_OPERATOR mcc_GetOperator(mcc_LogicalLine_t *line);
 PREPROC_DIRECTIVE mcc_GetPreprocessorDirective(mcc_LogicalLine_t *line);
 MCC_KEYWORD mcc_GetKeyword(mcc_LogicalLine_t * line);
 
+#if MCC_DEBUG
+void mcc_DebugPrintToken_Fn(uintptr_t token_ptr);
+#endif
 
 #endif /* MCC_TOKENS_H_ */

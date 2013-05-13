@@ -21,13 +21,13 @@ Fix the b-tree after a macro deletion
 macro replacement
 evaluate macro expressions (like #if etc)
  - Create an Integer Constant Expression parser/evaluator module?
+  - Boolean expressions can be evaluated just like integer constant expresseions.
 support function macros
 Need to handle the ## operator
 handle if-like constructs
 
 Tokeniser:
-handle constant numbers better (floating point, decimal, octal and hex!)
- - suffixes, etc
+Need to figure out the difference between unary and binary operators.
 
 Parser:
 Assert that the input file conforms to the c(99) standard

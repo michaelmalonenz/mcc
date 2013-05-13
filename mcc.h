@@ -16,7 +16,7 @@
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ DISCLAIMED. IN NO EVENT SHALL Michael Malone BE LIABLE FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -33,6 +33,7 @@
 #include <limits.h>
 #include <assert.h>
 #include <ctype.h>
+#include <stdint.h>
 
 #include "config.h"
 
@@ -54,6 +55,23 @@
 #endif
 
 typedef _Bool bool_t;
+
+typedef enum { UNSIGNED_INT, SIGNED_INT, FLOAT, DOUBLE, NUMBER_OF_NUMBER_TYPES } mcc_NumberType_t;
+
+typedef union 
+{
+   int32_t integer_s;
+   uint32_t integer_u;
+   float float_s;
+   double float_d;
+} mcc_NumberContainer_t;
+
+typedef struct 
+{
+   mcc_NumberContainer_t number;
+   mcc_NumberType_t numberType;
+} mcc_Number_t;
+
 
 #ifndef TRUE
 #define TRUE ((bool_t) 1)

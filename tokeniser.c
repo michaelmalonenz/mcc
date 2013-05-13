@@ -16,7 +16,7 @@
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ DISCLAIMED. IN NO EVENT SHALL Michael Malone BE LIABLE FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -495,15 +495,18 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
                                  mcc_GetFileBufferFileNumber(fileBuffer));
          if (isDouble)
          {
-            token->numberContainer.floatingPointNum = strtod(token->text, NULL);
+            token->number.number.float_d = strtod(token->text, NULL);
+            token->number.numberType = DOUBLE;
          }
          else if (isUnsigned)
          {
-            token->numberContainer.uint32 = strtoul(token->text, NULL, 10);
+            token->number.number.integer_u = strtoul(token->text, NULL, 10);
+            token->number.numberType = UNSIGNED_INT;
          }
          else 
          {
-            token->numberContainer.int32 = strtol(token->text, NULL, 10);
+            token->number.number.integer_s = strtol(token->text, NULL, 10);
+            token->number.numberType = SIGNED_INT;
          }
          line->index += numLen;
       }

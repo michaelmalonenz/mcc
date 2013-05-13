@@ -49,6 +49,75 @@ Assignment Operators	= += -= *= /= %= >>= <<= &= ^= |=	right-to-left
 Comma	,
 */
 
+static mcc_Number_t *evaluate_operands(mcc_Token_t *l_operand, mcc_Token_t *r_operand,
+                                       mcc_Token_t *operator)
+{
+   mcc_Number_t *result = (mcc_Number_t *) malloc(sizeof(mcc_Number_t));
+
+   MCC_ASSERT(operator->tokenType == TOK_OPERATOR);
+   MCC_ASSERT(l_operand->tokenType == TOK_NUMBER);
+   MCC_ASSERT(r_operand->tokenType == TOK_NUMBER);
+
+   printf("Evaluating '%s %s %s'\n", l_operand->text, operator->text, r_operand->text);
+   result->number.integer_s = 0;
+   result->numberType = SIGNED_INT;
+   
+   switch (operator->tokenIndex)
+   {
+      case OP_ADD:
+      {
+         result->number.integer_s = 
+            l_operand->number.number.integer_s +
+            r_operand->number.number.integer_s;
+         result->numberType = SIGNED_INT;
+      }
+      break;
+      case OP_MINUS:
+      {
+         result->number.integer_s = 
+            l_operand->number.number.integer_s -
+            r_operand->number.number.integer_s;
+         result->numberType = SIGNED_INT;
+      }
+      break;
+      case OP_DIVIDE:
+      {
+         result->number.integer_s = 
+            l_operand->number.number.integer_s /
+            r_operand->number.number.integer_s;
+         result->numberType = SIGNED_INT;
+      }
+      break;
+      case OP_DEREFERENCE: //this is a total lie!
+      case OP_MULTIPLY:
+      {
+         result->number.integer_s = 
+            l_operand->number.number.integer_s *
+            r_operand->number.number.integer_s;
+         result->numberType = SIGNED_INT;
+      }
+      break;
+      case OP_BITWISE_EXCL_OR:
+      {
+         result->number.integer_s = 
+            l_operand->number.number.integer_s ^
+            r_operand->number.number.integer_s;
+         result->numberType = SIGNED_INT;
+      }
+      break;
+      default:
+      {
+         mcc_DebugPrintToken(operator);
+         mcc_PrettyError(mcc_ResolveFileNameFromNumber(operator->fileno),
+                         operator->lineno,
+                         "Unimplemented Operator in arithmetic statement: %s\n",
+                         operators[operator->tokenIndex]);
+      }
+   }
+
+   return result;
+}
+
 static token_associativity_t getOperatorAssociativity(const mcc_Token_t *token)
 {
    if (token->tokenType == TOK_OPERATOR &&
@@ -90,14 +159,70 @@ static int getRelativeOperatorPrecedence(MCC_OPERATOR op)
    return precedents[op];
 }
 
-static int mcc_EvaluateRPN(mcc_Stack_t UNUSED(*input))
+static int mcc_EvaluateRPN(mcc_Stack_t *input)
 {
    int result;
-   mcc_Stack_t *output = mcc_StackCreate();
+   mcc_Stack_t *operator_stack = mcc_StackCreate();
+   mcc_Token_t *temp = (mcc_Token_t *) mcc_StackPop(input);
+   mcc_Token_t *l_operand = NULL, *r_operand = NULL;
 
-   result = 0;
+   while(!mcc_StackEmpty(input))
+   {
+      temp = (mcc_Token_t *) mcc_StackPop(input);
+      if (temp->tokenType == TOK_OPERATOR &&
+          l_operand == NULL && r_operand == NULL)
+      {
+         mcc_StackPush(operator_stack, (uintptr_t) temp);
+      }
+      else if (temp->tokenType == TOK_NUMBER)
+      {
+         if (r_operand == NULL)
+         {
+            r_operand = temp;
+         }
+         else if (l_operand == NULL)
+         {
+            mcc_Number_t *number;
+            l_operand = temp;
+            temp = (mcc_Token_t *) mcc_StackPop(operator_stack);
+            if (temp == NULL)
+            {
+               MCC_ASSERT(mcc_StackEmpty(input));
+               break;
+            }
+            number = evaluate_operands(l_operand, r_operand, temp);
+            switch(number->numberType)
+            {
+               case SIGNED_INT:
+               {
+                  temp->number.number.integer_s = number->number.integer_s;
+               }
+               break;
+               case UNSIGNED_INT:
+               case FLOAT:
+               case DOUBLE:
+               case NUMBER_OF_NUMBER_TYPES:
+               {
+                  mcc_PrettyError(mcc_ResolveFileNameFromNumber(l_operand->fileno),
+                                  l_operand->lineno,
+                                  "Unimplemented Number Type in arithmetic evaluator: %s\n",
+                                  number_types[number->numberType]);
+               }
+            }
+            free(number);
+            mcc_StackPush(input, (uintptr_t) &temp);
+            mcc_DebugPrintStack(input, mcc_DebugPrintToken_Fn);
+            l_operand = NULL;
+            r_operand = NULL;
+         }
+         else
+         {
+            MCC_ASSERT(FALSE); //something is borked
+         }
+      }
+   }
+   result = temp->number.number.integer_s;
 
-   mcc_StackDelete(output, NULL);
    return result;
 }
 

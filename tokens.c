@@ -33,6 +33,7 @@
  */
 #include "tokens.h"
 #include "fileBuffer.h"
+#include "tokenList.h"
 
 const char *token_types[NUM_TOK_TYPES] = { "Preprocessor directive", "Identifier", "Keyword", "Symbol",
                                            "Operator", "Number", "String Constant", "Character Constant",
@@ -73,6 +74,9 @@ size_t operator_strlens[NUM_OPERATORS];
 const char *symbols[NUM_SYMBOLS] = { "{", "}", "[", "]", ";", "(", ")", "\"",
                                      "'", "\\", "<", ">", "\"" };
 size_t symbol_strlens[NUM_SYMBOLS];
+
+const char *number_types[NUMBER_OF_NUMBER_TYPES] = { "signed integer", "unsigned integer", "single precision float", "double precision float"};
+
 
 static bool_t initialised;
 
@@ -187,3 +191,11 @@ MCC_KEYWORD mcc_GetKeyword(mcc_LogicalLine_t *line)
       return KEY_NONE;
    }
 }
+
+
+#if MCC_DEBUG
+void mcc_DebugPrintToken_Fn(uintptr_t token_ptr)
+{
+   mcc_DebugPrintToken((mcc_Token_t *) token_ptr);
+}
+#endif
