@@ -27,6 +27,7 @@
 #include "ICE.h"
 #include "stack.h"
 #include "tokens.h"
+#include "tokenList.h"
 
 typedef enum token_associativity { TOK_ASSOC_RIGHT, TOK_ASSOC_LEFT, TOK_ASSOC_UNARY } token_associativity_t;
 /*
@@ -162,19 +163,15 @@ static int getRelativeOperatorPrecedence(MCC_OPERATOR op)
 static int mcc_EvaluateRPN(mcc_Stack_t *input)
 {
    int result;
-   mcc_Stack_t *operator_stack = mcc_StackCreate();
    mcc_Token_t *temp = (mcc_Token_t *) mcc_StackPop(input);
+   mcc_Token_t *resultTok = mcc_CreateToken("num", 3, TOK_NUMBER, 0, 0);
    mcc_Token_t *l_operand = NULL, *r_operand = NULL;
 
    while(!mcc_StackEmpty(input))
    {
       temp = (mcc_Token_t *) mcc_StackPop(input);
-      if (temp->tokenType == TOK_OPERATOR &&
-          l_operand == NULL && r_operand == NULL)
-      {
-         mcc_StackPush(operator_stack, (uintptr_t) temp);
-      }
-      else if (temp->tokenType == TOK_NUMBER)
+      MCC_ASSERT(temp != NULL);
+      if (temp->tokenType == TOK_NUMBER)
       {
          if (r_operand == NULL)
          {
@@ -184,18 +181,14 @@ static int mcc_EvaluateRPN(mcc_Stack_t *input)
          {
             mcc_Number_t *number;
             l_operand = temp;
-            temp = (mcc_Token_t *) mcc_StackPop(operator_stack);
-            if (temp == NULL)
-            {
-               MCC_ASSERT(mcc_StackEmpty(input));
-               break;
-            }
+            temp = (mcc_Token_t *) mcc_StackPop(input);
+            MCC_ASSERT(temp->tokenType == TOK_OPERATOR);
             number = evaluate_operands(l_operand, r_operand, temp);
             switch(number->numberType)
             {
                case SIGNED_INT:
                {
-                  temp->number.number.integer_s = number->number.integer_s;
+                  resultTok->number.number.integer_s = number->number.integer_s;
                }
                break;
                case UNSIGNED_INT:
@@ -210,18 +203,20 @@ static int mcc_EvaluateRPN(mcc_Stack_t *input)
                }
             }
             free(number);
-            mcc_StackPush(input, (uintptr_t) &temp);
-            mcc_DebugPrintStack(input, mcc_DebugPrintToken_Fn);
+            mcc_StackPush(input, (uintptr_t) &resultTok);
+            //  mcc_DebugPrintStack(input, mcc_DebugPrintToken_Fn);
             l_operand = NULL;
             r_operand = NULL;
          }
-         else
-         {
-            MCC_ASSERT(FALSE); //something is borked
-         }
+      }
+      else
+      {
+         mcc_DebugPrintToken(temp);
+         MCC_ASSERT(FALSE); //something is borked
       }
    }
-   result = temp->number.number.integer_s;
+   result = resultTok->number.number.integer_s;
+   mcc_DeleteToken((uintptr_t)resultTok);
 
    return result;
 }
@@ -307,6 +302,7 @@ int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
 
    mcc_StackDelete(operator_stack, NULL);
 
+   mcc_DebugPrintStack(output, mcc_DebugPrintToken_Fn);
    result = mcc_EvaluateRPN(output);
 
    mcc_StackDelete(output, NULL);

@@ -42,6 +42,8 @@ bool_t mcc_StackEmpty(const mcc_Stack_t *stack);
 
 uint32_t mcc_StackNumItems(const mcc_Stack_t *stack);
 
+mcc_Stack_t *mcc_StackReverse(mcc_Stack_t *stack);
+
 #if MCC_DEBUG
 typedef void (*stackItemPrinter_t)(uintptr_t item);
 void mcc_DebugPrintStack(const mcc_Stack_t *stack, stackItemPrinter_t);

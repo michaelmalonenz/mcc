@@ -73,6 +73,17 @@ uint32_t mcc_StackNumItems(const mcc_Stack_t *stack)
    return mcc_ListGetLength(stack->list);
 }
 
+mcc_Stack_t *mcc_StackReverse(mcc_Stack_t *stack)
+{
+   mcc_Stack_t *result = mcc_StackCreate();
+   while(!mcc_StackEmpty(stack))
+   {
+      mcc_StackPush(result, mcc_StackPop(stack));
+   }
+   mcc_StackDelete(stack, NULL);
+   return result;
+}
+
 void mcc_DebugPrintStack(const mcc_Stack_t *stack, stackItemPrinter_t itemPrinterFn)
 {
    mcc_ListIterator_t *iter = mcc_ListGetIterator(stack->list);

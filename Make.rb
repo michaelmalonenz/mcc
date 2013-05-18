@@ -129,7 +129,7 @@ end
 
 class CompileJob
 
-   @@files_to_cleanup = []
+   @@known_files = []
 
    def initialize(command, failure_message=nil, cleanup_file=nil)
       @command = command
@@ -137,19 +137,19 @@ class CompileJob
       @@files_to_cleanup << cleanup_file unless cleanup_file.nil?
    end
 
-   def CompileJob.clean_up_files
-      FileUtils.rm(@@files_to_cleanup)
-   end
-
    def CompileJob.clean_unused_o_files(out_dir)
       Dir.chdir(out_dir) do
-         o_files_to_delete = Dir.glob('*.o') - @@files_to_cleanup
+         o_files_to_delete = Dir.glob('*.o') - @@known_files
          FileUtils.rm(o_files_to_delete)
       end
    end
 
    def compile!
       run_command(@command, @failure_message)
+   end
+
+   def CompileJob::known_files
+      @@known_files
    end
 
 end
@@ -183,9 +183,13 @@ def compile_a_directory(input_dir, out_dir)
    Dir.chdir(input_dir) do
       Dir.glob("*.c").each do |file|
          o_file = c_to_o(file)
-         jobs << CompileJob.new( "#{$cc} #{CFLAGS} -I#{SRC_DIR} -c #{file} -o #{out_dir}/#{o_file}",
-                                 "Compilation of #{input_dir}/#{file} failed...",
-                                 o_file)
+         CompileJob::known_files << o_file
+         if File.mtime(file) > File.mtime("#{out_dir}/#{o_file}")
+            jobs << CompileJob.new( "#{$cc} #{CFLAGS} -I#{SRC_DIR} -c #{file} \
+-o #{out_dir}/#{o_file}",
+                                    "Compilation of #{input_dir}/#{file} failed...",
+                                    o_file)
+         end
       end
       jobs.each do |job|
          job.compile!
@@ -232,6 +236,7 @@ if $0 == __FILE__ then
       compile_a_directory(SRC_DIR, BIN_DIR)
       compile_a_directory(TEST_SRC_DIR, TEST_BIN_DIR)
 
+      $log_file.note("Finished Compilation")
       linker = Linker.new()
       linker.add_bin_dir(BIN_DIR)
 
