@@ -182,8 +182,9 @@ def compile_a_directory(input_dir, out_dir)
    Dir.chdir(input_dir) do
       Dir.glob("*.c").each do |file|
          o_file = c_to_o(file)
+         out_file = "#{out_dir}/#{o_file}"
          CompileJob::known_files << o_file
-         if File.mtime(file) > File.mtime("#{out_dir}/#{o_file}")
+         if !FileTest.exist?out_file || File.mtime(file) > File.mtime(out_file)
             jobs << CompileJob.new( "#{$cc} #{CFLAGS} -I#{SRC_DIR} -c #{file} \
 -o #{out_dir}/#{o_file}",
                                     "Compilation of #{input_dir}/#{file} failed...",
