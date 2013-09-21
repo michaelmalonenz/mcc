@@ -134,7 +134,6 @@ class CompileJob
    def initialize(command, failure_message=nil, cleanup_file=nil)
       @command = command
       @failure_message = failure_message
-      @@files_to_cleanup << cleanup_file unless cleanup_file.nil?
    end
 
    def CompileJob.clean_unused_o_files(out_dir)

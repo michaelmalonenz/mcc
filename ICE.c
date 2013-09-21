@@ -166,22 +166,30 @@ static int mcc_EvaluateRPN(mcc_Stack_t *input)
    mcc_Token_t *temp = (mcc_Token_t *) mcc_StackPop(input);
    mcc_Token_t *resultTok = mcc_CreateToken("num", 3, TOK_NUMBER, 0, 0);
    mcc_Token_t *l_operand = NULL, *r_operand = NULL;
+   mcc_Stack_t *operators = mcc_StackCreate();
 
    while(!mcc_StackEmpty(input))
    {
+      mcc_DebugPrintStack(input, mcc_DebugPrintToken_Fn);
       temp = (mcc_Token_t *) mcc_StackPop(input);
       MCC_ASSERT(temp != NULL);
-      if (temp->tokenType == TOK_NUMBER)
+      if (temp->tokenType == TOK_OPERATOR)
+      {
+         mcc_StackPush(operators, (uintptr_t) temp);
+      }
+      else if (temp->tokenType == TOK_NUMBER)
       {
          if (r_operand == NULL)
          {
+            printf("r_operand was not NULL, assigning\n");
             r_operand = temp;
          }
          else if (l_operand == NULL)
          {
             mcc_Number_t *number;
+            printf("l_operand was not NULL, assigning\n");
             l_operand = temp;
-            temp = (mcc_Token_t *) mcc_StackPop(input);
+            temp = (mcc_Token_t *) mcc_StackPop(operators);
             MCC_ASSERT(temp->tokenType == TOK_OPERATOR);
             number = evaluate_operands(l_operand, r_operand, temp);
             switch(number->numberType)
@@ -204,6 +212,8 @@ static int mcc_EvaluateRPN(mcc_Stack_t *input)
             }
             free(number);
             mcc_StackPush(input, (uintptr_t) &resultTok);
+            printf("l_operand = NULL, r_operand = NULL\n");
+            mcc_DebugPrintToken(resultTok);
             //  mcc_DebugPrintStack(input, mcc_DebugPrintToken_Fn);
             l_operand = NULL;
             r_operand = NULL;
@@ -211,6 +221,7 @@ static int mcc_EvaluateRPN(mcc_Stack_t *input)
       }
       else
       {
+         printf("Broken Token: \n");
          mcc_DebugPrintToken(temp);
          MCC_ASSERT(FALSE); //something is borked
       }
