@@ -70,7 +70,7 @@ class ShuntingYard
           opstate = :prefix
           reduce op # For handling the postfix operators
           @ostack << (op.type == :lp && possible_func ? Oper.new(1, :call, :infix) : op)
-          o = @ostack[-1]
+#          o = @ostack[-1]
         end
       else 
         @out.value(token)
