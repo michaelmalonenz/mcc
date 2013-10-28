@@ -200,11 +200,16 @@ end
 
 
 if $0 == __FILE__ then
+   #These options, while better for finding specific errors, are really slow when it comes to just running the test suite.
+#   VALGRIND_COMMAND = "valgrind -v --leak-check=full --track-origins=yes --error-exitcode=1 --read-var-info=yes --show-reachable=yes"
+   VALGRIND_COMMAND = "valgrind --leak-check=full --error-exitcode=1 --show-reachable=yes"
+
 
    tests = []
    $log_file = SimpleLogger.new("#{MAIN_EXE_NAME}.log")
    dog_food = false
    coverage = false
+   valgrind_cmd = VALGRIND_COMMAND
 
    ARGV.each do |arg|
       if arg =~ %r{--?cl(?:e(?:a(?:n)?)?)?}ix
@@ -218,15 +223,13 @@ if $0 == __FILE__ then
          coverage = true
          CFLAGS << " --coverage -fprofile-arcs -ftest-coverage"
          LINKER_FLAGS << " --coverage"
+      elsif arg =~ %r{--?n(?:o-?(?:v(?:a(?:l(?:g(?:r(?:i(?:n(?:d)?)?)?)?)?)?)?)?)?}ix
+         valgrind_cmd = ''         
       end
    end
 
 
    $log_file.note "Initialising..."
-
-   #These options, while better for finding specific errors, are really slow when it comes to just running the test suite.
-#   VALGRIND_COMMAND = "valgrind -v --leak-check=full --track-origins=yes --error-exitcode=1 --read-var-info=yes --show-reachable=yes"
-   VALGRIND_COMMAND = "valgrind --leak-check=full --error-exitcode=1 --show-reachable=yes"
 
    FileUtils.mkdir(BIN_DIR, :mode => 0775) unless FileTest.exist?(BIN_DIR)
    FileUtils.mkdir(TEST_BIN_DIR, :mode => 0775) unless FileTest.exist?(TEST_BIN_DIR)
@@ -275,7 +278,7 @@ if $0 == __FILE__ then
          if tests.empty?
             Dir.new(TEST_BIN_DIR).each do |file|
                if !FileTest.directory?(file) && FileTest.executable?(file)
-                  run_command("#{VALGRIND_COMMAND} ./#{file}", "#{File.basename(file)} failed to run correctly!")
+                  run_command("#{valgrind_cmd} ./#{file}", "#{File.basename(file)} failed to run correctly!")
                end
             end
          else

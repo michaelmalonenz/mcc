@@ -24,6 +24,7 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
+#include <string.h>
 #include "ICE.h"
 #include "stack.h"
 #include "tokens.h"
@@ -50,7 +51,8 @@ Assignment Operators	= += -= *= /= %= >>= <<= &= ^= |=	right-to-left
 Comma	,
 */
 
-static mcc_Number_t *evaluate_operands(mcc_Token_t *l_operand, mcc_Token_t *r_operand,
+static mcc_Number_t *evaluate_operands(mcc_Token_t *l_operand,
+                                       mcc_Token_t *r_operand,
                                        mcc_Token_t *operator)
 {
    mcc_Number_t *result = (mcc_Number_t *) malloc(sizeof(mcc_Number_t));
@@ -141,7 +143,7 @@ static int getRelativeOperatorPrecedence(MCC_OPERATOR op)
 {
    static const int precedents[NUM_OPERATORS] = {
       [OP_MEMBER_OF] = 1, [OP_DEREF_MEMBER_OF] = 2,
-      [OP_DECREMENT] = 3, [OP_INCREMENT] = 3, [OP_DEREFERENCE] = 4,
+      [OP_DECREMENT_POST] = 3, [OP_INCREMENT_POST] = 3, [OP_DEREFERENCE] = 4,
       [OP_ADDRESS_OF] = 4, [OP_NOT] = 5, [OP_NEGATE] = 6, 
       [OP_SIZEOF] = 7, [OP_MULTIPLY] = 8, [OP_DIVIDE] = 8, [OP_MODULO] = 9,
       [OP_ADD] = 10, [OP_MINUS] = 10, [OP_R_SHIFT] = 11, [OP_L_SHIFT] = 11,
@@ -155,81 +157,62 @@ static int getRelativeOperatorPrecedence(MCC_OPERATOR op)
       [OP_R_SHIFT_EQUALS] = 21, [OP_L_SHIFT_EQUALS] = 21,
       [OP_BITWISE_AND_EQUALS] = 21, [OP_BITWISE_EXCL_OR_EQUALS] = 21,
       [OP_BITWISE_INCL_OR_EQUALS] = 21, [OP_COMMA] = 22,
+      [OP_DECREMENT_PRE] = 23, [OP_INCREMENT_PRE] = 23,
    };
-   
+
    return precedents[op];
 }
 
 static int mcc_EvaluateRPN(mcc_Stack_t *input)
 {
-   int result;
-   mcc_Token_t *temp = (mcc_Token_t *) mcc_StackPop(input);
-   mcc_Token_t *resultTok = mcc_CreateToken("num", 3, TOK_NUMBER, 0, 0);
-   mcc_Token_t *l_operand = NULL, *r_operand = NULL;
-   mcc_Stack_t *operators = mcc_StackCreate();
+   mcc_Stack_t *operands = mcc_StackCreate();
+   mcc_Token_t *token = (mcc_Token_t *) mcc_StackPop(input);
 
-   while(!mcc_StackEmpty(input))
+   while (token != NULL && token->tokenType != TOK_EOL)
    {
-      mcc_DebugPrintStack(input, mcc_DebugPrintToken_Fn);
-      temp = (mcc_Token_t *) mcc_StackPop(input);
-      MCC_ASSERT(temp != NULL);
-      if (temp->tokenType == TOK_OPERATOR)
+      if (token->tokenType == TOK_NUMBER)
       {
-         mcc_StackPush(operators, (uintptr_t) temp);
+         mcc_StackPush(operands, (uintptr_t) token);
       }
-      else if (temp->tokenType == TOK_NUMBER)
+      else if (token->tokenType == TOK_OPERATOR)
       {
-         if (r_operand == NULL)
+         if (mcc_StackNumItems(operands) >= 2)
          {
-            printf("r_operand was not NULL, assigning\n");
-            r_operand = temp;
+            mcc_Token_t *r_operand = (mcc_Token_t *) mcc_StackPop(operands);
+            mcc_Token_t *l_operand = (mcc_Token_t *) mcc_StackPop(operands);
+            mcc_Number_t *resultNum = evaluate_operands(l_operand, r_operand,
+                                                        token);
+            char numberText[20];
+            snprintf(numberText, 20, "%d", resultNum->number.integer_s);
+            mcc_Token_t *result = mcc_CreateToken(numberText, strlen(numberText),
+                                                  TOK_NUMBER, 0, 0);
+            memcpy(&result->number, resultNum, sizeof(*resultNum));
+            free(resultNum);
+            mcc_StackPush(operands, (uintptr_t) result);
          }
-         else if (l_operand == NULL)
+         else
          {
-            mcc_Number_t *number;
-            printf("l_operand was not NULL, assigning\n");
-            l_operand = temp;
-            temp = (mcc_Token_t *) mcc_StackPop(operators);
-            MCC_ASSERT(temp->tokenType == TOK_OPERATOR);
-            number = evaluate_operands(l_operand, r_operand, temp);
-            switch(number->numberType)
-            {
-               case SIGNED_INT:
-               {
-                  resultTok->number.number.integer_s = number->number.integer_s;
-               }
-               break;
-               case UNSIGNED_INT:
-               case FLOAT:
-               case DOUBLE:
-               case NUMBER_OF_NUMBER_TYPES:
-               {
-                  mcc_PrettyError(mcc_ResolveFileNameFromNumber(l_operand->fileno),
-                                  l_operand->lineno,
-                                  "Unimplemented Number Type in arithmetic evaluator: %s\n",
-                                  number_types[number->numberType]);
-               }
-            }
-            free(number);
-            mcc_StackPush(input, (uintptr_t) &resultTok);
-            printf("l_operand = NULL, r_operand = NULL\n");
-            mcc_DebugPrintToken(resultTok);
-            //  mcc_DebugPrintStack(input, mcc_DebugPrintToken_Fn);
-            l_operand = NULL;
-            r_operand = NULL;
+            mcc_Error("wrong number of operands to operator '%s'\n", 
+                      token->text);
+            //arithmetic error?  Unary operator?
          }
       }
       else
       {
-         printf("Broken Token: \n");
-         mcc_DebugPrintToken(temp);
-         MCC_ASSERT(FALSE); //something is borked
+         printf("Something is borked\n");
+         MCC_ASSERT(FALSE);
       }
+      token = (mcc_Token_t *) mcc_StackPop(input);
    }
-   result = resultTok->number.number.integer_s;
-   mcc_DeleteToken((uintptr_t)resultTok);
 
-   return result;
+   if (mcc_StackNumItems(operands) == 1)
+   {
+      token = (mcc_Token_t *) mcc_StackPop(operands);
+      mcc_StackDelete(operands, NULL);
+      return token->number.number.integer_s;
+   }
+   mcc_Error("Failed to evaluate the tokens correctly\n");
+   return -1;
 }
 
 int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
@@ -313,7 +296,9 @@ int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
 
    mcc_StackDelete(operator_stack, NULL);
 
-   mcc_DebugPrintStack(output, mcc_DebugPrintToken_Fn);
+   output = mcc_StackReverse(output);
+//   printf("This is the RPN, ready for evaluation:\n");
+//   mcc_DebugPrintStack(output, mcc_DebugPrintToken_Fn);
    result = mcc_EvaluateRPN(output);
 
    mcc_StackDelete(output, NULL);

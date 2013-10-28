@@ -48,6 +48,7 @@ static void test_Implementation(const char *token_string, int expected_result)
    mcc_TokeniseFile(file, iter);
    mcc_TokenListDeleteIterator(iter);
 
+   printf("About to evaluate: '%s'\n", token_string);
    iter = mcc_TokenListGetIterator();
    actual_result = mcc_ICE_EvaluateTokenString(iter);
    printf("Token string: %s Expected: %d, got: %d\n", 
@@ -63,7 +64,7 @@ static void test_Implementation(const char *token_string, int expected_result)
 int main(void)
 {
    test_Implementation(ice_is_nonzero_twenty, 20);
-   test_Implementation(ice_shunting_yard_wiki_example, 0);
+   test_Implementation(ice_shunting_yard_wiki_example, 1);
    test_Implementation(ice_is_zero, 0);
 
    return EXIT_SUCCESS;

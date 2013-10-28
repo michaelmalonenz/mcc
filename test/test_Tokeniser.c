@@ -78,6 +78,10 @@ int main(int UNUSED(argc), char UNUSED(**argv))
          printf("Expected token type: %s, Actual token type: %s\n",
                 token_types[expected_token_types[i][j]],
                 token_types[token->tokenType]);
+         if (token->tokenType != expected_token_types[i][j])
+         {
+            mcc_DebugPrintToken(token);
+         }
          MCC_ASSERT(token->tokenType == expected_token_types[i][j]);
          MCC_ASSERT(token->tokenIndex == expected_token_indices[i][j]);
       }
