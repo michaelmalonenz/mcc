@@ -166,6 +166,7 @@ static int getRelativeOperatorPrecedence(MCC_OPERATOR op)
 static int mcc_EvaluateRPN(mcc_Stack_t *input)
 {
    mcc_Stack_t *operands = mcc_StackCreate();
+   mcc_Stack_t *numbersToDelete = mcc_StackCreate();
    mcc_Token_t *token = (mcc_Token_t *) mcc_StackPop(input);
 
    while (token != NULL && token->tokenType != TOK_EOL)
@@ -189,6 +190,7 @@ static int mcc_EvaluateRPN(mcc_Stack_t *input)
             memcpy(&result->number, resultNum, sizeof(*resultNum));
             free(resultNum);
             mcc_StackPush(operands, (uintptr_t) result);
+            mcc_StackPush(numbersToDelete, (uintptr_t) result);
          }
          else
          {
@@ -207,9 +209,12 @@ static int mcc_EvaluateRPN(mcc_Stack_t *input)
 
    if (mcc_StackNumItems(operands) == 1)
    {
+      int resultNum;
       token = (mcc_Token_t *) mcc_StackPop(operands);
       mcc_StackDelete(operands, NULL);
-      return token->number.number.integer_s;
+      resultNum = token->number.number.integer_s;
+      mcc_StackDelete(numbersToDelete, mcc_DeleteToken);
+      return resultNum;
    }
    mcc_Error("Failed to evaluate the tokens correctly\n");
    return -1;
