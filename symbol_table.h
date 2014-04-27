@@ -3,6 +3,9 @@
 #include "mcc.h"
 #include "tokens.h"
 
+struct symbol_table;
+typedef struct symbol_table mcc_SymbolTable_t;
+
 bool_t mcc_IsFunction(const mcc_Token_t *token);
 
 

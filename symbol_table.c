@@ -1,6 +1,12 @@
 #include "mcc.h"
 #include "symbol_table.h"
 
+
+struct symbol_table
+{
+   
+};
+
 bool_t mcc_IsFunction(const mcc_Token_t UNUSED(*token))
 {
    return FALSE;
