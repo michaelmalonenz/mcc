@@ -36,14 +36,27 @@
 #include "toolChainCommands.h"
 #include "macro.h"
 
+static void test_Define(void)
+{
+   const char *token_string  = "#define TEST_MACRO 42\n";
+   const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
+                                                         strlen(token_string));
+   mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator();
+   mcc_FileOpenerInitialise();
+   mcc_TokeniseFile(file, iter);
+   mcc_TokenListDeleteIterator(iter);
 
-/* To test this correctly, I will either have to do only the function
- * (static) declarations at the top of the file, having them automatic
- * when they're defined. And, of course give them external linkage when
- * MCC_DEBUG is defined.  I might ask John Carter whether he thinks this 
- * is even vaguely reasonable.  I suspect he'll give an answer similar to
- * "Use your own judgement" :)
- */
+   mcc_PreprocessCurrentTokens();
+
+   //should assert that we indeed got the right symbol defined.
+   mcc_Macro_t *macro = mcc_ResolveMacro("TEST_MACRO");
+   MCC_ASSERT(macro != NULL);
+   MCC_ASSERT(strncmp(macro->value, "42", 2) == 0);
+
+   mcc_FreeTokens();
+   mcc_FileOpenerDelete();
+   unlink(file);
+}
 
 static void test_NestedIf(void)
 {
@@ -55,10 +68,12 @@ static void test_NestedIf(void)
    mcc_TokeniseFile(file, iter);
    mcc_TokenListDeleteIterator(iter);
 
+   mcc_PreprocessCurrentTokens();
+
    //should assert that we indeed got the right symbol defined.
    mcc_Macro_t *macro = mcc_ResolveMacro("TEST_MACRO");
    MCC_ASSERT(macro != NULL);
-   MCC_ASSERT(strncmp(macro->value, "42", 2));
+   MCC_ASSERT(strncmp(macro->value, "42", 2) == 0);
 
    mcc_FreeTokens();
    mcc_FileOpenerDelete();
@@ -66,8 +81,10 @@ static void test_NestedIf(void)
 }
 
 
+
 int main(int UNUSED(argc), char UNUSED(**argv))
 {
+   test_Define();
    test_NestedIf();
    return 0;
 }
