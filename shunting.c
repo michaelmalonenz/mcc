@@ -14,18 +14,22 @@ static void mcc_ResolveOperator(mcc_Token_t *op, op_state_t opstate)
          case OP_DECREMENT_POST:
          {
             op->tokenIndex = OP_DECREMENT_PRE;
+            break;
          }
          case OP_INCREMENT_POST:
          {
             op->tokenIndex = OP_INCREMENT_PRE;
+            break;
          }
          case OP_BITWISE_AND:
          {
             op->tokenIndex = OP_ADDRESS_OF;
+            break;
          }
          case OP_MULTIPLY:
          {
             op->tokenIndex = OP_DEREFERENCE;
+            break;
          }
       }
    }
@@ -36,18 +40,22 @@ static void mcc_ResolveOperator(mcc_Token_t *op, op_state_t opstate)
          case OP_DECREMENT_PRE:
          {
             op->tokenIndex = OP_DECREMENT_POST;
+            break;
          }
          case OP_INCREMENT_PRE:
          {
             op->tokenIndex = OP_INCREMENT_POST;
+            break;
          }
          case OP_ADDRESS_OF:
          {
             op->tokenIndex = OP_BITWISE_AND;
+            break;
          }
          case OP_DEREFERENCE:
          {
             op->tokenIndex = OP_MULTIPLY;
+            break;
          }
       }
    }
