@@ -1,0 +1,5 @@
+bin/*.o
+bin/mcc
+bin
+mcc.log
+.vscode/
