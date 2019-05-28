@@ -38,26 +38,20 @@
 #include "toolChainCommands.h"
 #include "ICE.h"
 
-#ifdef MCC_DEBUG
-#define HANDLER_LINKAGE extern
-#else
-#define HANDLER_LINKAGE static
-#endif
-
 typedef void (preprocessorDirectiveHandler_t)(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
 
-HANDLER_LINKAGE void handleInclude(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
-HANDLER_LINKAGE void handleDefine(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
-HANDLER_LINKAGE void handleIfdef(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
-HANDLER_LINKAGE void handleIfndef(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
-HANDLER_LINKAGE void handleIf(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
-HANDLER_LINKAGE void handleEndif(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
-HANDLER_LINKAGE void handleElse(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
-HANDLER_LINKAGE void handleElif(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
-HANDLER_LINKAGE void handleUndef(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
-HANDLER_LINKAGE void handleError(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
-HANDLER_LINKAGE void handlePragma(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
-HANDLER_LINKAGE void handleJoin(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
+static void handleInclude(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
+static void handleDefine(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
+static void handleIfdef(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
+static void handleIfndef(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
+static void handleIf(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
+static void handleEndif(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
+static void handleElse(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
+static void handleElif(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
+static void handleUndef(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
+static void handleError(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
+static void handlePragma(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
+static void handleJoin(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
 
 static inline void mcc_ExpectTokenType(mcc_Token_t *token, TOKEN_TYPE tokenType)
 {
@@ -77,28 +71,33 @@ static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] =
                                                                                    &handleElse, &handleElif, &handleUndef,
                                                                                    &handleError, &handlePragma, &handleJoin };
 
-//static FILE *outputFile;
+static void handlePreprocessorDirective(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter)
+{
+   MCC_ASSERT(currentToken->tokenType == TOK_PP_DIRECTIVE);
+   currentToken = mcc_RemoveCurrentToken(tokenListIter);
+   ppHandlers[currentToken->tokenIndex](currentToken, tokenListIter, FALSE);
+}
 
 void mcc_PreprocessCurrentTokens(void)
 {
    mcc_TokenListIterator_t *tokenListIter = mcc_TokenListGetIterator();
    mcc_Token_t *currentToken = mcc_GetNextToken(tokenListIter);
-   
+
+   mcc_InitialiseMacros();
    while(currentToken != NULL)
    {
       if (currentToken->tokenType == TOK_PP_DIRECTIVE)
       {
-         currentToken = mcc_RemoveCurrentToken(tokenListIter);
-         ppHandlers[currentToken->tokenIndex](currentToken, tokenListIter, FALSE);
+         handlePreprocessorDirective(currentToken, tokenListIter);
       }
       currentToken = mcc_GetNextToken(tokenListIter);
    }
    mcc_TokenListDeleteIterator(tokenListIter);
 }
 
-HANDLER_LINKAGE void handleInclude(mcc_Token_t *currentToken,
-                                   mcc_TokenListIterator_t *tokenListIter,
-                                   bool_t ignore)
+static void handleInclude(mcc_Token_t *currentToken,
+                          mcc_TokenListIterator_t *tokenListIter,
+                          bool_t ignore)
 {
    mcc_TokenListIterator_t *incIter;
    char *include_path;
@@ -138,9 +137,9 @@ HANDLER_LINKAGE void handleInclude(mcc_Token_t *currentToken,
 }
 
 //currently doesn't handle function-like macros
-HANDLER_LINKAGE void handleDefine(mcc_Token_t *currentToken,
-                                  mcc_TokenListIterator_t *tokenListIter,
-                                  bool_t UNUSED(ignore))
+static void handleDefine(mcc_Token_t *currentToken,
+                         mcc_TokenListIterator_t *tokenListIter,
+                         bool_t UNUSED(ignore))
 {
    const char *macro_identifier;
    mcc_TokenList_t *tokens = mcc_TokenListCreateStandalone();
@@ -164,9 +163,9 @@ HANDLER_LINKAGE void handleDefine(mcc_Token_t *currentToken,
    mcc_DefineMacro(macro_identifier, tokens);
 }
 
-HANDLER_LINKAGE void handleUndef(mcc_Token_t *currentToken,
-                                 mcc_TokenListIterator_t *tokenListIter,
-                                 bool_t UNUSED(ignore))
+static void handleUndef(mcc_Token_t *currentToken,
+                        mcc_TokenListIterator_t *tokenListIter,
+                        bool_t UNUSED(ignore))
 {
    currentToken = mcc_RemoveCurrentToken(tokenListIter);
    mcc_ExpectTokenType(currentToken, TOK_WHITESPACE);
@@ -187,9 +186,9 @@ HANDLER_LINKAGE void handleUndef(mcc_Token_t *currentToken,
    }
 }
 
-HANDLER_LINKAGE void handleError(mcc_Token_t *currentToken,
-                                 mcc_TokenListIterator_t *tokenListIter,
-                                 bool_t UNUSED(ignore))
+static void handleError(mcc_Token_t *currentToken,
+                        mcc_TokenListIterator_t *tokenListIter,
+                        bool_t UNUSED(ignore))
 {
    mcc_Token_t *temp = NULL;
    currentToken = mcc_GetNextToken(tokenListIter);
@@ -212,7 +211,7 @@ HANDLER_LINKAGE void handleError(mcc_Token_t *currentToken,
 
 static void mcc_Defined(mcc_Token_t *currentToken,
                         mcc_TokenListIterator_t *tokenListIter,
-                        bool_t positive)
+                        bool_t UNUSED(positive))
 {
    bool_t macroDefined;
    currentToken = mcc_RemoveCurrentToken(tokenListIter);
@@ -221,36 +220,72 @@ static void mcc_Defined(mcc_Token_t *currentToken,
    mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER);
    macroDefined = mcc_IsMacroDefined(currentToken->text);
 
-   do
+   while (currentToken->tokenType != TOK_PP_DIRECTIVE &&
+            currentToken->tokenIndex != PP_ENDIF)
+   {
+      printf("checkpoint 1\n");
+      currentToken = mcc_GetNextToken(tokenListIter);
+      if (currentToken->tokenType == TOK_PP_DIRECTIVE)
+      {
+         printf("checkpoint 2\n");
+         printf("%s \n", currentToken->text);
+         if (macroDefined)
+         {
+            printf("checkpoint 3\n");
+            handlePreprocessorDirective(currentToken, tokenListIter);
+            printf("checkpoint 3.5\n");
+         }
+         if (currentToken->tokenIndex == PP_ELSE)
+         {
+            printf("checkpoint 4\n");
+            macroDefined = !macroDefined;
+         }
+      }
+   }
+   printf("checkpoint 5\n");
+   // If the macro is defined, iterate through until we hit
+   // an #ELSE, #ELIF, or #ENDIF
+}
+
+static void handleIfdef(mcc_Token_t *currentToken,
+                        mcc_TokenListIterator_t *tokenListIter,
+                        bool_t UNUSED(ignore))
+{
+   mcc_Defined(currentToken, tokenListIter, TRUE);
+}
+
+static void handleIfndef(mcc_Token_t *currentToken,
+                         mcc_TokenListIterator_t *tokenListIter,
+                         bool_t UNUSED(ignore))
+{
+   bool_t macroDefined;
+   currentToken = mcc_RemoveCurrentToken(tokenListIter);
+   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE);
+   currentToken = mcc_RemoveCurrentToken(tokenListIter);
+   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER);
+   macroDefined = mcc_IsMacroDefined(currentToken->text);
+
+   while (currentToken->tokenType != TOK_PP_DIRECTIVE &&
+            currentToken->tokenIndex != PP_ENDIF)
    {
       currentToken = mcc_GetNextToken(tokenListIter);
-      if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
-          currentToken->tokenIndex != PP_ENDIF)
+      if (currentToken->tokenType == TOK_PP_DIRECTIVE)
       {
-         currentToken = mcc_RemoveCurrentToken(tokenListIter);         
-         ppHandlers[currentToken->tokenIndex](currentToken, tokenListIter, (macroDefined && positive));
+         if (currentToken->tokenIndex == PP_ELSE)
+         {
+            macroDefined = !macroDefined;
+         }
+         else if (!macroDefined)
+         {
+            handlePreprocessorDirective(currentToken, tokenListIter);
+         }
       }
-   } while (currentToken->tokenType != TOK_PP_DIRECTIVE && 
-            currentToken->tokenIndex != PP_ENDIF);
+   }
 }
 
-HANDLER_LINKAGE void handleIfdef(mcc_Token_t *currentToken,
-                                 mcc_TokenListIterator_t *tokenListIter,
-                                 bool_t UNUSED(ignore))
-{
-   mcc_Defined(currentToken, tokenListIter, TRUE);  
-}
-
-HANDLER_LINKAGE void handleIfndef(mcc_Token_t *currentToken,
-                                  mcc_TokenListIterator_t *tokenListIter,
-                                  bool_t UNUSED(ignore))
-{
-   mcc_Defined(currentToken, tokenListIter, FALSE);
-}
-
-HANDLER_LINKAGE void handleIf(mcc_Token_t UNUSED(*currentToken),
-                              mcc_TokenListIterator_t *tokenListIter,
-                              bool_t UNUSED(ignore)) 
+static void handleIf(mcc_Token_t UNUSED(*currentToken),
+                     mcc_TokenListIterator_t *tokenListIter,
+                     bool_t UNUSED(ignore))
 {
    //Get values for the identifier tokens.
    int result = mcc_ICE_EvaluateTokenString(tokenListIter);
@@ -259,7 +294,7 @@ HANDLER_LINKAGE void handleIf(mcc_Token_t UNUSED(*currentToken),
    }
 }
 
-HANDLER_LINKAGE void handleEndif(mcc_Token_t *currentToken,
+static void handleEndif(mcc_Token_t *currentToken,
                                  mcc_TokenListIterator_t UNUSED(*tokenListIter),
                                  bool_t ignore)
 {
@@ -271,7 +306,7 @@ HANDLER_LINKAGE void handleEndif(mcc_Token_t *currentToken,
    }
 }
 
-HANDLER_LINKAGE void handleElse(mcc_Token_t *currentToken,
+static void handleElse(mcc_Token_t *currentToken,
                                 mcc_TokenListIterator_t UNUSED(*tokenListIter),
                                 bool_t ignore)
 {
@@ -283,7 +318,7 @@ HANDLER_LINKAGE void handleElse(mcc_Token_t *currentToken,
    }
 }
 
-HANDLER_LINKAGE void handleElif(mcc_Token_t *currentToken,
+static void handleElif(mcc_Token_t *currentToken,
                                 mcc_TokenListIterator_t UNUSED(*tokenListIter),
                                 bool_t ignore)
 {
@@ -295,12 +330,12 @@ HANDLER_LINKAGE void handleElif(mcc_Token_t *currentToken,
    }
 }
 
-HANDLER_LINKAGE void handleJoin(mcc_Token_t UNUSED(*currentToken),
+static void handleJoin(mcc_Token_t UNUSED(*currentToken),
                                 mcc_TokenListIterator_t UNUSED(*tokenListIter),
                                 bool_t UNUSED(ignore)) {}
 
 //What shall I do with #pragmas???
-HANDLER_LINKAGE void handlePragma(mcc_Token_t UNUSED(*currentToken),
+static void handlePragma(mcc_Token_t UNUSED(*currentToken),
                                   mcc_TokenListIterator_t UNUSED(*tokenListIter),
                                   bool_t UNUSED(ignore)) {}
 
