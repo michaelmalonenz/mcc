@@ -43,6 +43,8 @@ typedef struct macro {
 #endif
 }mcc_Macro_t;
 
+void mcc_InitialiseMacros(void);
+
 void mcc_DeleteAllMacros(void);
 
 void mcc_DefineMacro(const char *text, mcc_TokenList_t *tokens);

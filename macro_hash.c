@@ -41,7 +41,7 @@
 
 static mcc_Macro_t *macro_table[HASH_TABLE_LENGTH];
 
-static uint32_t elf_hash(const void *key, uint16_t len )
+static uint32_t elf_hash(const void *key, uint16_t len)
 {
    const unsigned char *array = key;
    uint32_t hash = 0, mixer;
@@ -58,6 +58,15 @@ static uint32_t elf_hash(const void *key, uint16_t len )
    }
  
    return hash % HASH_TABLE_LENGTH;
+}
+
+void mcc_InitialiseMacros(void)
+{
+   uint16_t i;
+   for (i = 0; i < HASH_TABLE_LENGTH; i++)
+   {
+      macro_table[i] = NULL;
+   }
 }
 
 void mcc_DeleteAllMacros(void)

@@ -30,6 +30,7 @@
 #include "tokenList.h"
 #include "toolChainCommands.h"
 #include "options.h"
+#include "macro.h"
 
 int main(int argc, char **argv)
 {
@@ -62,6 +63,7 @@ int main(int argc, char **argv)
       fprintf(stderr, "Preprocessing %s...\n", currentFile);
       mcc_PreprocessCurrentTokens();
       mcc_FreeTokens();
+      mcc_DeleteAllMacros();
       currentFile = (char *) mcc_ListGetNextData(fileIter);
    }
 

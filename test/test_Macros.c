@@ -56,17 +56,27 @@ static void test_Find(void)
    printf("Testing Find...");
    mcc_Macro_t *result = mcc_ResolveMacro(MACRO_NAME);
    MCC_ASSERT(result != NULL);
+   bool_t defined = mcc_IsMacroDefined(MACRO_NAME);
+   MCC_ASSERT(defined);
    printf("ok\n");
 }
-
 
 static void test_Undefine(void)
 {
    printf("Testing undefine...");
    mcc_UndefineMacro(MACRO_NAME);
+   bool_t defined = mcc_IsMacroDefined(MACRO_NAME);
+   MCC_ASSERT(!defined);
    printf("ok\n");
 }
 
+static void test_Undefined(void)
+{
+   printf("Testing undefined...");
+   bool_t defined = mcc_IsMacroDefined("SOME_OTHER_MACRO");
+   MCC_ASSERT(!defined);
+   printf("ok\n");
+}
 
 static void test_BulkMacros(void)
 {
@@ -100,6 +110,7 @@ int main(void)
    test_Define();
    test_Find();
    test_Undefine();
+   test_Undefined();
    test_BulkMacros();
    return 0;
 }
