@@ -220,31 +220,26 @@ static void mcc_Defined(mcc_Token_t *currentToken,
    mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER);
    macroDefined = mcc_IsMacroDefined(currentToken->text);
 
-   while (currentToken->tokenType != TOK_PP_DIRECTIVE &&
-            currentToken->tokenIndex != PP_ENDIF)
+   while (currentToken->tokenType != TOK_PP_DIRECTIVE ||
+          (currentToken->tokenType == TOK_PP_DIRECTIVE &&
+           currentToken->tokenIndex != PP_ENDIF))
    {
-      printf("checkpoint 1\n");
-      currentToken = mcc_GetNextToken(tokenListIter);
       if (currentToken->tokenType == TOK_PP_DIRECTIVE)
       {
-         printf("checkpoint 2\n");
-         printf("%s \n", currentToken->text);
-         if (macroDefined)
-         {
-            printf("checkpoint 3\n");
-            handlePreprocessorDirective(currentToken, tokenListIter);
-            printf("checkpoint 3.5\n");
-         }
          if (currentToken->tokenIndex == PP_ELSE)
          {
-            printf("checkpoint 4\n");
             macroDefined = !macroDefined;
          }
+         else if (macroDefined)
+         {
+            handlePreprocessorDirective(currentToken, tokenListIter);
+         }
+         currentToken = mcc_RemoveCurrentToken(tokenListIter);
+      } else {
+         currentToken = mcc_GetNextToken(tokenListIter);
       }
    }
-   printf("checkpoint 5\n");
-   // If the macro is defined, iterate through until we hit
-   // an #ELSE, #ELIF, or #ENDIF
+   mcc_ExpectTokenType(currentToken, TOK_PP_DIRECTIVE);
 }
 
 static void handleIfdef(mcc_Token_t *currentToken,
@@ -265,8 +260,9 @@ static void handleIfndef(mcc_Token_t *currentToken,
    mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER);
    macroDefined = mcc_IsMacroDefined(currentToken->text);
 
-   while (currentToken->tokenType != TOK_PP_DIRECTIVE &&
-            currentToken->tokenIndex != PP_ENDIF)
+   while (currentToken->tokenType != TOK_PP_DIRECTIVE ||
+          (currentToken->tokenType == TOK_PP_DIRECTIVE &&
+           currentToken->tokenIndex != PP_ENDIF))
    {
       currentToken = mcc_GetNextToken(tokenListIter);
       if (currentToken->tokenType == TOK_PP_DIRECTIVE)

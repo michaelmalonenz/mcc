@@ -45,6 +45,7 @@ static void test_Define(void)
    mcc_FileOpenerInitialise();
    mcc_TokeniseFile(file, iter);
    mcc_TokenListDeleteIterator(iter);
+   printf("Test Define\n");
 
    mcc_PreprocessCurrentTokens();
 
@@ -55,10 +56,12 @@ static void test_Define(void)
    mcc_Token_t *token = mcc_GetNextToken(valueIter);
    MCC_ASSERT(strncmp(token->text, "42", 2) == 0);
    mcc_TokenListDeleteIterator(valueIter);
+   printf("ok\n");
 
    mcc_FreeTokens();
    mcc_FileOpenerDelete();
    unlink(file);
+   mcc_DeleteAllMacros();
 }
 
 static void test_NestedIf(void)
@@ -87,9 +90,11 @@ static void test_NestedIf(void)
    MCC_ASSERT(macro != NULL);
    MCC_ASSERT(strncmp(macro->value, "42", 2) == 0);
 
+   printf("ok\n");
    mcc_FreeTokens();
    mcc_FileOpenerDelete();
    unlink(file);
+   mcc_DeleteAllMacros();
 }
 
 static void test_IfNDef(void)
@@ -151,11 +156,11 @@ static void test_IfDef_Else(void)
    printf("Test IFDEF else\n");
    mcc_PreprocessCurrentTokens();
 
-   mcc_Macro_t *macro = mcc_ResolveMacro("ELSE_MACRO");
-   MCC_ASSERT(macro != NULL);
-
-   macro = mcc_ResolveMacro("IF_MACRO");
+   mcc_Macro_t *macro = mcc_ResolveMacro("IF_MACRO");
    MCC_ASSERT(macro == NULL);
+
+   macro = mcc_ResolveMacro("ELSE_MACRO");
+   MCC_ASSERT(macro != NULL);
    printf("ok\n");
 
    mcc_FreeTokens();
@@ -166,7 +171,7 @@ static void test_IfDef_Else(void)
 
 static void test_IfDef_If(void)
 {
-   const char *token_string  = "#define SOME_MACRO 3\n#ifdef SOME_MACRO\n#define IF_MACRO 2\n#else\n#define ELSE_MACRO\n#endif\n";
+   const char *token_string  = "#define SOME_MACRO 3\n#ifdef SOME_MACRO\n#define IF_MACRO 2\n#else\n#define ELSE_MACRO 3\n#endif\n";
    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
                                                          strlen(token_string));
    mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator();

@@ -141,7 +141,7 @@ mcc_Macro_t *mcc_ResolveMacro(const char *text)
 
    while (result != NULL)
    {
-      if (memcmp(text, result->text, sizeof(*text)) == 0)
+      if (strncmp(text, result->text, max(strlen(result->text), strlen(text))) == 0)
       {
          return result;
       }
