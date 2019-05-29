@@ -51,7 +51,10 @@ static void test_Define(void)
    //should assert that we indeed got the right symbol defined.
    mcc_Macro_t *macro = mcc_ResolveMacro("TEST_MACRO");
    MCC_ASSERT(macro != NULL);
-   MCC_ASSERT(strncmp(macro->text, "42", 2) == 0);
+   mcc_TokenListIterator_t *valueIter = mcc_TokenListStandaloneGetIterator(macro->tokens);
+   mcc_Token_t *token = mcc_GetNextToken(valueIter);
+   MCC_ASSERT(strncmp(token->text, "42", 2) == 0);
+   mcc_TokenListDeleteIterator(valueIter);
 
    mcc_FreeTokens();
    mcc_FileOpenerDelete();
@@ -61,9 +64,9 @@ static void test_Define(void)
 static void test_NestedIf(void)
 {
    const char *token_string  = "\
-#define SOME_MACRO 1\n\
-#if SOME_MACRO\n\
-   #if SOME_OTHER_MACRO\n\
+#define SOME_MACRO\n\
+#ifdef SOME_MACRO\n\
+   #ifdef SOME_OTHER_MACRO\n\
       #define TEST_MACRO 10\n\
    #else\n\
       #define TEST_MACRO 42\
@@ -71,6 +74,7 @@ static void test_NestedIf(void)
 #endif\n";
    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
                                                          strlen(token_string));
+   printf("Test nested IFDEF\n");
    mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator();
    mcc_FileOpenerInitialise();
    mcc_TokeniseFile(file, iter);
@@ -113,7 +117,7 @@ static void test_IfNDef(void)
 
 static void test_IfDef(void)
 {
-   const char *token_string  = "#define SOME_MACRO\n#ifdef IF_MACRO\n#define IF_MACRO\n#endif\n";
+   const char *token_string  = "#define SOME_MACRO 1\n#ifdef SOME_MACRO\n#define IF_MACRO\n#endif\n";
    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
                                                          strlen(token_string));
    mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator();
@@ -136,7 +140,7 @@ static void test_IfDef(void)
 
 static void test_IfDef_Else(void)
 {
-   const char *token_string  = "#ifdef SOME_MACRO\n#define IF_MACRO\n#else\n#define ELSE_MACRO\n#endif\n";
+   const char *token_string  = "#ifdef SOME_MACRO\n#define IF_MACRO 1\n#else\n#define ELSE_MACRO 2\n#endif\n";
    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
                                                          strlen(token_string));
    mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator();
@@ -162,7 +166,7 @@ static void test_IfDef_Else(void)
 
 static void test_IfDef_If(void)
 {
-   const char *token_string  = "#define SOME_MACRO\n#ifdef SOME_MACRO\n#define IF_MACRO\n#else\n#define ELSE_MACRO\n#endif\n";
+   const char *token_string  = "#define SOME_MACRO 3\n#ifdef SOME_MACRO\n#define IF_MACRO 2\n#else\n#define ELSE_MACRO\n#endif\n";
    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
                                                          strlen(token_string));
    mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator();
@@ -189,10 +193,10 @@ static void test_IfDef_If(void)
 int main(int UNUSED(argc), char UNUSED(**argv))
 {
    test_Define();
-   test_NestedIf();
-   test_IfNDef();
    test_IfDef();
    test_IfDef_Else();
    test_IfDef_If();
+   test_IfNDef();
+   test_NestedIf();
    return 0;
 }
