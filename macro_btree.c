@@ -130,9 +130,6 @@ void mcc_UndefineMacro(const char *text)
          {
             root = NULL;
          }
-         else
-         {
-         }
          return;
       }
       else

@@ -46,10 +46,10 @@ struct FileBuffer {
    FILE *file;
    const char *filename;
    unsigned short fileNumber;
-   unsigned int line_no;
+   unsigned int lineNum;
    unsigned int bufferIndex;
    char buffer[FILE_BUFFER_SIZE + 1];
-   size_t chars_read;
+   size_t charsRead;
    mcc_LogicalLine_t currentLine;
 };
 
@@ -65,7 +65,7 @@ const char *mcc_GetFileBufferFilename(mcc_FileBuffer_t *fileBuffer)
 
 unsigned int mcc_GetFileBufferCurrentLineNo(mcc_FileBuffer_t *fileBuffer)
 {
-   return fileBuffer->line_no;
+   return fileBuffer->lineNum;
 }
 
 unsigned short mcc_GetFileBufferFileNumber(mcc_FileBuffer_t *fileBuffer)
@@ -78,9 +78,9 @@ mcc_FileBuffer_t *mcc_CreateFileBuffer(const char *file)
    mcc_FileBuffer_t *fileBuffer = (mcc_FileBuffer_t *) malloc(sizeof(mcc_FileBuffer_t));
    fileBuffer->filename = file;
    fileBuffer->file = mcc_OpenFile(file, "r", &fileBuffer->fileNumber);
-   fileBuffer->line_no = 0;
+   fileBuffer->lineNum = 0;
    fileBuffer->bufferIndex = 0;
-   fileBuffer->chars_read = 0;
+   fileBuffer->charsRead = 0;
    fileBuffer->currentLine.string = NULL;
    fileBuffer->currentLine.length = 0;
    fileBuffer->currentLine.index = 0;
@@ -101,7 +101,7 @@ void mcc_DeleteFileBuffer(mcc_FileBuffer_t* buffer)
 
 static void readFileChunk(mcc_FileBuffer_t *fileBuffer)
 {
-   fileBuffer->chars_read = fread(fileBuffer->buffer,
+   fileBuffer->charsRead = fread(fileBuffer->buffer,
                                   sizeof(*(fileBuffer->buffer)),
                                   FILE_BUFFER_SIZE,
                                   fileBuffer->file);
@@ -116,7 +116,7 @@ static void readFileChunk(mcc_FileBuffer_t *fileBuffer)
 
 bool_t mcc_FileBufferEOFReached(mcc_FileBuffer_t *buffer)
 {
-   return (bool_t) (feof(buffer->file) && buffer->chars_read == 0);
+   return (bool_t) (feof(buffer->file) && buffer->charsRead == 0);
 }
 
 mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer)
@@ -129,7 +129,7 @@ mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer
    }
    while(!lineIsRead)
    {
-      if (fileBuffer->bufferIndex == fileBuffer->chars_read)
+      if (fileBuffer->bufferIndex == fileBuffer->charsRead)
       {
          readFileChunk(fileBuffer);
          if (mcc_FileBufferEOFReached(fileBuffer))
@@ -141,7 +141,7 @@ mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer
             return &fileBuffer->currentLine;
          }
       }
-      while ((fileBuffer->bufferIndex < fileBuffer->chars_read) && !lineIsRead)
+      while ((fileBuffer->bufferIndex < fileBuffer->charsRead) && !lineIsRead)
       {
          if (!isBreakingWhiteSpace(fileBuffer->buffer[fileBuffer->bufferIndex]))
          {
@@ -172,7 +172,7 @@ mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer
             }
             //We want to increase this regardless of whether we have a full logical line or not,
             //so we keep the line numbers in sync with the source file
-            fileBuffer->line_no++;
+            fileBuffer->lineNum++;
          }
       }
    }
@@ -195,6 +195,7 @@ int SkipWhiteSpace(mcc_LogicalLine_t *line)
 }
 
 /**
+ * Shift the string left in-place by amountToShift starting at shiftOffset.
  * We don't realloc here, because it's a side effect which would break client
  * referential integrity.
  */
@@ -214,8 +215,8 @@ void mcc_ShiftLineLeftAndShrink(mcc_LogicalLine_t *line,
 #if MCC_DEBUG
 void printFileBuffer(mcc_FileBuffer_t *buffer)
 {
-   printf("----- FileBuffer ----- \nfilename:\t%s\nline_no:\t%u\nbufferIndex:\t%u\nchars_read:\t%" PRIuPTR "\n",
-          buffer->filename, buffer->line_no, buffer->bufferIndex, (uintptr_t)buffer->chars_read);
+   printf("----- FileBuffer ----- \nfilename:\t%s\nlineNum:\t%u\nbufferIndex:\t%u\ncharsRead:\t%" PRIuPTR "\n",
+          buffer->filename, buffer->lineNum, buffer->bufferIndex, (uintptr_t)buffer->charsRead);
    printf("Current Char:\t%d\n", buffer->buffer[buffer->bufferIndex]);
 }
 #endif

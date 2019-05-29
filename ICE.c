@@ -286,8 +286,8 @@ int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
 #if MCC_DEBUG
          if (token->tokenType != TOK_WHITESPACE)
          {
-            MCC_ASSERT(FALSE);
             mcc_DebugPrintToken(token);
+            MCC_ASSERT(FALSE);
          }
 #endif
       }
@@ -302,8 +302,10 @@ int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
    mcc_StackDelete(operator_stack, NULL);
 
    output = mcc_StackReverse(output);
-//   printf("This is the RPN, ready for evaluation:\n");
-//   mcc_DebugPrintStack(output, mcc_DebugPrintToken_Fn);
+#if MCC_DEBUG
+  printf("This is the RPN, ready for evaluation:\n");
+  mcc_DebugPrintStack(output, mcc_DebugPrintToken_Fn);
+#endif
    result = mcc_EvaluateRPN(output);
 
    mcc_StackDelete(output, NULL);

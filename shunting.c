@@ -101,7 +101,7 @@ static op_state_t getOperatorFixness(const mcc_Token_t UNUSED(*token))
    return INFIX;
 }
 
-static void reduce(mcc_Stack_t UNUSED(*output), mcc_Stack_t UNUSED(*operator_stack),
+static void reduce(mcc_Stack_t *output, mcc_Stack_t *operator_stack,
                    const mcc_Token_t *token)
 {
    int precedence;

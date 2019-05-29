@@ -41,9 +41,13 @@ typedef mcc_ListIterator_t mcc_TokenListIterator_t;
 typedef mcc_List_t mcc_TokenList_t;
 
 /**
- * These next functions can't be used with a Standalone token list.
+ * Can't be used with a Standalone token list.
  */
 void mcc_FreeTokens(void);
+
+/**
+ * Can't be used with a Standalone token list.
+ */
 mcc_TokenListIterator_t *mcc_TokenListGetIterator(void);
 
 mcc_TokenList_t *mcc_GetTokenList(void);
@@ -66,6 +70,9 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
                              TOKEN_TYPE type, const int lineno,
                              const unsigned short fileno);
 
+/**
+ * @param token - the token to delete
+ */
 void mcc_DeleteToken(uintptr_t token);
 
 /**
