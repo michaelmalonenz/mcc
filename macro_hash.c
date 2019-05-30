@@ -60,15 +60,6 @@ static uint32_t elf_hash(const void *key, uint16_t len)
    return hash % HASH_TABLE_LENGTH;
 }
 
-void mcc_InitialiseMacros(void)
-{
-   uint16_t i;
-   for (i = 0; i < HASH_TABLE_LENGTH; i++)
-   {
-      macro_table[i] = NULL;
-   }
-}
-
 void mcc_DeleteAllMacros(void)
 {
    uint16_t i;
@@ -84,6 +75,7 @@ void mcc_DeleteAllMacros(void)
             delete_macro(current);
             current = next;
          }
+         macro_table[i] = NULL;
       }
    }
 }

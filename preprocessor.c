@@ -53,23 +53,29 @@ static void handleError(mcc_Token_t *currentToken, mcc_TokenListIterator_t *toke
 static void handlePragma(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
 static void handleJoin(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter, bool_t ignore);
 
-static inline void mcc_ExpectTokenType(mcc_Token_t *token, TOKEN_TYPE tokenType)
+static inline void mcc_ExpectTokenType(mcc_Token_t *token, TOKEN_TYPE tokenType, int index)
 {
    if (token->tokenType != tokenType)
    {
-      /* @TODO make this better than "Expect kEnd, got End" */
+      const char *expected = token_types[tokenType];
+      if (tokenType == TOK_PP_DIRECTIVE)
+      {
+         expected = preprocessor_directives[index];
+      }
       mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
                       token->lineno,
                       "Preprocessor expected a %s token, but got a %s token\n",
-                      token_types[tokenType],
+                      expected,
                       token_types[token->tokenType]);
    }
 }
 
-static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = { &handleInclude, &handleDefine, &handleIfdef,
-                                                                                   &handleIfndef, &handleIf, &handleEndif,
-                                                                                   &handleElse, &handleElif, &handleUndef,
-                                                                                   &handleError, &handlePragma, &handleJoin };
+static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = {
+   &handleInclude, &handleDefine, &handleIfdef,
+   &handleIfndef, &handleIf, &handleEndif,
+   &handleElse, &handleElif, &handleUndef,
+   &handleError, &handlePragma, &handleJoin
+};
 
 static void handlePreprocessorDirective(mcc_Token_t *currentToken, mcc_TokenListIterator_t *tokenListIter)
 {
@@ -83,7 +89,6 @@ void mcc_PreprocessCurrentTokens(void)
    mcc_TokenListIterator_t *tokenListIter = mcc_TokenListGetIterator();
    mcc_Token_t *currentToken = mcc_GetNextToken(tokenListIter);
 
-   mcc_InitialiseMacros();
    while(currentToken != NULL)
    {
       if (currentToken->tokenType == TOK_PP_DIRECTIVE)
@@ -102,7 +107,7 @@ static void handleInclude(mcc_Token_t *currentToken,
    mcc_TokenListIterator_t *incIter;
    char *include_path;
    currentToken = mcc_RemoveCurrentToken(tokenListIter);
-   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE);
+   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
    currentToken = mcc_RemoveCurrentToken(tokenListIter);
    if (!ignore)
    {
@@ -145,10 +150,11 @@ static void handleDefine(mcc_Token_t *currentToken,
    mcc_TokenList_t *tokens = mcc_TokenListCreateStandalone();
    mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(tokens);
    currentToken = mcc_RemoveCurrentToken(tokenListIter);
-   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE);
+   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
    currentToken = mcc_RemoveCurrentToken(tokenListIter);
-   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER);
+   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
    macro_identifier = currentToken->text;
+   printf("Defining Macro: %s\n", macro_identifier);
    currentToken = mcc_RemoveCurrentToken(tokenListIter);
    if (currentToken->tokenType == TOK_WHITESPACE)
    {
@@ -168,9 +174,9 @@ static void handleUndef(mcc_Token_t *currentToken,
                         bool_t UNUSED(ignore))
 {
    currentToken = mcc_RemoveCurrentToken(tokenListIter);
-   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE);
+   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
    currentToken = mcc_RemoveCurrentToken(tokenListIter);
-   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER);
+   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
    mcc_UndefineMacro(currentToken->text);
    currentToken = mcc_RemoveCurrentToken(tokenListIter);
    if (currentToken->tokenType == TOK_WHITESPACE)
@@ -209,16 +215,17 @@ static void handleError(mcc_Token_t *currentToken,
                    "Error: %s\n", temp->text);
 }
 
-static void mcc_Defined(mcc_Token_t *currentToken,
+static void handleIfdef(mcc_Token_t *currentToken,
                         mcc_TokenListIterator_t *tokenListIter,
-                        bool_t UNUSED(positive))
+                        bool_t UNUSED(ignore))
 {
-   bool_t macroDefined;
+   bool_t processMacro;
    currentToken = mcc_RemoveCurrentToken(tokenListIter);
-   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE);
+   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
    currentToken = mcc_RemoveCurrentToken(tokenListIter);
-   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER);
-   macroDefined = mcc_IsMacroDefined(currentToken->text);
+   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
+   processMacro = mcc_IsMacroDefined(currentToken->text);
+   printf("Process Macro: %d\n", processMacro);
 
    while (currentToken->tokenType != TOK_PP_DIRECTIVE ||
           (currentToken->tokenType == TOK_PP_DIRECTIVE &&
@@ -228,25 +235,23 @@ static void mcc_Defined(mcc_Token_t *currentToken,
       {
          if (currentToken->tokenIndex == PP_ELSE)
          {
-            macroDefined = !macroDefined;
+            processMacro = !processMacro;
+            printf("Unprocess Macro: %u\n", processMacro);
+            (void)mcc_RemoveCurrentToken(tokenListIter);
          }
-         else if (macroDefined)
+         else if (processMacro)
          {
+            mcc_DebugPrintTokenList(tokenListIter);
             handlePreprocessorDirective(currentToken, tokenListIter);
+            mcc_DebugPrintTokenList(tokenListIter);
          }
-         currentToken = mcc_RemoveCurrentToken(tokenListIter);
+         currentToken = mcc_GetNextToken(tokenListIter);
       } else {
          currentToken = mcc_GetNextToken(tokenListIter);
       }
+      mcc_DebugPrintToken(currentToken);
    }
-   mcc_ExpectTokenType(currentToken, TOK_PP_DIRECTIVE);
-}
-
-static void handleIfdef(mcc_Token_t *currentToken,
-                        mcc_TokenListIterator_t *tokenListIter,
-                        bool_t UNUSED(ignore))
-{
-   mcc_Defined(currentToken, tokenListIter, TRUE);
+   mcc_ExpectTokenType(currentToken, TOK_PP_DIRECTIVE, PP_ENDIF);
 }
 
 static void handleIfndef(mcc_Token_t *currentToken,
@@ -255,9 +260,9 @@ static void handleIfndef(mcc_Token_t *currentToken,
 {
    bool_t macroDefined;
    currentToken = mcc_RemoveCurrentToken(tokenListIter);
-   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE);
+   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
    currentToken = mcc_RemoveCurrentToken(tokenListIter);
-   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER);
+   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
    macroDefined = mcc_IsMacroDefined(currentToken->text);
 
    while (currentToken->tokenType != TOK_PP_DIRECTIVE ||

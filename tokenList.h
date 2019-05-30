@@ -55,6 +55,7 @@ mcc_TokenList_t *mcc_GetTokenList(void);
 // This one can... ish
 #if MCC_DEBUG
 void mcc_DebugPrintToken(const mcc_Token_t *token);
+void mcc_DebugPrintTokenList(mcc_TokenListIterator_t *iter);
 #endif
 
 /**

@@ -48,7 +48,7 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
    memcpy(token->text, text, text_len);
    token->text[text_len] = '\0';
    token->tokenType = type;
-   token->tokenIndex = 0;
+   token->tokenIndex = TOK_UNSET_INDEX;
    token->lineno = lineno;
    token->fileno = fileno;
 
@@ -225,5 +225,19 @@ void mcc_DebugPrintToken(const mcc_Token_t *token)
    {
       printf("Token was NULL\n");
    }
+}
+
+void mcc_DebugPrintTokenList(mcc_TokenListIterator_t *iter)
+{
+   mcc_TokenListIterator_t *copy = mcc_TokenListCopyIterator(iter);
+   mcc_Token_t *token = mcc_GetNextToken(copy);
+   printf("----- Token List -----\n");
+   while (token != NULL)
+   {
+      mcc_DebugPrintToken(token);
+      token = mcc_GetNextToken(copy);
+   }
+   printf("----- End Token List -----\n");
+   mcc_TokenListDeleteIterator(copy);
 }
 #endif

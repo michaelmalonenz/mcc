@@ -284,7 +284,7 @@ if $0 == __FILE__ then
          else
             tests.each do |test|
                if !FileTest.directory?(test) && FileTest.executable?(test)
-                  run_command("#{VALGRIND_COMMAND} ./#{test}", "#{File.basename(test)} failed to run correctly!")
+                  run_command("#{valgrind_cmd} ./#{test}", "#{File.basename(test)} failed to run correctly!")
                end
             end
          end
