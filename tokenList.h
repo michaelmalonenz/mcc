@@ -72,6 +72,14 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
                              const unsigned short fileno);
 
 /**
+ * @param token     The token to copy
+ * 
+ * @returns a freshly allocated token that contains the content of the original
+ * NOTE: does not copy the tokenIndex because I'm lazy.
+ */
+mcc_Token_t *mcc_CopyToken(const mcc_Token_t *token);
+
+/**
  * @param token - the token to delete
  */
 void mcc_DeleteToken(uintptr_t token);
@@ -94,13 +102,13 @@ void mcc_AddEndOfLineToken(const int lineno, const unsigned short fileno,
                            mcc_TokenListIterator_t *iter);
 
 void mcc_InsertToken(mcc_Token_t *token, mcc_TokenListIterator_t *iter);
-mcc_Token_t *mcc_RemoveCurrentToken(mcc_TokenListIterator_t *iter);
 const mcc_Token_t *mcc_TokenListPeekCurrentToken(mcc_TokenListIterator_t *iter);
 
 
 mcc_TokenList_t *mcc_TokenListCreateStandalone(void);
 void mcc_TokenListDeleteStandalone(mcc_TokenList_t *list);
 mcc_TokenListIterator_t *mcc_TokenListStandaloneGetIterator(mcc_TokenList_t *list);
+void mcc_TokenListStandaloneAppend(mcc_TokenList_t *list, mcc_Token_t *token);
 
 mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, mcc_Token_t *second, TOKEN_TYPE newType);
 mcc_TokenListIterator_t *mcc_TokenListCopyIterator(mcc_TokenListIterator_t *iter);

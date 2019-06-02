@@ -55,6 +55,13 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
    return token;
 }
 
+mcc_Token_t *mcc_CopyToken(const mcc_Token_t *token)
+{
+   return mcc_CreateToken(
+      token->text, strlen(token->text), token->tokenType,
+      token->lineno, token->fileno);
+}
+
 void mcc_AddEndOfLineToken(const int lineno, const unsigned short fileno,
                            mcc_TokenListIterator_t *iter)
 {
@@ -92,11 +99,6 @@ void mcc_InsertToken(mcc_Token_t *token, mcc_TokenListIterator_t *iter)
 #endif
 }
 
-mcc_Token_t *mcc_RemoveCurrentToken(mcc_TokenListIterator_t *iter)
-{
-   return (mcc_Token_t *) mcc_ListRemoveDataAtCurrentPosition((mcc_ListIterator_t *) iter);
-}
-
 const mcc_Token_t *mcc_TokenListPeekCurrentToken(mcc_TokenListIterator_t *iter)
 {
    return (const mcc_Token_t *) mcc_ListPeekCurrentData((mcc_ListIterator_t *) iter);
@@ -125,6 +127,11 @@ mcc_TokenListIterator_t *mcc_TokenListGetIterator(void)
 mcc_TokenListIterator_t *mcc_TokenListStandaloneGetIterator(mcc_TokenList_t *list)
 {
    return (mcc_TokenListIterator_t *) mcc_ListGetIterator(list);
+}
+
+void mcc_TokenListStandaloneAppend(mcc_TokenList_t *list, mcc_Token_t *token)
+{
+   mcc_ListAppendData((mcc_List_t *)list, (uintptr_t)token);
 }
 
 mcc_TokenListIterator_t *mcc_TokenListCopyIterator(mcc_TokenListIterator_t *iter)

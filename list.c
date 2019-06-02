@@ -209,51 +209,6 @@ void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, uintptr_t dat
    iter->list->nItems++;
 }
 
-
-// I could probably do this with fewer temporary variables, but this
-// is clearer and it's easier to know what's happening.
-uintptr_t mcc_ListRemoveDataAtCurrentPosition(mcc_ListIterator_t *iter)
-{
-   uintptr_t result = NULL_DATA;
-   mcc_ListNode_t *prev, *next;
-
-   if (iter->current == NULL)
-   {
-      return NULL_DATA;
-   }
-
-   prev = iter->current->prev;
-   next = iter->current->next;
-
-   if (prev != NULL)
-   {
-      prev->next = next;
-   }
-
-   if (next != NULL)
-   {
-      next->prev = prev;
-   }   
-
-   result = iter->current->data;
-   if (iter->current == iter->list->head)
-   {
-      iter->list->head = next;
-   }
-   //deliberately not an else if
-   if (iter->current == iter->list->tail)
-   {
-      iter->list->tail = prev;
-   }
-   
-   free(iter->current);
-   iter->current = next;
-
-   iter->list->nItems--;
-
-   return result;
-}
-
 bool_t mcc_ListEmpty(mcc_List_t *list)
 {
    return list->nItems == 0;
