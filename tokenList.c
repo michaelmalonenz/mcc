@@ -230,7 +230,7 @@ void mcc_DebugPrintToken(const mcc_Token_t *token)
 void mcc_DebugPrintTokenList(mcc_TokenListIterator_t *iter)
 {
    mcc_TokenListIterator_t *copy = mcc_TokenListCopyIterator(iter);
-   mcc_Token_t *token = mcc_GetNextToken(copy);
+   mcc_Token_t *token = (mcc_Token_t *)mcc_TokenListPeekCurrentToken(copy);
    printf("----- Token List -----\n");
    while (token != NULL)
    {
