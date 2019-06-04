@@ -95,7 +95,6 @@ static void getToken(void)
 static void handlePreprocessorDirective()
 {
    MCC_ASSERT(currentToken->tokenType == TOK_PP_DIRECTIVE);
-   getToken();
    ppHandlers[currentToken->tokenIndex]();
 }
 
@@ -180,7 +179,7 @@ static void handleDefine()
    }
    while (currentToken->tokenType != TOK_EOL)
    {
-      mcc_InsertToken(currentToken, iter);
+      mcc_InsertToken(mcc_CopyToken(currentToken), iter);
       getToken();
    }
    mcc_TokenListDeleteIterator(iter);
@@ -232,26 +231,29 @@ static void handleError()
 static void handleIfdef()
 {
    bool_t processMacro;
+   bool_t handled = FALSE;
    getToken();
    mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
    getToken();
    mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
    processMacro = mcc_IsMacroDefined(currentToken->text);
 
+   getToken();
    while (currentToken->tokenType != TOK_PP_DIRECTIVE ||
           (currentToken->tokenType == TOK_PP_DIRECTIVE &&
            currentToken->tokenIndex != PP_ENDIF))
    {
-      getToken();
       if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
           currentToken->tokenIndex == PP_ELSE)
       {
+         handled = handled || processMacro;
          processMacro = !processMacro;
       }
-      else if (processMacro)
+      else if (processMacro && !handled)
       {
          if (currentToken->tokenType == TOK_PP_DIRECTIVE)
          {
+            mcc_DebugPrintToken(currentToken);
             handlePreprocessorDirective(currentToken, tokenListIter);
          }
          else
@@ -259,6 +261,7 @@ static void handleIfdef()
             emitToken();
          }
       }
+      getToken();
    }
    mcc_ExpectTokenType(currentToken, TOK_PP_DIRECTIVE, PP_ENDIF);
 }
@@ -266,28 +269,37 @@ static void handleIfdef()
 static void handleIfndef()
 {
    bool_t processMacro;
+   bool_t handled = FALSE;
    getToken();
    mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
    getToken();
    mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
    processMacro = !mcc_IsMacroDefined(currentToken->text);
 
+   getToken();
    while (currentToken->tokenType != TOK_PP_DIRECTIVE ||
           (currentToken->tokenType == TOK_PP_DIRECTIVE &&
            currentToken->tokenIndex != PP_ENDIF))
    {
-      getToken();
-      if (currentToken->tokenType == TOK_PP_DIRECTIVE)
+      if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
+          currentToken->tokenIndex == PP_ELSE)
       {
-         if (currentToken->tokenIndex == PP_ELSE)
+         handled = handled || processMacro;
+         processMacro = !processMacro;
+      }
+      else if (processMacro && !handled)
+      {
+         if (currentToken->tokenType == TOK_PP_DIRECTIVE)
          {
-            processMacro = !processMacro;
-         }
-         else if (processMacro)
-         {
+            mcc_DebugPrintToken(currentToken);
             handlePreprocessorDirective(currentToken, tokenListIter);
          }
+         else
+         {
+            emitToken();
+         }
       }
+      getToken();
    }
    mcc_ExpectTokenType(currentToken, TOK_PP_DIRECTIVE, PP_ENDIF);
 }
