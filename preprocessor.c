@@ -53,6 +53,7 @@ static void handleUndef(void);
 static void handleError(void);
 static void handlePragma(void);
 static void handleJoin(void);
+static void handleWarning(void);
 
 static void mcc_ExpectTokenType(mcc_Token_t *token, TOKEN_TYPE tokenType, int index)
 {
@@ -75,7 +76,8 @@ static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] =
    &handleInclude, &handleDefine, &handleIfdef,
    &handleIfndef, &handleIf, &handleEndif,
    &handleElse, &handleElif, &handleUndef,
-   &handleError, &handlePragma, &handleJoin
+   &handleError, &handlePragma, &handleJoin,
+   &handleWarning,
 };
 
 static mcc_TokenListIterator_t *tokenListIter;
@@ -171,7 +173,6 @@ static void handleDefine()
    getToken();
    mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
    macro_identifier = currentToken->text;
-   printf("Defining Macro: %s\n", macro_identifier);
    getToken();
    if (currentToken->tokenType == TOK_WHITESPACE)
    {
@@ -253,7 +254,6 @@ static void handleIfdef()
       {
          if (currentToken->tokenType == TOK_PP_DIRECTIVE)
          {
-            mcc_DebugPrintToken(currentToken);
             handlePreprocessorDirective(currentToken, tokenListIter);
          }
          else
@@ -291,7 +291,6 @@ static void handleIfndef()
       {
          if (currentToken->tokenType == TOK_PP_DIRECTIVE)
          {
-            mcc_DebugPrintToken(currentToken);
             handlePreprocessorDirective(currentToken, tokenListIter);
          }
          else
@@ -338,3 +337,5 @@ static void handleJoin() {}
 
 //What shall I do with #pragmas???
 static void handlePragma() {}
+
+static void handleWarning() {}

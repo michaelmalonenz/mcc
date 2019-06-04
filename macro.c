@@ -37,10 +37,6 @@ void delete_macro(mcc_Macro_t *macro)
 {
    MCC_ASSERT(macro != NULL);
    MCC_ASSERT(macro->text != NULL);
-   if (macro->tokens != NULL)
-   {
-      mcc_TokenListDeleteStandalone(macro->tokens);
-   }
    free(macro->text);
    free(macro);
 }

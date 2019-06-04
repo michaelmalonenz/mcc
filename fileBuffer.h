@@ -53,4 +53,9 @@ void mcc_ShiftLineLeftAndShrink(mcc_LogicalLine_t *line, uint32_t shiftOffset, i
 const char *mcc_GetFileBufferFilename(mcc_FileBuffer_t *fileBuffer);
 unsigned short mcc_GetFileBufferFileNumber(mcc_FileBuffer_t *fileBuffer);
 unsigned int mcc_GetFileBufferCurrentLineNo(mcc_FileBuffer_t *fileBuffer);
+
+#if MCC_DEBUG
+void mcc_DebugPrintFileBuffer(mcc_FileBuffer_t *buffer);
+#endif
+
 #endif /* MCC_FILE_BUFFER_H */

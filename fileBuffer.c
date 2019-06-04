@@ -55,7 +55,7 @@ struct FileBuffer {
 
 
 #if MCC_DEBUG
-void printFileBuffer(mcc_FileBuffer_t *buffer);
+void mcc_DebugPrintFileBuffer(mcc_FileBuffer_t *buffer);
 #endif
 
 const char *mcc_GetFileBufferFilename(mcc_FileBuffer_t *fileBuffer)
@@ -213,7 +213,7 @@ void mcc_ShiftLineLeftAndShrink(mcc_LogicalLine_t *line,
 }
 
 #if MCC_DEBUG
-void printFileBuffer(mcc_FileBuffer_t *buffer)
+void mcc_DebugPrintFileBuffer(mcc_FileBuffer_t *buffer)
 {
    printf("----- FileBuffer ----- \nfilename:\t%s\nlineNum:\t%u\nbufferIndex:\t%u\ncharsRead:\t%" PRIuPTR "\n",
           buffer->filename, buffer->lineNum, buffer->bufferIndex, (uintptr_t)buffer->charsRead);

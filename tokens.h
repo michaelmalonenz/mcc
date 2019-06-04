@@ -122,7 +122,7 @@ extern size_t symbol_strlens[NUM_SYMBOLS];
    pre-processing portion a little bit */
 typedef enum pp_directives { PP_INCLUDE, PP_DEFINE, PP_IFDEF, PP_IFNDEF,
                              PP_IF, PP_ENDIF, PP_ELSE, PP_ELIF, PP_UNDEF,
-                             PP_ERROR, PP_PRAGMA, PP_JOIN,
+                             PP_ERROR, PP_PRAGMA, PP_JOIN, PP_WARNING,
                              NUM_PREPROCESSOR_DIRECTIVES, PP_NONE }
    PREPROC_DIRECTIVE;
 

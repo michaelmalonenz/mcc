@@ -41,7 +41,8 @@ const char *token_types[NUM_TOK_TYPES] = { "Preprocessor directive", "Identifier
                                            "End Of Line"};
 
 const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES] = { "include", "define", "ifdef", "ifndef", "if",
-                                                                     "endif", "else", "elif", "undef", "error", "pragma", "#" };
+                                                                     "endif", "else", "elif", "undef", "error", "pragma",
+                                                                     "#", "warning"};
 
 size_t pp_strlens[NUM_PREPROCESSOR_DIRECTIVES];
 
