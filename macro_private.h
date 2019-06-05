@@ -31,6 +31,6 @@
 
 void delete_macro(mcc_Macro_t *macro);
 
-mcc_Macro_t *create_macro(const char *text, mcc_TokenList_t *value);
+mcc_Macro_t *create_macro(const char *text, mcc_TokenList_t *value, mcc_TokenList_t *arguments);
 
 #endif /* _MCC_MACRO_PRIVATE_H_ */

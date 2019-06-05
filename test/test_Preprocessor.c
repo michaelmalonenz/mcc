@@ -205,6 +205,30 @@ static void test_IfDef_If(void)
    mcc_DeleteAllMacros();
 }
 
+static void test_DefineFunctionMacro(void)
+{
+   const char *token_string  = "#define max(a, b) ( ((a) > (b)) ? (a) : (b) )\n";
+   const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
+                                                         strlen(token_string));
+   mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator();
+   mcc_FileOpenerInitialise();
+   mcc_TokeniseFile(file, iter);
+   mcc_TokenListDeleteIterator(iter);
+
+   printf("Test IFDEF if\n");
+   mcc_TokenList_t *output = mcc_PreprocessCurrentTokens();
+
+   mcc_Macro_t *macro = mcc_ResolveMacro("max");
+   MCC_ASSERT(macro != NULL);
+   printf("ok\n");
+
+   mcc_TokenListDeleteStandalone(output);
+   mcc_FreeTokens();
+   mcc_FileOpenerDelete();
+   unlink(file);
+   mcc_DeleteAllMacros();
+}
+
 int main(int UNUSED(argc), char UNUSED(**argv))
 {
    test_Define();
@@ -213,5 +237,6 @@ int main(int UNUSED(argc), char UNUSED(**argv))
    test_IfDef_If();
    test_IfNDef();
    test_NestedIf();
+   test_DefineFunctionMacro();
    return 0;
 }

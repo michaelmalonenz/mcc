@@ -35,6 +35,7 @@ typedef struct macro {
    char *text;
    char *value;
    mcc_TokenList_t *tokens;
+   mcc_TokenList_t *arguments;
 #if MCC_USE_HASH_TABLE_FOR_MACROS
    struct macro *next;
 #elif MCC_USE_B_TREE_FOR_MACROS
@@ -45,7 +46,7 @@ typedef struct macro {
 
 void mcc_DeleteAllMacros(void);
 
-void mcc_DefineMacro(const char *text, mcc_TokenList_t *tokens);
+void mcc_DefineMacro(const char *text, mcc_TokenList_t *tokens, mcc_TokenList_t *arguments);
 
 void mcc_UndefineMacro(const char *text);
 

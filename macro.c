@@ -37,6 +37,14 @@ void delete_macro(mcc_Macro_t *macro)
 {
    MCC_ASSERT(macro != NULL);
    MCC_ASSERT(macro->text != NULL);
+   if (macro->arguments != NULL)
+   {
+      mcc_TokenListDeleteStandalone(macro->arguments);
+   }
+   if (macro->tokens != NULL)
+   {
+      mcc_TokenListDeleteStandalone(macro->tokens);
+   }
    free(macro->text);
    free(macro);
 }
@@ -55,7 +63,7 @@ void delete_macro(mcc_Macro_t *macro)
 // would yield the same result as YET_ANOTHER_MACRO, which is bad!
 //
 // To make life better, I also need to evaluate constant expressions here
-mcc_Macro_t *create_macro(const char *text, mcc_TokenList_t *value)
+mcc_Macro_t *create_macro(const char *text, mcc_TokenList_t *value, mcc_TokenList_t *arguments)
 {
    mcc_Macro_t *result = (mcc_Macro_t *) malloc(sizeof(mcc_Macro_t));
    result->text = (char *) malloc(sizeof(char) * (strlen(text) + 1));
@@ -63,6 +71,7 @@ mcc_Macro_t *create_macro(const char *text, mcc_TokenList_t *value)
    MCC_ASSERT(result->text != NULL);
    strncpy(result->text, text, strlen(text) + 1);
    result->tokens = value;
+   result->arguments = arguments;
 #if MCC_USE_HASH_TABLE_FOR_MACROS
    result->next = NULL;
 #elif MCC_USE_B_TREE_FOR_MACROS

@@ -50,9 +50,11 @@ void mcc_FreeTokens(void);
  */
 mcc_TokenListIterator_t *mcc_TokenListGetIterator(void);
 
+/**
+ * This is the global token list, not just any token list.
+ */
 mcc_TokenList_t *mcc_GetTokenList(void);
 
-// This one can... ish
 #if MCC_DEBUG
 void mcc_DebugPrintToken(const mcc_Token_t *token);
 void mcc_DebugPrintTokenList(mcc_TokenListIterator_t *iter);
@@ -66,6 +68,11 @@ void mcc_DebugPrintTokenList(mcc_TokenListIterator_t *iter);
  * @param type      The type of token to create
  *
  * @param lineno    The current line number of the file where the token was found
+ * 
+ * Allocates the memory for the token and returns it to the caller.  The
+ * caller then becomes responsible for freeing the memory.  Calling
+ * `mcc_TokenListDeleteStandalone` is sufficient - it is assumed the token
+ * will be added to a `mcc_TokenList_t`
  */
 mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
                              TOKEN_TYPE type, const int lineno,
@@ -108,6 +115,16 @@ const mcc_Token_t *mcc_TokenListPeekCurrentToken(mcc_TokenListIterator_t *iter);
 mcc_TokenList_t *mcc_TokenListCreateStandalone(void);
 void mcc_TokenListDeleteStandalone(mcc_TokenList_t *list);
 mcc_TokenListIterator_t *mcc_TokenListStandaloneGetIterator(mcc_TokenList_t *list);
+
+/**
+ * Add a token to the end of a list.
+ * Instead of requiring an interator to insert at a particular position,
+ * just append to the end of the list.  No one needs to deal with an iterator's
+ * memory that way.
+ * 
+ * @param list The list to append to
+ * @param token The token to append to the list
+ * */
 void mcc_TokenListStandaloneAppend(mcc_TokenList_t *list, mcc_Token_t *token);
 
 mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, mcc_Token_t *second, TOKEN_TYPE newType);

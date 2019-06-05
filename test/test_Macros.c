@@ -46,7 +46,7 @@ static void test_Define(void)
    mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, 1, 1);
    printf("Testing Define...");
    mcc_ListAppendData(tokens, (uintptr_t) tok);
-   mcc_DefineMacro(MACRO_NAME, tokens);
+   mcc_DefineMacro(MACRO_NAME, tokens, NULL);
    printf("ok\n");
    mcc_ListDelete(tokens, &mcc_DeleteToken);
 }
@@ -95,7 +95,7 @@ static void test_BulkMacros(void)
       mcc_TokeniseFile(tempFilename, tokenListIter);
       mcc_TokenListDeleteIterator(tokenListIter);
 
-      mcc_DefineMacro(test_Macros[i], mcc_GetTokenList());
+      mcc_DefineMacro(test_Macros[i], mcc_GetTokenList(), NULL);
 
       unlink(tempFilename);
       mcc_FreeTokens();

@@ -167,6 +167,7 @@ static void handleDefine()
 {
    const char *macro_identifier;
    mcc_TokenList_t *tokens = mcc_TokenListCreateStandalone();
+   mcc_TokenList_t *arguments = NULL;
    mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(tokens);
    getToken();
    mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
@@ -178,13 +179,45 @@ static void handleDefine()
    {
       getToken();
    }
+   else if (currentToken->tokenType == TOK_SYMBOL &&
+            currentToken->tokenIndex == SYM_OPEN_PAREN)
+   {
+      arguments = mcc_TokenListCreateStandalone();
+      getToken();
+      while (currentToken->tokenType != TOK_SYMBOL &&
+             currentToken->tokenIndex != SYM_CLOSE_PAREN)
+      {
+         if (currentToken->tokenType == TOK_EOL)
+         {
+            mcc_PrettyError(
+               mcc_ResolveFileNameFromNumber(currentToken->fileno),
+               currentToken->lineno,
+               "Unclosed parentheses in function macro '%s'\n",
+               macro_identifier);
+         }
+         if ((currentToken->tokenType == TOK_OPERATOR &&
+              currentToken->tokenIndex == OP_COMMA) ||
+             currentToken->tokenType == TOK_WHITESPACE)
+         {
+            // Do nothing.
+            // This is fine and normal and expected, but I don't care.
+            // I should attempt to deal with two commas in a row, but
+            // other than that, it's fine
+         }
+         if (currentToken->tokenType == TOK_IDENTIFIER)
+         {
+            mcc_TokenListStandaloneAppend(arguments, mcc_CopyToken(currentToken));
+         }
+         getToken();
+      }
+   }
    while (currentToken->tokenType != TOK_EOL)
    {
-      mcc_InsertToken(mcc_CopyToken(currentToken), iter);
+      mcc_TokenListStandaloneAppend(tokens, mcc_CopyToken(currentToken));
       getToken();
    }
    mcc_TokenListDeleteIterator(iter);
-   mcc_DefineMacro(macro_identifier, tokens);
+   mcc_DefineMacro(macro_identifier, tokens, arguments);
 }
 
 static void handleUndef()

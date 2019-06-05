@@ -80,20 +80,20 @@ void mcc_DeleteAllMacros(void)
    }
 }
 
-void mcc_DefineMacro(const char *text, mcc_TokenList_t *value)
+void mcc_DefineMacro(const char *text, mcc_TokenList_t *value, mcc_TokenList_t *arguments)
 {
    uint32_t hash = elf_hash(text, strlen(text));
    mcc_Macro_t *temp;
    if (macro_table[hash] == NULL)
    {
-      macro_table[hash] = create_macro(text, value);
+      macro_table[hash] = create_macro(text, value, arguments);
    }
    else
    {
       temp = macro_table[hash];
       while(temp->next != NULL)
          temp = temp->next;
-      temp->next = create_macro(text, value);
+      temp->next = create_macro(text, value, arguments);
    }   
 }
 
