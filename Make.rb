@@ -315,8 +315,13 @@ if $0 == __FILE__ then
 
       if dog_food
          $log_file.note("Eating My Own Dog Food...")
-         # use vlagrind...
-         $cc = "#{BIN_DIR}/#{MAIN_EXE_NAME}"
+         Dir.chdir(BIN_DIR) do
+            run_command('rm *.o', 'Failed to clear out object files for dogfooding')
+         end
+         Dir.chdir(TEST_BIN_DIR) do
+            run_command('rm *.o', 'Failed to clear out test object files for dogfooding')
+         end
+         $cc = "#{valgrind_cmd} #{BIN_DIR}/#{MAIN_EXE_NAME}"
          compile_a_directory(SRC_DIR, BIN_DIR)
          compile_a_directory(TEST_SRC_DIR, TEST_BIN_DIR)
       end
