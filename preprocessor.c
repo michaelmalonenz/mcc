@@ -168,7 +168,6 @@ static void handleDefine()
    const char *macro_identifier;
    mcc_TokenList_t *tokens = mcc_TokenListCreateStandalone();
    mcc_TokenList_t *arguments = NULL;
-   mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(tokens);
    getToken();
    mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
    getToken();
@@ -216,7 +215,6 @@ static void handleDefine()
       mcc_TokenListStandaloneAppend(tokens, mcc_CopyToken(currentToken));
       getToken();
    }
-   mcc_TokenListDeleteIterator(iter);
    mcc_DefineMacro(macro_identifier, tokens, arguments);
 }
 
