@@ -36,6 +36,7 @@ typedef struct macro {
    char *value;
    mcc_TokenList_t *tokens;
    mcc_TokenList_t *arguments;
+   bool_t is_function;
 #if MCC_USE_HASH_TABLE_FOR_MACROS
    struct macro *next;
 #elif MCC_USE_B_TREE_FOR_MACROS
@@ -43,6 +44,8 @@ typedef struct macro {
    struct macro *right;
 #endif
 }mcc_Macro_t;
+
+void mcc_InitialiseMacros(void);
 
 void mcc_DeleteAllMacros(void);
 
