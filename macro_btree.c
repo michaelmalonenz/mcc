@@ -34,6 +34,11 @@
 
 static mcc_Macro_t *root = NULL;
 
+void mcc_InitialiseMacros(void)
+{
+   root = NULL;
+}
+
 
 /** This whole implementation is pretty crappy. It has too much duplication,
  *  the functions are too ad-hoc and it feels generally fragile.
@@ -63,12 +68,12 @@ void mcc_DeleteAllMacros(void)
 
 // I should really refactor these next couple of functions
 // because they're somewhat similar
-void mcc_DefineMacro(const char *text, mcc_TokenList_t *tokens)
+void mcc_DefineMacro(const char *text, mcc_TokenList_t *tokens, mcc_TokenList_t *arguments)
 {
    mcc_Macro_t *current = root;
    if (root == NULL)
    {
-      root = create_macro(text, tokens);
+      root = create_macro(text, tokens, arguments);
       return;
    }
 
@@ -80,7 +85,7 @@ void mcc_DefineMacro(const char *text, mcc_TokenList_t *tokens)
       {
          if (current->right == NULL)
          {
-            current->right = create_macro(text, tokens);
+            current->right = create_macro(text, tokens, arguments);
             return;
          }
          else
@@ -97,7 +102,7 @@ void mcc_DefineMacro(const char *text, mcc_TokenList_t *tokens)
       {
          if (current->left == NULL)
          {
-            current->left = create_macro(text, tokens);
+            current->left = create_macro(text, tokens, arguments);
             return;
          }
          else
@@ -111,13 +116,10 @@ void mcc_DefineMacro(const char *text, mcc_TokenList_t *tokens)
 void mcc_UndefineMacro(const char *text)
 {
    mcc_Macro_t *current = root;
-   mcc_Macro_t *last = NULL;
    while (current != NULL)
    {
       int cmpResult = strncmp(text, current->text, 
                               max(strlen(current->text), strlen(text)));
-      last = current;
-
       if (cmpResult > 0)
       {
          current = current->right;
