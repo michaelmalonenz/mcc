@@ -57,16 +57,20 @@ static void handleWarning(void);
 
 static void mcc_ExpectTokenType(mcc_Token_t *token, TOKEN_TYPE tokenType, int index)
 {
+   const char *expected = token_types[tokenType];
+   if (tokenType == TOK_PP_DIRECTIVE)
+   {
+      expected = preprocessor_directives[index];
+   }
+   if (token == NULL)
+   {
+      mcc_Error("Encountered unexpected end of file while searching for %s\n", expected);
+   }
    if (token->tokenType != tokenType)
    {
-      const char *expected = token_types[tokenType];
-      if (tokenType == TOK_PP_DIRECTIVE)
-      {
-         expected = preprocessor_directives[index];
-      }
       mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
                       token->lineno,
-                      "Preprocessor expected a %s token, but got a %s token\n",
+                      "Preprocessor expected a %s, but got a %s\n",
                       expected,
                       token_types[token->tokenType]);
    }
