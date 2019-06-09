@@ -245,18 +245,12 @@ static void handleUndef()
 
 static void handleError()
 {
-   mcc_Token_t *temp = NULL;
+   mcc_Token_t *temp;
    getToken();
+   temp = currentToken;
    while (currentToken->tokenType != TOK_EOL)
    {
-      if (temp == NULL)
-      {
-         temp = currentToken;
-      }
-      else
-      {
-         temp = mcc_ConCatTokens(temp, currentToken, TOK_STR_CONST);
-      }
+      temp = mcc_ConCatTokens(temp, currentToken, TOK_STR_CONST);
       getToken();
    }
    mcc_PrettyError(mcc_ResolveFileNameFromNumber(temp->fileno),
@@ -264,15 +258,10 @@ static void handleError()
                    "Error: %s\n", temp->text);
 }
 
-static void handleIfdef()
+static void conditionalInnerImpl(bool_t initialConditionTrue)
 {
-   bool_t processMacro;
+   bool_t processMacro = initialConditionTrue;
    bool_t handled = FALSE;
-   getToken();
-   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
-   getToken();
-   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
-   processMacro = mcc_IsMacroDefined(currentToken->text);
 
    getToken();
    while (currentToken->tokenType != TOK_PP_DIRECTIVE ||
@@ -301,50 +290,29 @@ static void handleIfdef()
    mcc_ExpectTokenType(currentToken, TOK_PP_DIRECTIVE, PP_ENDIF);
 }
 
-static void handleIfndef()
+static void handleIfdef()
 {
-   bool_t processMacro;
-   bool_t handled = FALSE;
    getToken();
    mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
    getToken();
    mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
-   processMacro = !mcc_IsMacroDefined(currentToken->text);
+   conditionalInnerImpl(mcc_IsMacroDefined(currentToken->text));
+}
 
+static void handleIfndef()
+{
    getToken();
-   while (currentToken->tokenType != TOK_PP_DIRECTIVE ||
-          (currentToken->tokenType == TOK_PP_DIRECTIVE &&
-           currentToken->tokenIndex != PP_ENDIF))
-   {
-      if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
-          currentToken->tokenIndex == PP_ELSE)
-      {
-         handled = handled || processMacro;
-         processMacro = !processMacro;
-      }
-      else if (processMacro && !handled)
-      {
-         if (currentToken->tokenType == TOK_PP_DIRECTIVE)
-         {
-            handlePreprocessorDirective(currentToken, tokenListIter);
-         }
-         else
-         {
-            emitToken();
-         }
-      }
-      getToken();
-   }
-   mcc_ExpectTokenType(currentToken, TOK_PP_DIRECTIVE, PP_ENDIF);
+   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
+   getToken();
+   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
+   conditionalInnerImpl(!mcc_IsMacroDefined(currentToken->text));
 }
 
 static void handleIf()
 {
    //Get values for the identifier tokens.
    int result = mcc_ICE_EvaluateTokenString(tokenListIter);
-   if (result)
-   {
-   }
+   conditionalInnerImpl(result);
 }
 
 static void handleEndif()
@@ -373,4 +341,17 @@ static void handleJoin() {}
 //What shall I do with #pragmas???
 static void handlePragma() {}
 
-static void handleWarning() {}
+static void handleWarning()
+{
+   mcc_Token_t *temp;
+   getToken();
+   temp = currentToken;
+   while (currentToken->tokenType != TOK_EOL)
+   {
+      temp = mcc_ConCatTokens(temp, currentToken, TOK_STR_CONST);
+      getToken();
+   }
+   printf(mcc_ResolveFileNameFromNumber(temp->fileno),
+          temp->lineno,
+          "Warning: %s\n", temp->text);
+}
