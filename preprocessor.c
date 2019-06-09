@@ -90,7 +90,29 @@ static mcc_List_t *output;
 
 static void emitToken(void)
 {
-   mcc_TokenListStandaloneAppend(output, mcc_CopyToken(currentToken));
+   if (currentToken->tokenType == TOK_IDENTIFIER)
+   {
+      mcc_Macro_t *macro = mcc_ResolveMacro(currentToken->text);
+      if (macro == NULL)
+      {
+         mcc_TokenListStandaloneAppend(output, mcc_CopyToken(currentToken));
+      }
+      else
+      {
+         mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(macro->tokens);
+         mcc_Token_t *macroToken = mcc_GetNextToken(iter);
+         while (macroToken != NULL)
+         {
+            mcc_TokenListStandaloneAppend(output, mcc_CopyToken(macroToken));
+            macroToken = mcc_GetNextToken(iter);
+         }
+         mcc_TokenListDeleteIterator(iter);
+      }
+   }
+   else
+   {
+      mcc_TokenListStandaloneAppend(output, mcc_CopyToken(currentToken));
+   }
 }
 
 static void getToken(void)
