@@ -241,18 +241,12 @@ static void handleUndef()
 
 static void handleError()
 {
-   mcc_Token_t *temp = NULL;
+   mcc_Token_t *temp;
    getToken();
+   temp = currentToken;
    while (currentToken->tokenType != TOK_EOL)
    {
-      if (temp == NULL)
-      {
-         temp = currentToken;
-      }
-      else
-      {
-         temp = mcc_ConCatTokens(temp, currentToken, TOK_STR_CONST);
-      }
+      temp = mcc_ConCatTokens(temp, currentToken, TOK_STR_CONST);
       getToken();
    }
    mcc_PrettyError(mcc_ResolveFileNameFromNumber(temp->fileno),
@@ -369,4 +363,17 @@ static void handleJoin() {}
 //What shall I do with #pragmas???
 static void handlePragma() {}
 
-static void handleWarning() {}
+static void handleWarning()
+{
+   mcc_Token_t *temp;
+   getToken();
+   temp = currentToken;
+   while (currentToken->tokenType != TOK_EOL)
+   {
+      temp = mcc_ConCatTokens(temp, currentToken, TOK_STR_CONST);
+      getToken();
+   }
+   printf(mcc_ResolveFileNameFromNumber(temp->fileno),
+          temp->lineno,
+          "Warning: %s\n", temp->text);
+}
