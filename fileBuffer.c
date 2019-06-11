@@ -134,6 +134,14 @@ mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer
          readFileChunk(fileBuffer);
          if (mcc_FileBufferEOFReached(fileBuffer))
          {
+            long lineLength = mcc_GetStringBufferLength(lineBuffer);
+            if (lineLength > 0)
+            {
+               fileBuffer->currentLine.length = lineLength;
+               fileBuffer->currentLine.string = mcc_DestroyBufferNotString(lineBuffer);
+               fileBuffer->currentLine.index = 0;
+               return &fileBuffer->currentLine;
+            }
             mcc_DeleteStringBuffer(lineBuffer);
             fileBuffer->currentLine.string = NULL;
             fileBuffer->currentLine.index = 0;
