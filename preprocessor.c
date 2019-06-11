@@ -54,6 +54,8 @@ static void handleError(void);
 static void handlePragma(void);
 static void handleJoin(void);
 static void handleWarning(void);
+static void handleMacroFunction(mcc_Macro_t *macro);
+static void handleMacroReplacement(mcc_Macro_t *macro);
 
 static void mcc_ExpectTokenType(mcc_Token_t *token, TOKEN_TYPE tokenType, int index)
 {
@@ -99,14 +101,14 @@ static void emitToken(void)
       }
       else
       {
-         mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(macro->tokens);
-         mcc_Token_t *macroToken = mcc_GetNextToken(iter);
-         while (macroToken != NULL)
+         if (macro->is_function)
          {
-            mcc_TokenListStandaloneAppend(output, mcc_CopyToken(macroToken));
-            macroToken = mcc_GetNextToken(iter);
+            handleMacroFunction(macro);
          }
-         mcc_TokenListDeleteIterator(iter);
+         else
+         {
+            handleMacroReplacement(macro);
+         }
       }
    }
    else
@@ -118,6 +120,14 @@ static void emitToken(void)
 static void getToken(void)
 {
    currentToken = mcc_GetNextToken(tokenListIter);
+}
+
+static void maybeGetWhitespaceToken(void)
+{
+   if (currentToken->tokenType == TOK_WHITESPACE)
+   {
+      getToken();
+   }
 }
 
 static void handlePreprocessorDirective()
@@ -252,10 +262,7 @@ static void handleUndef()
    mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
    mcc_UndefineMacro(currentToken->text);
    getToken();
-   if (currentToken->tokenType == TOK_WHITESPACE)
-   {
-      getToken();
-   }
+   maybeGetWhitespaceToken();
    if (currentToken->tokenType != TOK_EOL)
    {
       mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
@@ -332,7 +339,7 @@ static void handleIfndef()
 
 static void handleIf()
 {
-   //Get values for the identifier tokens.
+   // Still need to replace the macros here.
    int result = mcc_ICE_EvaluateTokenString(tokenListIter);
    conditionalInnerImpl(result);
 }
@@ -376,4 +383,41 @@ static void handleWarning()
    printf(mcc_ResolveFileNameFromNumber(temp->fileno),
           temp->lineno,
           "Warning: %s\n", temp->text);
+}
+
+static void handleMacroReplacement(mcc_Macro_t *macro)
+{
+   mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(macro->tokens);
+   mcc_Token_t *macroToken = mcc_GetNextToken(iter);
+   while (macroToken != NULL)
+   {
+      mcc_TokenListStandaloneAppend(output, mcc_CopyToken(macroToken));
+      macroToken = mcc_GetNextToken(iter);
+   }
+   mcc_TokenListDeleteIterator(iter);
+}
+
+static void handleMacroFunction(mcc_Macro_t *macro)
+{
+   getToken();
+   maybeGetWhitespaceToken();
+   mcc_ExpectTokenType(currentToken, TOK_SYMBOL, SYM_OPEN_PAREN);
+   getToken();
+   mcc_List_t UNUSED(*parameters) = mcc_ListCreate();
+   mcc_TokenListIterator_t UNUSED(*iter) = mcc_TokenListStandaloneGetIterator(macro->arguments);
+   while (currentToken->tokenType != TOK_SYMBOL &&
+          currentToken->tokenIndex != SYM_CLOSE_PAREN)
+   {
+      maybeGetWhitespaceToken();
+      mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
+      // collect parameters
+      maybeGetWhitespaceToken();
+      if (currentToken->tokenType == TOK_OPERATOR && currentToken->tokenIndex == OP_COMMA)
+      {
+         getToken();
+      }
+   }
+   // If the parameters.length != arguments.length throw an error 
+
+   // go through the macro tokens, replacing the matching arguments with the parameters; emit.
 }
