@@ -403,21 +403,37 @@ static void handleMacroFunction(mcc_Macro_t *macro)
    maybeGetWhitespaceToken();
    mcc_ExpectTokenType(currentToken, TOK_SYMBOL, SYM_OPEN_PAREN);
    getToken();
-   mcc_List_t UNUSED(*parameters) = mcc_ListCreate();
-   mcc_TokenListIterator_t UNUSED(*iter) = mcc_TokenListStandaloneGetIterator(macro->arguments);
+   mcc_List_t *parameters = mcc_ListCreate();
+   mcc_TokenListIterator_t *argumentsIter = mcc_TokenListStandaloneGetIterator(macro->arguments);
+   mcc_TokenListIterator_t *tokensIter = mcc_TokenListStandaloneGetIterator(macro->tokens);
    while (currentToken->tokenType != TOK_SYMBOL &&
           currentToken->tokenIndex != SYM_CLOSE_PAREN)
    {
+      mcc_MacroParameter_t *param = mcc_MacroParameterCreate();
       maybeGetWhitespaceToken();
       mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
-      // collect parameters
+      param->argument = mcc_GetNextToken(argumentsIter);
+      param->parameter = currentToken;
       maybeGetWhitespaceToken();
       if (currentToken->tokenType == TOK_OPERATOR && currentToken->tokenIndex == OP_COMMA)
       {
          getToken();
       }
+      mcc_ListAppendData(parameters, (uintptr_t)param);
    }
-   // If the parameters.length != arguments.length throw an error 
+   if (mcc_ListGetLength(parameters) != mcc_ListGetLength(macro->arguments))
+   {
+      mcc_PrettyError(
+         mcc_ResolveFileNameFromNumber(currentToken->fileno),
+         currentToken->lineno,
+         "macro function %s expects %d argument(s), but %d were provided\n",
+         macro->text,
+         mcc_ListGetLength(macro->arguments),
+         mcc_ListGetLength(parameters));
+   }
 
    // go through the macro tokens, replacing the matching arguments with the parameters; emit.
+   mcc_TokenListDeleteIterator(argumentsIter);
+   mcc_TokenListDeleteIterator(tokensIter);
+   // mcc_ListDelete(parameters, deleteMacroParamUpcastingFrom_uintptr_r);
 }

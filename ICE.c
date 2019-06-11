@@ -228,7 +228,7 @@ int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
    const mcc_Token_t *temp = NULL;
    int result;
    
-   while (token->tokenType != TOK_EOL)
+   while (token != NULL && token->tokenType != TOK_EOL)
    {
       if (token->tokenType == TOK_NUMBER)
       {

@@ -45,6 +45,11 @@ typedef struct macro {
 #endif
 }mcc_Macro_t;
 
+typedef struct macroParameter {
+   const mcc_Token_t *argument;
+   const mcc_Token_t *parameter;
+}mcc_MacroParameter_t;
+
 void mcc_InitialiseMacros(void);
 
 void mcc_DeleteAllMacros(void);
@@ -59,4 +64,6 @@ mcc_Macro_t *mcc_ResolveMacro(const char *text);
 
 void mcc_DoMacroReplacement(mcc_LogicalLine_t *line);
 
+mcc_MacroParameter_t *mcc_MacroParameterCreate(void);
+void mcc_MacroParameterDelete(mcc_MacroParameter_t *param);
 #endif /* MCC_MACRO_H */

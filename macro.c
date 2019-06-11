@@ -93,3 +93,12 @@ bool_t mcc_IsMacroDefined(const char *text)
 {
    return (mcc_ResolveMacro(text) != NULL);
 }
+
+mcc_MacroParameter_t *mcc_MacroParameterCreate(void)
+{
+   return (mcc_MacroParameter_t *) malloc(sizeof(mcc_MacroParameter_t));
+}
+void mcc_MacroParameterDelete(mcc_MacroParameter_t *param)
+{
+   free(param);
+}
