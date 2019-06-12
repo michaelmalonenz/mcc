@@ -397,6 +397,31 @@ static void handleMacroReplacement(mcc_Macro_t *macro)
    mcc_TokenListDeleteIterator(iter);
 }
 
+mcc_List_t *replaceMacroTokens(mcc_Macro_t *macro, mcc_List_t *parameters)
+{
+   mcc_List_t *functionTokens = mcc_TokenListDeepCopy(macro->tokens);
+   mcc_TokenListIterator_t *parametersIter = mcc_TokenListStandaloneGetIterator(parameters);
+   mcc_MacroParameter_t *param = (mcc_MacroParameter_t *) mcc_ListGetNextData(parametersIter);
+   while (param != NULL)
+   {
+      mcc_TokenListIterator_t *tokensIter = mcc_TokenListStandaloneGetIterator(functionTokens);
+      mcc_Token_t *functionToken = mcc_GetNextToken(tokensIter);
+      while (functionToken != NULL)
+      {
+         if (functionToken->tokenType == TOK_IDENTIFIER &&
+             strncmp(functionToken->text, param->argument->text, strlen(functionToken->text)))
+         {
+            mcc_TokenListStandaloneReplaceCurrent(tokensIter, param->parameter);
+         }
+         functionToken = mcc_GetNextToken(tokensIter);
+      }
+      mcc_TokenListDeleteIterator(tokensIter);
+      param = (mcc_MacroParameter_t *) mcc_ListGetNextData(parametersIter);
+   }
+   mcc_TokenListDeleteIterator(parametersIter);
+   return functionTokens;
+}
+
 static void handleMacroFunction(mcc_Macro_t *macro)
 {
    getToken();
@@ -405,7 +430,6 @@ static void handleMacroFunction(mcc_Macro_t *macro)
    getToken();
    mcc_List_t *parameters = mcc_ListCreate();
    mcc_TokenListIterator_t *argumentsIter = mcc_TokenListStandaloneGetIterator(macro->arguments);
-   mcc_TokenListIterator_t *tokensIter = mcc_TokenListStandaloneGetIterator(macro->tokens);
    while (currentToken->tokenType != TOK_SYMBOL &&
           currentToken->tokenIndex != SYM_CLOSE_PAREN)
    {
@@ -431,9 +455,7 @@ static void handleMacroFunction(mcc_Macro_t *macro)
          mcc_ListGetLength(macro->arguments),
          mcc_ListGetLength(parameters));
    }
-
-   // go through the macro tokens, replacing the matching arguments with the parameters; emit.
    mcc_TokenListDeleteIterator(argumentsIter);
-   mcc_TokenListDeleteIterator(tokensIter);
+   mcc_TokenList_t UNUSED(*functionTokens) = replaceMacroTokens(macro, parameters);
    // mcc_ListDelete(parameters, deleteMacroParamUpcastingFrom_uintptr_r);
 }

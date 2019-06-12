@@ -62,6 +62,20 @@ mcc_Token_t *mcc_CopyToken(const mcc_Token_t *token)
       token->lineno, token->fileno);
 }
 
+mcc_List_t *mcc_TokenListDeepCopy(mcc_TokenList_t *list)
+{
+   mcc_List_t *result = mcc_ListCreate();
+   mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);
+   mcc_Token_t *token = mcc_GetNextToken(iter);
+   while (token != NULL)
+   {
+      mcc_TokenListStandaloneAppend(result, mcc_CopyToken(token));
+      token = mcc_GetNextToken(iter);
+   }
+   mcc_TokenListDeleteIterator(iter);
+   return result;
+}
+
 void mcc_AddEndOfLineToken(const int lineno, const unsigned short fileno,
                            mcc_TokenListIterator_t *iter)
 {
@@ -97,6 +111,12 @@ void mcc_InsertToken(mcc_Token_t *token, mcc_TokenListIterator_t *iter)
 #if MCC_DEBUG
 //   printf("Got me a token '%s' of type %d\n", token->text, token->tokenType);
 #endif
+}
+
+void mcc_TokenListStandaloneReplaceCurrent(mcc_TokenListIterator_t UNUSED(*iter), mcc_Token_t UNUSED(*token))
+{
+   // throw new NotImplementedException()
+   MCC_ASSERT(FALSE);
 }
 
 const mcc_Token_t *mcc_TokenListPeekCurrentToken(mcc_TokenListIterator_t *iter)

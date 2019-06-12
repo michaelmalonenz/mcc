@@ -47,7 +47,7 @@ typedef struct macro {
 
 typedef struct macroParameter {
    const mcc_Token_t *argument;
-   const mcc_Token_t *parameter;
+   mcc_Token_t *parameter;
 }mcc_MacroParameter_t;
 
 void mcc_InitialiseMacros(void);
