@@ -294,15 +294,15 @@ if $0 == __FILE__ then
          Dir.chdir(BIN_DIR) do
             run_command("lcov -d #{SRC_DIR} -b #{SRC_DIR} -c -o mcc_test_results.info --ignore-errors source",
                         "Failed to measure test coverage")
-            run_command("lcov -r mcc_test_results.info test_*.c -o mcc_test_results.info",
+            run_command("lcov -r mcc_test_results.info '*test_*.c' -o mcc_test_results.info",
                         "Failed to remove test results from coverage results")
-            run_command("lcov -r mcc_test_results.info TestUtils.c -o mcc_test_results.info",
+            run_command("lcov -r mcc_test_results.info '*TestUtils.c' -o mcc_test_results.info",
                         "Failed to remove test results from coverage results")
             run_command("lcov -r mcc_test_results.info mcc.c -o mcc_test_results.info",
                         "Failed to remove test results from coverage results")
-            run_command("lcov -r mcc_baseline.info test_*.c -o mcc_baseline.info",
+            run_command("lcov -r mcc_baseline.info '*test_*.c' -o mcc_baseline.info",
                         "Failed to remove test results from coverage results")
-            run_command("lcov -r mcc_baseline.info TestUtils.c -o mcc_baseline.info",
+            run_command("lcov -r mcc_baseline.info '*TestUtils.c' -o mcc_baseline.info",
                         "Failed to remove test results from coverage results")
             run_command("lcov -r mcc_baseline.info mcc.c -o mcc_baseline.info",
                         "Failed to remove test results from coverage results")
