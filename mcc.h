@@ -41,7 +41,7 @@
 
 #define mcc_Error(...) fprintf(stderr, __VA_ARGS__); exit(EXIT_FAILURE)
 
-#define mcc_PrettyError(file, lineno, ...) fprintf(stderr, "%s:%d ", file, lineno); \
+#define mcc_PrettyError(file, lineno, col, ...) fprintf(stderr, "%s:%d:%u ", file, lineno, col); \
    mcc_Error(__VA_ARGS__)
 
 

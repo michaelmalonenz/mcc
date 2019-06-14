@@ -40,8 +40,8 @@ static mcc_TokenList_t *token_list = NULL;
 static const char whitespaceText = ' ';
 
 mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
-                             TOKEN_TYPE type, const int lineno,
-                             const unsigned short fileno)
+                             TOKEN_TYPE type, const unsigned int column,
+                             const int lineno, const unsigned short fileno)
 {
    mcc_Token_t *token = (mcc_Token_t *) malloc(sizeof(mcc_Token_t));
    token->text = (char *) malloc(sizeof(char) * (text_len + 1));
@@ -49,6 +49,7 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
    token->text[text_len] = '\0';
    token->tokenType = type;
    token->tokenIndex = TOK_UNSET_INDEX;
+   token->line_index = column;
    token->lineno = lineno;
    token->fileno = fileno;
 
@@ -59,7 +60,7 @@ mcc_Token_t *mcc_CopyToken(const mcc_Token_t *token)
 {
    return mcc_CreateToken(
       token->text, strlen(token->text), token->tokenType,
-      token->lineno, token->fileno);
+      token->line_index, token->lineno, token->fileno);
 }
 
 mcc_List_t *mcc_TokenListDeepCopy(mcc_TokenList_t *list)
@@ -76,15 +77,15 @@ mcc_List_t *mcc_TokenListDeepCopy(mcc_TokenList_t *list)
    return result;
 }
 
-void mcc_AddEndOfLineToken(const int lineno, const unsigned short fileno,
+void mcc_AddEndOfLineToken(const unsigned int column, const int lineno, const unsigned short fileno,
                            mcc_TokenListIterator_t *iter)
 {
    mcc_Token_t *token = mcc_CreateToken(&whitespaceText, sizeof(whitespaceText),
-                                        TOK_EOL, lineno, fileno);
+                                        TOK_EOL, column, lineno, fileno);
    mcc_InsertToken(token, iter);   
 }
 
-void mcc_CreateAndAddWhitespaceToken(const int lineno,
+void mcc_CreateAndAddWhitespaceToken(const unsigned int column, const int lineno,
                                      const unsigned short fileno,
                                      mcc_TokenListIterator_t *iter)
 {
@@ -92,7 +93,7 @@ void mcc_CreateAndAddWhitespaceToken(const int lineno,
    if (temp != NULL && temp->tokenType != TOK_WHITESPACE)
    {
       mcc_Token_t *token = mcc_CreateToken(&whitespaceText, sizeof(whitespaceText),
-                                           TOK_WHITESPACE, lineno, fileno);
+                                           TOK_WHITESPACE, column, lineno, fileno);
       mcc_InsertToken(token, iter);
    }
 }

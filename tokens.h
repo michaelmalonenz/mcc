@@ -68,7 +68,7 @@ typedef struct token {
    int tokenIndex;
    unsigned short fileno;
    int lineno;
-   int line_index;
+   unsigned int line_index;
    mcc_Number_t number;
 } mcc_Token_t;
 

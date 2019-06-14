@@ -72,6 +72,7 @@ static void mcc_ExpectTokenType(mcc_Token_t *token, TOKEN_TYPE tokenType, int in
    {
       mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
                       token->lineno,
+                      token->line_index,
                       "Preprocessor expected %s, but got %s (%s)\n",
                       expected,
                       token_types[token->tokenType],
@@ -178,6 +179,7 @@ static void handleInclude()
    {
       mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
                         currentToken->lineno,
+                        currentToken->line_index,
                         "Expected a filename to include, got '%s'\n",
                         currentToken->text);
    }
@@ -185,6 +187,7 @@ static void handleInclude()
    {
       mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
                         currentToken->lineno,
+                        currentToken->line_index,
                         "Couldn't locate file '%s' for inclusion\n",
                         currentToken->text);
    }
@@ -228,6 +231,7 @@ static void handleDefine()
             mcc_PrettyError(
                mcc_ResolveFileNameFromNumber(currentToken->fileno),
                currentToken->lineno,
+               currentToken->line_index,
                "Unclosed parentheses in function macro '%s'\n",
                macro_identifier);
          }
@@ -268,6 +272,7 @@ static void handleUndef()
    {
       mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
                       currentToken->lineno,
+                      currentToken->line_index,
                       "Unexpected characters after #undef '%s'\n",
                       currentToken->text);
    }
@@ -285,6 +290,7 @@ static void handleError()
    }
    mcc_PrettyError(mcc_ResolveFileNameFromNumber(temp->fileno),
                    temp->lineno,
+                   temp->line_index,
                    "Error: %s\n", temp->text);
 }
 
@@ -349,6 +355,7 @@ static void handleEndif()
 {
    mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
                      currentToken->lineno,
+                     currentToken->line_index,
                      "endif without if\n");
 }
 
@@ -356,6 +363,7 @@ static void handleElse()
 {
    mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
                      currentToken->lineno,
+                     currentToken->line_index,
                      "else without if\n");
 }
 
@@ -363,6 +371,7 @@ static void handleElif()
 {
    mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
                      currentToken->lineno,
+                     currentToken->line_index,
                      "elif without if\n");
 }
 
@@ -450,6 +459,7 @@ static void handleMacroFunction(mcc_Macro_t *macro)
       mcc_PrettyError(
          mcc_ResolveFileNameFromNumber(currentToken->fileno),
          currentToken->lineno,
+         currentToken->line_index,
          "macro function %s expects %d argument(s), but %d were provided\n",
          macro->text,
          mcc_ListGetLength(macro->arguments),

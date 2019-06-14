@@ -113,6 +113,7 @@ static mcc_Number_t *evaluate_operands(mcc_Token_t *l_operand,
          mcc_DebugPrintToken(operator);
          mcc_PrettyError(mcc_ResolveFileNameFromNumber(operator->fileno),
                          operator->lineno,
+                         operator->line_index,
                          "Unimplemented Operator in arithmetic statement: %s\n",
                          operators[operator->tokenIndex]);
       }
@@ -186,7 +187,7 @@ static int mcc_EvaluateRPN(mcc_Stack_t *input)
             char numberText[20];
             snprintf(numberText, 20, "%d", resultNum->number.integer_s);
             mcc_Token_t *result = mcc_CreateToken(numberText, strlen(numberText),
-                                                  TOK_NUMBER, 0, 0);
+                                                  TOK_NUMBER, 0, 0, 0);
             memcpy(&result->number, resultNum, sizeof(*resultNum));
             free(resultNum);
             mcc_StackPush(operands, (uintptr_t) result);
@@ -270,6 +271,7 @@ int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
             {
                mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
                                token->lineno,
+                               token->line_index,
                                "Unmatched Parentheses\n");
             }
          }
@@ -277,6 +279,7 @@ int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
          {
             mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
                             token->lineno,
+                            token->line_index,
                             "Unexpected symbol in arithmetic statement: %s\n",
                             symbols[token->tokenIndex]);
          }
