@@ -98,7 +98,8 @@ mcc_MacroParameter_t *mcc_MacroParameterCreate(void)
 {
    return (mcc_MacroParameter_t *) malloc(sizeof(mcc_MacroParameter_t));
 }
-void mcc_MacroParameterDelete(mcc_MacroParameter_t *param)
+
+void mcc_MacroParameterDelete(uintptr_t param)
 {
-   free(param);
+   free((mcc_MacroParameter_t *)param);
 }

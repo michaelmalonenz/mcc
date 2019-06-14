@@ -107,16 +107,12 @@ void mcc_DeleteToken(uintptr_t token)
 void mcc_InsertToken(mcc_Token_t *token, mcc_TokenListIterator_t *iter)
 {
    mcc_ListInsertDataAtCurrentPosition((mcc_ListIterator_t *) iter, (uintptr_t) token);
-
-#if MCC_DEBUG
-//   printf("Got me a token '%s' of type %d\n", token->text, token->tokenType);
-#endif
 }
 
-void mcc_TokenListStandaloneReplaceCurrent(mcc_TokenListIterator_t UNUSED(*iter), mcc_Token_t UNUSED(*token))
+void mcc_TokenListStandaloneReplaceCurrent(mcc_TokenListIterator_t *iter, mcc_Token_t *token)
 {
-   // throw new NotImplementedException()
-   MCC_ASSERT(FALSE);
+   mcc_RemoveDataFromCurrentPosition((mcc_ListIterator_t *)iter);
+   mcc_ListInsertDataAtCurrentPosition((mcc_ListIterator_t *)iter, (uintptr_t)token);
 }
 
 const mcc_Token_t *mcc_TokenListPeekCurrentToken(mcc_TokenListIterator_t *iter)

@@ -111,6 +111,12 @@ mcc_ListIterator_t *mcc_ListCopyIterator(mcc_ListIterator_t *iter);
 void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, uintptr_t data);
 
 /**
+ * Remove the current data and return it.  Set the new current to the existing
+ * "next".
+ */
+uintptr_t mcc_RemoveDataFromCurrentPosition(mcc_ListIterator_t *iter);
+
+/**
  * This shows what data the iterator is currently pointing at.
  * It has no side-effects on the iterator and callers *must not*
  * free the memory associated with the data returned.

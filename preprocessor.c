@@ -72,9 +72,10 @@ static void mcc_ExpectTokenType(mcc_Token_t *token, TOKEN_TYPE tokenType, int in
    {
       mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
                       token->lineno,
-                      "Preprocessor expected a %s, but got a %s\n",
+                      "Preprocessor expected %s, but got %s (%s)\n",
                       expected,
-                      token_types[token->tokenType]);
+                      token_types[token->tokenType],
+                      token->text);
    }
 }
 
@@ -435,10 +436,9 @@ static void handleMacroFunction(mcc_Macro_t *macro)
    {
       mcc_MacroParameter_t *param = mcc_MacroParameterCreate();
       maybeGetWhitespaceToken();
-      mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
       param->argument = mcc_GetNextToken(argumentsIter);
       param->parameter = currentToken;
-      maybeGetWhitespaceToken();
+      getToken();
       if (currentToken->tokenType == TOK_OPERATOR && currentToken->tokenIndex == OP_COMMA)
       {
          getToken();
@@ -456,6 +456,14 @@ static void handleMacroFunction(mcc_Macro_t *macro)
          mcc_ListGetLength(parameters));
    }
    mcc_TokenListDeleteIterator(argumentsIter);
-   mcc_TokenList_t UNUSED(*functionTokens) = replaceMacroTokens(macro, parameters);
-   // mcc_ListDelete(parameters, deleteMacroParamUpcastingFrom_uintptr_r);
+   mcc_TokenList_t *functionTokens = replaceMacroTokens(macro, parameters);
+   mcc_TokenListIterator_t *functionTokenIter = mcc_TokenListStandaloneGetIterator(functionTokens);
+   mcc_Token_t *token = mcc_GetNextToken(functionTokenIter);
+   while (token != NULL)
+   {
+      token = mcc_GetNextToken(functionTokenIter);
+      mcc_TokenListStandaloneAppend(output, token);
+   }
+   mcc_TokenListDeleteIterator(functionTokenIter);
+   mcc_ListDelete(parameters, mcc_MacroParameterDelete);
 }
