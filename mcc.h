@@ -39,7 +39,7 @@
 
 #define MCC_MAX_INPUT_FILES USHRT_MAX
 
-#define mcc_Error(...) fprintf(stderr, __VA_ARGS__); exit(1)
+#define mcc_Error(...) fprintf(stderr, __VA_ARGS__); exit(EXIT_FAILURE)
 
 #define mcc_PrettyError(file, lineno, ...) fprintf(stderr, "%s:%d ", file, lineno); \
    mcc_Error(__VA_ARGS__)

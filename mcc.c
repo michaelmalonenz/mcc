@@ -71,5 +71,5 @@ int main(int argc, char **argv)
 
    mcc_TearDownOptions();
 
-   return 0;
+   return EXIT_SUCCESS;
 } 
