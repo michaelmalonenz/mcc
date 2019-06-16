@@ -209,27 +209,12 @@ void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, uintptr_t dat
    iter->list->nItems++;
 }
 
-uintptr_t mcc_RemoveDataFromCurrentPosition(mcc_ListIterator_t *iter)
+uintptr_t mcc_ListReplaceCurrentData(mcc_ListIterator_t *iter, uintptr_t data)
 {
    MCC_ASSERT(iter->current != NULL);
-   mcc_ListNode_t *node = iter->current;
-   if (iter->list->head == node)
-   {
-      iter->list->head = node->next;
-   }
-   else if (iter->list->tail == node)
-   {
-      iter->list->tail = node->prev;
-   }
-   else {
-      node->prev->next = node->next;
-      node->next->prev = node->prev;
-   }
-   iter->current = node->next;
-   uintptr_t data = node->data;
-   node->data = NULL_DATA;
-   free(node);
-   return data;
+   uintptr_t previous = iter->current->data;
+   iter->current->data = data;
+   return previous;
 }
 
 bool_t mcc_ListEmpty(mcc_List_t *list)

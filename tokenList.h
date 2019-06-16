@@ -145,9 +145,9 @@ mcc_List_t *mcc_TokenListDeepCopy(mcc_TokenList_t *list);
 
 /**
  * Replace the current token as defined by the iterator with the given
- * token.
+ * token.  Return existing current.
  */
-void mcc_TokenListStandaloneReplaceCurrent(mcc_TokenListIterator_t *iter, mcc_Token_t *token);
+mcc_Token_t *mcc_TokenListStandaloneReplaceCurrent(mcc_TokenListIterator_t *iter, mcc_Token_t *token);
 
 mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, mcc_Token_t *second, TOKEN_TYPE newType);
 mcc_TokenListIterator_t *mcc_TokenListCopyIterator(mcc_TokenListIterator_t *iter);

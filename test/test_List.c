@@ -256,19 +256,62 @@ static void test_InsertionIteratingBackwards(void)
    printf("*** Finished backwards insertion test ***\n\n");
 }
 
+void test_RemoveThenAdd(void)
+{
+   int i;
+   mcc_ListIterator_t *iter = NULL;
+   mcc_List_t *list = mcc_ListCreate();
+   int result;
+
+   printf("*** Starting remove then add test ***\n");
+   for (i = 0; i < NUM_BASIC_TEST_ITEMS; i++)
+   {
+      mcc_ListAppendData(list, basic_test_data[i]);
+   }
+
+   iter = mcc_ListGetIterator(list);
+   for (i = 0; i < NUM_BASIC_TEST_ITEMS/2; i++)
+   {
+      result = (int) mcc_ListGetNextData(iter);
+   }
+   MCC_ASSERT(result == 5);
+
+   result = (int) mcc_ListReplaceCurrentData(iter, 42);
+   MCC_ASSERT(result == 5);
+
+   mcc_ListDeleteIterator(iter);
+
+   iter = mcc_ListGetIterator(list);
+   for (i = 0; i < NUM_BASIC_TEST_ITEMS; i++)
+   {
+      result = (int) mcc_ListGetNextData(iter);
+      if (basic_test_data[i] != 5)
+      {
+         printf("Expected: %d, Actual: %d\n", basic_test_data[i], result);
+         MCC_ASSERT(result == basic_test_data[i]);
+      }
+      else
+      {
+         printf("Expected: 42, Actual: %d\n", result);
+         MCC_ASSERT(result == 42);
+      }
+   }
+   mcc_ListDeleteIterator(iter);
+   mcc_ListDelete(list, NULL);
+
+   printf("*** Finished remove then add test ***\n");
+}
+
 int main(void)
 {
    printf("Beginning %s\n", __FILE__);
 
    test_NullList();
-
    test_BasicListFunctionality();
-
    test_InsertionWithIterator();
-
    test_CopyingIterator();
-
    test_InsertionIteratingBackwards();
+   test_RemoveThenAdd();
 
    printf("Finished %s\n", __FILE__);
    return 0;

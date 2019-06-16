@@ -110,10 +110,9 @@ void mcc_InsertToken(mcc_Token_t *token, mcc_TokenListIterator_t *iter)
    mcc_ListInsertDataAtCurrentPosition((mcc_ListIterator_t *) iter, (uintptr_t) token);
 }
 
-void mcc_TokenListStandaloneReplaceCurrent(mcc_TokenListIterator_t *iter, mcc_Token_t *token)
+mcc_Token_t *mcc_TokenListStandaloneReplaceCurrent(mcc_TokenListIterator_t *iter, mcc_Token_t *token)
 {
-   mcc_RemoveDataFromCurrentPosition((mcc_ListIterator_t *)iter);
-   mcc_ListInsertDataAtCurrentPosition((mcc_ListIterator_t *)iter, (uintptr_t)token);
+   return (mcc_Token_t *)mcc_ListReplaceCurrentData((mcc_ListIterator_t *)iter, (uintptr_t)token);
 }
 
 const mcc_Token_t *mcc_TokenListPeekCurrentToken(mcc_TokenListIterator_t *iter)
