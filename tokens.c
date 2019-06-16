@@ -73,8 +73,7 @@ const char *operators[NUM_OPERATORS] = { "--", "++", "*=", "/=", "%=", "+=",
                                          "--", "++" };
 size_t operator_strlens[NUM_OPERATORS];
 
-const char *symbols[NUM_SYMBOLS] = { "{", "}", "[", "]", ";", "(", ")", "\"",
-                                     "'", "\\", "<", ">", "\"" };
+const char *symbols[NUM_SYMBOLS] = { "{", "}", "[", "]", ";", "(", ")", "\"", "'", "\\"};
 size_t symbol_strlens[NUM_SYMBOLS];
 
 const char *number_types[NUMBER_OF_NUMBER_TYPES] = { "signed integer", "unsigned integer", "single precision float", "double precision float"};

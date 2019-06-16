@@ -112,8 +112,7 @@ extern size_t operator_strlens[NUM_OPERATORS];
 typedef enum symbol_index {SYM_OPEN_BRACE, SYM_CLOSE_BRACE, SYM_OPEN_BRACKET,
                            SYM_CLOSE_BRACKET, SYM_SEMI_COLON, SYM_OPEN_PAREN,
                            SYM_CLOSE_PAREN, SYM_DOUBLE_QUOTE, SYM_SINGLE_QUOTE,
-                           SYM_ESCAPE, SYM_OPEN_SYS_INCL, SYM_CLOSE_SYS_INCL,
-                           SYM_LOCAL_INCL, NUM_SYMBOLS, SYM_NONE} MCC_SYMBOL;
+                           SYM_ESCAPE, NUM_SYMBOLS, SYM_NONE} MCC_SYMBOL;
 extern const char *symbols[NUM_SYMBOLS];
 extern size_t symbol_strlens[NUM_SYMBOLS];
 
