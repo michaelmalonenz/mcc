@@ -214,12 +214,8 @@ static void handleDefine()
    mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
    macro_identifier = currentToken->text;
    getToken();
-   if (currentToken->tokenType == TOK_WHITESPACE)
-   {
-      getToken();
-   }
-   else if (currentToken->tokenType == TOK_SYMBOL &&
-            currentToken->tokenIndex == SYM_OPEN_PAREN)
+   if (currentToken->tokenType == TOK_SYMBOL &&
+       currentToken->tokenIndex == SYM_OPEN_PAREN)
    {
       arguments = mcc_TokenListCreateStandalone();
       getToken();
@@ -250,7 +246,9 @@ static void handleDefine()
          }
          getToken();
       }
+      maybeGetWhitespaceToken();
    }
+   getToken();
    while (currentToken->tokenType != TOK_EOL)
    {
       mcc_TokenListStandaloneAppend(tokens, mcc_CopyToken(currentToken));

@@ -82,8 +82,8 @@ int meaningOfLife = max(42, 4);\n";
    const TOKEN_TYPE expectedOutputTokenTypes[20] = {
      TOK_KEYWORD, TOK_WHITESPACE, TOK_IDENTIFIER, TOK_WHITESPACE, TOK_OPERATOR, TOK_WHITESPACE,
      TOK_NUMBER, TOK_WHITESPACE, TOK_SYMBOL, TOK_WHITESPACE, TOK_NUMBER, TOK_WHITESPACE,
-     TOK_SYMBOL, TOK_WHITESPACE, TOK_NUMBER, TOK_WHITESPACE, TOK_SYMBOL, TOK_WHITESPACE,
-     TOK_NUMBER, TOK_EOL
+     TOK_OPERATOR, TOK_WHITESPACE, TOK_NUMBER, TOK_WHITESPACE, TOK_OPERATOR, TOK_WHITESPACE,
+     TOK_NUMBER, TOK_SYMBOL
    };
    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
                                                          strlen(token_string));

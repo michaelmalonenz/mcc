@@ -240,9 +240,9 @@ void mcc_DebugPrintToken(const mcc_Token_t *token)
 {
    if (token != NULL)
    {
-      printf("\t----- Token -----\n\tText: %s\n\tType: %s\n\tIndex: %d\n\tPosition: %s:%d\n",
+      printf("\t----- Token -----\n\tText: %s\n\tType: %s\n\tIndex: %d\n\tPosition: %s:%d:%u\n",
              token->text, token_types[token->tokenType], token->tokenIndex,
-             mcc_ResolveFileNameFromNumber(token->fileno), token->lineno);
+             mcc_ResolveFileNameFromNumber(token->fileno), token->lineno, token->line_index);
    }
    else
    {
