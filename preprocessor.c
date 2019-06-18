@@ -246,9 +246,12 @@ static void handleDefine()
          }
          getToken();
       }
+   }
+   if (currentToken->tokenType != TOK_EOL)
+   {
+      getToken();
       maybeGetWhitespaceToken();
    }
-   getToken();
    while (currentToken->tokenType != TOK_EOL)
    {
       mcc_TokenListStandaloneAppend(tokens, mcc_CopyToken(currentToken));
@@ -419,7 +422,10 @@ mcc_List_t *replaceMacroTokens(mcc_Macro_t *macro, mcc_List_t *parameters)
          if (functionToken->tokenType == TOK_IDENTIFIER &&
              strncmp(functionToken->text, param->argument->text, strlen(functionToken->text)))
          {
-            mcc_TokenListStandaloneReplaceCurrent(tokensIter, param->parameter);
+            mcc_Token_t *result;
+            mcc_Token_t *copy = mcc_CopyToken(param->parameter);
+            result = mcc_TokenListStandaloneReplaceCurrent(tokensIter, copy);
+            mcc_DeleteToken((uintptr_t) result);
          }
          functionToken = mcc_GetNextToken(tokensIter);
       }
@@ -469,9 +475,10 @@ static void handleMacroFunction(mcc_Macro_t *macro)
    mcc_Token_t *token = mcc_GetNextToken(functionTokenIter);
    while (token != NULL)
    {
+      mcc_TokenListStandaloneAppend(output, mcc_CopyToken(token));
       token = mcc_GetNextToken(functionTokenIter);
-      mcc_TokenListStandaloneAppend(output, token);
    }
    mcc_TokenListDeleteIterator(functionTokenIter);
+   mcc_TokenListDeleteStandalone(functionTokens);
    mcc_ListDelete(parameters, mcc_MacroParameterDelete);
 }
