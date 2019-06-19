@@ -62,9 +62,6 @@ static mcc_Number_t *evaluate_operands(mcc_Token_t *l_operand,
    MCC_ASSERT(r_operand->tokenType == TOK_NUMBER);
 
    printf("Evaluating '%s %s %s'\n", l_operand->text, operator->text, r_operand->text);
-   result->number.integer_s = 0;
-   result->numberType = SIGNED_INT;
-   
    switch (operator->tokenIndex)
    {
       case OP_ADD:
@@ -182,12 +179,12 @@ static int mcc_EvaluateRPN(mcc_Stack_t *input)
          {
             mcc_Token_t *r_operand = (mcc_Token_t *) mcc_StackPop(operands);
             mcc_Token_t *l_operand = (mcc_Token_t *) mcc_StackPop(operands);
-            mcc_Number_t *resultNum = evaluate_operands(l_operand, r_operand,
-                                                        token);
-            char numberText[20];
+            mcc_Number_t *resultNum = evaluate_operands(l_operand, r_operand, token);
+            char numberText[20] = {0};
             snprintf(numberText, 20, "%d", resultNum->number.integer_s);
-            mcc_Token_t *result = mcc_CreateToken(numberText, strlen(numberText),
-                                                  TOK_NUMBER, 0, 0, 0);
+            mcc_Token_t *result = mcc_CreateToken(
+               numberText, strlen(numberText), TOK_NUMBER, TOK_UNSET_INDEX,
+               token->line_index, token->lineno, token->fileno);
             memcpy(&result->number, resultNum, sizeof(*resultNum));
             free(resultNum);
             mcc_StackPush(operands, (uintptr_t) result);
@@ -212,8 +209,8 @@ static int mcc_EvaluateRPN(mcc_Stack_t *input)
    {
       int resultNum;
       token = (mcc_Token_t *) mcc_StackPop(operands);
-      mcc_StackDelete(operands, NULL);
       resultNum = token->number.number.integer_s;
+      mcc_StackDelete(operands, NULL);
       mcc_StackDelete(numbersToDelete, mcc_DeleteToken);
       return resultNum;
    }
@@ -281,7 +278,7 @@ int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
                             token->lineno,
                             token->line_index,
                             "Unexpected symbol in arithmetic statement: %s\n",
-                            symbols[token->tokenIndex]);
+                            token->text);
          }
       }
       else

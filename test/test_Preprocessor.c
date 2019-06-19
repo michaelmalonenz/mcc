@@ -274,7 +274,7 @@ void test_If(void)
 
 void test_If_Else(void)
 {
-   const char *token_string  = "#if (1 - 1)\n#define IF_MACRO\n#else#define ELSE_MACRO\n#endif\n";
+   const char *token_string  = "#if (1 - 1)\n#define IF_MACRO\n#else\n#define ELSE_MACRO\n#endif\n";
    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
                                                          strlen(token_string));
    mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator();

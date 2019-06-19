@@ -75,7 +75,8 @@ void mcc_DebugPrintTokenList(mcc_TokenListIterator_t *iter);
  * will be added to a `mcc_TokenList_t`
  */
 mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
-                             TOKEN_TYPE type, const unsigned int column,
+                             TOKEN_TYPE type, int token_index,
+                             const unsigned int column,
                              const int lineno, const unsigned short fileno);
 
 /**

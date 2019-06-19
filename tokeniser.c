@@ -76,7 +76,7 @@ static void handle_pp_include_filename(mcc_LogicalLine_t *line,
                                        mcc_TokenListIterator_t *iter)
 {
    char delimiter;
-   TOKEN_TYPE type;
+   TOKEN_TYPE type = TOK_NONE;
    int filenameLen = 0;
    mcc_Token_t *token = NULL;
 
@@ -141,10 +141,10 @@ static void handle_pp_include_filename(mcc_LogicalLine_t *line,
 
    token =  mcc_CreateToken(&line->string[line->index],
                             filenameLen, type,
+                            TOK_UNSET_INDEX,
                             line->index+1,
                             mcc_GetFileBufferCurrentLineNo(fileBuffer),
                             mcc_GetFileBufferFileNumber(fileBuffer));
-   token->tokenType = type;
    mcc_InsertToken(token, iter);
    line->index += filenameLen + 1; //+1 for the delimiter
    handle_whitespace(line, fileBuffer, iter);
@@ -241,10 +241,11 @@ static void handle_string_char_const(mcc_LogicalLine_t *line,
       strLen++;
    }
    token = mcc_CreateToken(&line->string[line->index],
-                           strLen, type, line->index+1,
+                           strLen, type,
+                           TOK_UNSET_INDEX,
+                           line->index+1,
                            mcc_GetFileBufferCurrentLineNo(fileBuffer),
                            mcc_GetFileBufferFileNumber(fileBuffer));
-   token->tokenType = type;
    line->index += strLen + 1;
    mcc_InsertToken(token, iter);
 }
@@ -398,10 +399,10 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
          if (line->string[line->index] == '#')
          {
             token = mcc_CreateToken("#", 1, TOK_PP_DIRECTIVE,
+                                    PP_JOIN,
                                     line->index+1,
                                     mcc_GetFileBufferCurrentLineNo(fileBuffer),
                                     mcc_GetFileBufferFileNumber(fileBuffer));
-            token->tokenIndex = PP_JOIN;
             mcc_InsertToken(token, iter);
             line->index++;
             token = NULL;
@@ -414,10 +415,10 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
             MCC_ASSERT(pp_dir != PP_NONE);
             token = mcc_CreateToken(preprocessor_directives[pp_dir], 
                                     pp_strlens[pp_dir], TOK_PP_DIRECTIVE,
+                                    pp_dir,
                                     line->index+1,
                                     mcc_GetFileBufferCurrentLineNo(fileBuffer),
                                     mcc_GetFileBufferFileNumber(fileBuffer));
-            token->tokenIndex = pp_dir;
             line->index += pp_strlens[pp_dir];
             if (pp_dir == PP_INCLUDE)
             {
@@ -451,10 +452,10 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
             token = mcc_CreateToken(symbols[current_symbol],
                                     symbol_strlens[current_symbol],
                                     TOK_SYMBOL,
+                                    current_symbol,
                                     line->index+1,
                                     mcc_GetFileBufferCurrentLineNo(fileBuffer),
                                     mcc_GetFileBufferFileNumber(fileBuffer));
-            token->tokenIndex = current_symbol;
             line->index += symbol_strlens[current_symbol];
          }
       }
@@ -463,10 +464,10 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
          token = mcc_CreateToken(operators[current_operator],
                                  operator_strlens[current_operator], 
                                  TOK_OPERATOR,
+                                 current_operator,
                                  line->index+1,
                                  mcc_GetFileBufferCurrentLineNo(fileBuffer),
                                  mcc_GetFileBufferFileNumber(fileBuffer));
-         token->tokenIndex = current_operator;
          line->index += operator_strlens[current_operator];
       }
       else if (isNumber(line->string[line->index]))
@@ -507,6 +508,7 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
          
          token = mcc_CreateToken(&line->string[line->index], numLen,
                                  TOK_NUMBER,
+                                 TOK_UNSET_INDEX,
                                  line->index+1,
                                  mcc_GetFileBufferCurrentLineNo(fileBuffer),
                                  mcc_GetFileBufferFileNumber(fileBuffer));
@@ -534,10 +536,10 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
          {
             token = mcc_CreateToken(keywords[keyword], keyword_strlens[keyword],
                                     TOK_KEYWORD,
+                                    keyword,
                                     line->index+1,
                                     mcc_GetFileBufferCurrentLineNo(fileBuffer),
                                     mcc_GetFileBufferFileNumber(fileBuffer));
-            token->tokenIndex = keyword;
             line->index += keyword_strlens[keyword];
          }
          else //it's an identifier
@@ -551,6 +553,7 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
             }
             token = mcc_CreateToken(&line->string[line->index], identLen,
                                     TOK_IDENTIFIER,
+                                    TOK_UNSET_INDEX,
                                     line->index+1,
                                     mcc_GetFileBufferCurrentLineNo(fileBuffer),
                                     mcc_GetFileBufferFileNumber(fileBuffer));

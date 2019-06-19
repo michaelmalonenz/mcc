@@ -56,9 +56,9 @@
 
 typedef _Bool bool_t;
 
-typedef enum { UNSIGNED_INT, SIGNED_INT, FLOAT, DOUBLE, NUMBER_OF_NUMBER_TYPES } mcc_NumberType_t;
+typedef enum mcc_NumberType { UNSIGNED_INT, SIGNED_INT, FLOAT, DOUBLE, NUMBER_OF_NUMBER_TYPES } mcc_NumberType_t;
 
-typedef union 
+typedef union mcc_NumberContainer
 {
    int32_t integer_s;
    uint32_t integer_u;
@@ -66,7 +66,7 @@ typedef union
    double float_d;
 } mcc_NumberContainer_t;
 
-typedef struct 
+typedef struct mcc_Number
 {
    mcc_NumberContainer_t number;
    mcc_NumberType_t numberType;

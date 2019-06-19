@@ -43,7 +43,7 @@ char *test_MacroValues[NUM_BULK_MACROS] = { "1", "two", "1+2", "(FIRST_MACRO) + 
 static void test_Define(void)
 {
    mcc_TokenList_t *tokens = mcc_ListCreate();
-   mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, 1, 1, 1);
+   mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, TOK_UNSET_INDEX, 1, 1, 1);
    printf("Testing Define...");
    mcc_TokenListStandaloneAppend(tokens, tok);
    mcc_DefineMacro(MACRO_NAME, tokens, NULL);
@@ -54,7 +54,7 @@ static void test_Define(void)
 static void test_Find(void)
 {	
    mcc_TokenList_t *tokens = mcc_ListCreate();
-   mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, 1, 1, 1);
+   mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, TOK_UNSET_INDEX, 1, 1, 1);
    printf("Testing Find...");
    mcc_TokenListStandaloneAppend(tokens, tok);
    mcc_DefineMacro(MACRO_NAME, tokens, NULL);
@@ -70,7 +70,7 @@ static void test_Undefine(void)
 {
    printf("Testing undefine...");
    mcc_TokenList_t *tokens = mcc_ListCreate();
-   mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, 1, 1, 1);
+   mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, TOK_UNSET_INDEX, 1, 1, 1);
    printf("Testing Define...");
    mcc_TokenListStandaloneAppend(tokens, tok);
    mcc_DefineMacro(MACRO_NAME, tokens, NULL);

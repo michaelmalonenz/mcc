@@ -84,11 +84,12 @@ mcc_Stack_t *mcc_StackReverse(mcc_Stack_t *stack)
    return result;
 }
 
+#if MCC_DEBUG
 void mcc_DebugPrintStack(const mcc_Stack_t *stack, stackItemPrinter_t itemPrinterFn)
 {
    mcc_ListIterator_t *iter = mcc_ListGetIterator(stack->list);
    uintptr_t item = mcc_ListGetPrevData(iter);
-   printf("Number of Items: %d\n", mcc_ListGetLength(stack->list));
+   printf("Number of Stack Items: %d\n", mcc_ListGetLength(stack->list));
    while(item != NULL_DATA)
    {
       itemPrinterFn(item);
@@ -96,3 +97,4 @@ void mcc_DebugPrintStack(const mcc_Stack_t *stack, stackItemPrinter_t itemPrinte
    }
    mcc_ListDeleteIterator(iter);
 }
+#endif

@@ -54,8 +54,8 @@ static void handleError(void);
 static void handlePragma(void);
 static void handleJoin(void);
 static void handleWarning(void);
-static void handleMacroFunction(mcc_Macro_t *macro);
-static void handleMacroReplacement(mcc_Macro_t *macro);
+static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro);
+static mcc_TokenList_t *handleMacroReplacement(mcc_Macro_t *macro);
 
 static void mcc_ExpectTokenType(mcc_Token_t *token, TOKEN_TYPE tokenType, int index)
 {
@@ -103,14 +103,24 @@ static void emitToken(void)
       }
       else
       {
+         mcc_TokenList_t *macroTokens;
          if (macro->is_function)
          {
-            handleMacroFunction(macro);
+            macroTokens = handleMacroFunction(macro);
          }
          else
          {
-            handleMacroReplacement(macro);
+            macroTokens = handleMacroReplacement(macro);
          }
+         mcc_TokenListIterator_t *macroTokensIter = mcc_TokenListStandaloneGetIterator(macroTokens);
+         mcc_Token_t *token = mcc_GetNextToken(macroTokensIter);
+         while (token != NULL)
+         {
+            mcc_TokenListStandaloneAppend(output, mcc_CopyToken(token));
+            token = mcc_GetNextToken(macroTokensIter);
+         }
+         mcc_TokenListDeleteIterator(macroTokensIter);
+         mcc_TokenListDeleteStandalone(macroTokens);
       }
    }
    else
@@ -347,9 +357,20 @@ static void handleIfndef()
 
 static void handleIf()
 {
-   // Still need to replace the macros here.
-   int result = mcc_ICE_EvaluateTokenString(tokenListIter);
+   mcc_TokenList_t *list = mcc_TokenListCreateStandalone();
+   getToken();
+   while (currentToken->tokenType != TOK_EOL)
+   {
+      // Still need to replace the macros here.
+      mcc_TokenListStandaloneAppend(list, mcc_CopyToken(currentToken));
+      getToken();
+   }
+   mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);
+   int result = mcc_ICE_EvaluateTokenString(iter);
+   printf("If Result: %d\n", result);
    conditionalInnerImpl(result);
+   mcc_TokenListDeleteIterator(iter);
+   mcc_TokenListDeleteStandalone(list);
 }
 
 static void handleEndif()
@@ -396,16 +417,18 @@ static void handleWarning()
           "Warning: %s\n", temp->text);
 }
 
-static void handleMacroReplacement(mcc_Macro_t *macro)
+static mcc_TokenList_t *handleMacroReplacement(mcc_Macro_t *macro)
 {
+   mcc_TokenList_t *result = mcc_TokenListCreateStandalone();
    mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(macro->tokens);
    mcc_Token_t *macroToken = mcc_GetNextToken(iter);
    while (macroToken != NULL)
    {
-      mcc_TokenListStandaloneAppend(output, mcc_CopyToken(macroToken));
+      mcc_TokenListStandaloneAppend(result, mcc_CopyToken(macroToken));
       macroToken = mcc_GetNextToken(iter);
    }
    mcc_TokenListDeleteIterator(iter);
+   return result;
 }
 
 mcc_List_t *replaceMacroTokens(mcc_Macro_t *macro, mcc_List_t *parameters)
@@ -436,7 +459,7 @@ mcc_List_t *replaceMacroTokens(mcc_Macro_t *macro, mcc_List_t *parameters)
    return functionTokens;
 }
 
-static void handleMacroFunction(mcc_Macro_t *macro)
+static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro)
 {
    getToken();
    maybeGetWhitespaceToken();
@@ -470,15 +493,7 @@ static void handleMacroFunction(mcc_Macro_t *macro)
          mcc_ListGetLength(parameters));
    }
    mcc_TokenListDeleteIterator(argumentsIter);
-   mcc_TokenList_t *functionTokens = replaceMacroTokens(macro, parameters);
-   mcc_TokenListIterator_t *functionTokenIter = mcc_TokenListStandaloneGetIterator(functionTokens);
-   mcc_Token_t *token = mcc_GetNextToken(functionTokenIter);
-   while (token != NULL)
-   {
-      mcc_TokenListStandaloneAppend(output, mcc_CopyToken(token));
-      token = mcc_GetNextToken(functionTokenIter);
-   }
-   mcc_TokenListDeleteIterator(functionTokenIter);
-   mcc_TokenListDeleteStandalone(functionTokens);
+   mcc_TokenList_t *result = replaceMacroTokens(macro, parameters);
    mcc_ListDelete(parameters, mcc_MacroParameterDelete);
+   return result;
 }
