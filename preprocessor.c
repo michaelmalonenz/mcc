@@ -362,7 +362,33 @@ static void handleIf()
    while (currentToken->tokenType != TOK_EOL)
    {
       // Still need to replace the macros here.
-      mcc_TokenListStandaloneAppend(list, mcc_CopyToken(currentToken));
+      if (currentToken->tokenType == TOK_IDENTIFIER)
+      {
+         if (strncmp(currentToken->text, "defined", strlen(currentToken->text)) == 0)
+         {
+            getToken();
+            maybeGetWhitespaceToken();
+            mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
+            bool_t defined = mcc_IsMacroDefined(currentToken->text);
+            //create number token
+            mcc_Number_t *number = (mcc_Number_t *) malloc(sizeof(mcc_Number_t));
+            char numberText[20] = {0};
+            snprintf(numberText, 20, "%d", defined);
+            mcc_Token_t *token = mcc_CreateToken(
+               numberText, strlen(numberText), TOK_NUMBER, TOK_UNSET_INDEX,
+               currentToken->line_index,
+               currentToken->lineno,
+               currentToken->fileno
+            );
+            memcpy(&token->number, number, sizeof(*number));
+            mcc_DebugPrintToken(token);
+            mcc_TokenListStandaloneAppend(list, token);
+         }
+      }
+      else
+      {
+         mcc_TokenListStandaloneAppend(list, mcc_CopyToken(currentToken));
+      }
       getToken();
    }
    mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);

@@ -62,8 +62,6 @@ bool_t mcc_IsMacroDefined(const char *text);
 
 mcc_Macro_t *mcc_ResolveMacro(const char *text);
 
-void mcc_DoMacroReplacement(mcc_LogicalLine_t *line);
-
 mcc_MacroParameter_t *mcc_MacroParameterCreate(void);
 void mcc_MacroParameterDelete(uintptr_t param);
 #endif /* MCC_MACRO_H */

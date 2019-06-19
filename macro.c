@@ -82,13 +82,6 @@ mcc_Macro_t *create_macro(const char *text, mcc_TokenList_t *value, mcc_TokenLis
    return result;
 }
 
-
-void mcc_DoMacroReplacement(mcc_LogicalLine_t UNUSED(*line))
-{
-   // search through the text, and any whole word is potentially
-   // a macro.  If it does turn out to be, replace it.
-}
-
 bool_t mcc_IsMacroDefined(const char *text)
 {
    return (mcc_ResolveMacro(text) != NULL);

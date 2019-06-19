@@ -105,6 +105,22 @@ static mcc_Number_t *evaluate_operands(mcc_Token_t *l_operand,
          result->numberType = SIGNED_INT;
       }
       break;
+      case OP_LOGICAL_AND:
+      {
+         result->number.integer_s =
+            l_operand->number.number.integer_s &&
+            r_operand->number.number.integer_s;
+         result->numberType = SIGNED_INT;
+      }
+      break;
+      case OP_LOGICAL_INCL_OR:
+      {
+         result->number.integer_s =
+            l_operand->number.number.integer_s ||
+            r_operand->number.number.integer_s;
+         result->numberType = SIGNED_INT;
+      }
+      break;
       default:
       {
          mcc_DebugPrintToken(operator);
@@ -192,8 +208,12 @@ static int mcc_EvaluateRPN(mcc_Stack_t *input)
          }
          else
          {
-            mcc_Error("wrong number of operands to operator '%s'\n", 
-                      token->text);
+            mcc_DebugPrintStack(operands, mcc_DebugPrintToken_Fn);
+            mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
+               token->lineno,
+               token->line_index,
+               "wrong number of operands to operator '%s'\n",
+               token->text);
             //arithmetic error?  Unary operator?
          }
       }
