@@ -51,6 +51,35 @@ Assignment Operators	= += -= *= /= %= >>= <<= &= ^= |=	right-to-left
 Comma	,
 */
 
+static mcc_Number_t *evaluate_unary_operands(mcc_Token_t *operand, mcc_Token_t *operator)
+{
+   mcc_Number_t *result = (mcc_Number_t *) malloc(sizeof(mcc_Number_t));
+
+   MCC_ASSERT(operator->tokenType == TOK_OPERATOR);
+   MCC_ASSERT(operand->tokenType == TOK_NUMBER);
+   printf("Evaluating '%s %s'\n", operator->text, operand->text);
+
+   switch (operator->tokenIndex)
+   {
+      case OP_NOT:
+      {
+         result->number.integer_s = !operand->number.number.integer_s;
+         result->numberType = SIGNED_INT;
+      }
+      break;
+      default:
+      {
+         mcc_DebugPrintToken(operator);
+         mcc_PrettyError(mcc_ResolveFileNameFromNumber(operator->fileno),
+                         operator->lineno,
+                         operator->line_index,
+                         "Unimplemented Unary Operator in arithmetic statement: %s\n",
+                         operators[operator->tokenIndex]);
+      }
+   }
+   return result;
+}
+
 static mcc_Number_t *evaluate_operands(mcc_Token_t *l_operand,
                                        mcc_Token_t *r_operand,
                                        mcc_Token_t *operator)
@@ -191,30 +220,54 @@ static int mcc_EvaluateRPN(mcc_Stack_t *input)
       }
       else if (token->tokenType == TOK_OPERATOR)
       {
-         if (mcc_StackNumItems(operands) >= 2)
+         int numOperands = mcc_StackNumItems(operands);
+         switch (token->tokenIndex)
          {
-            mcc_Token_t *r_operand = (mcc_Token_t *) mcc_StackPop(operands);
-            mcc_Token_t *l_operand = (mcc_Token_t *) mcc_StackPop(operands);
-            mcc_Number_t *resultNum = evaluate_operands(l_operand, r_operand, token);
-            char numberText[20] = {0};
-            snprintf(numberText, 20, "%d", resultNum->number.integer_s);
-            mcc_Token_t *result = mcc_CreateToken(
-               numberText, strlen(numberText), TOK_NUMBER, TOK_UNSET_INDEX,
-               token->line_index, token->lineno, token->fileno);
-            memcpy(&result->number, resultNum, sizeof(*resultNum));
-            free(resultNum);
-            mcc_StackPush(operands, (uintptr_t) result);
-            mcc_StackPush(numbersToDelete, (uintptr_t) result);
-         }
-         else
-         {
-            mcc_DebugPrintStack(operands, mcc_DebugPrintToken_Fn);
-            mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
-               token->lineno,
-               token->line_index,
-               "wrong number of operands to operator '%s'\n",
-               token->text);
-            //arithmetic error?  Unary operator?
+            case OP_NOT:
+            {
+               if (numOperands >= 1)
+               {
+                  mcc_Token_t *operand = (mcc_Token_t *) mcc_StackPop(operands);
+                  mcc_Number_t *resultNum = evaluate_unary_operands(operand, token);
+                  mcc_Token_t *result = mcc_CreateNumberToken(resultNum,
+                     token->line_index, token->lineno, token->fileno);
+                  free(resultNum);
+                  mcc_StackPush(operands, (uintptr_t) result);
+                  mcc_StackPush(numbersToDelete, (uintptr_t) result);
+               }
+               else
+               {
+                  mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
+                     token->lineno,
+                     token->line_index,
+                     "wrong number of operands to operator '%s'\n",
+                     token->text);
+               }
+            }
+            break;
+            default:
+            {
+               if (numOperands >= 2)
+               {
+                  mcc_Token_t *r_operand = (mcc_Token_t *) mcc_StackPop(operands);
+                  mcc_Token_t *l_operand = (mcc_Token_t *) mcc_StackPop(operands);
+                  mcc_Number_t *resultNum = evaluate_operands(l_operand, r_operand, token);
+                  mcc_Token_t *result = mcc_CreateNumberToken(resultNum,
+                     token->line_index, token->lineno, token->fileno);
+                  free(resultNum);
+                  mcc_StackPush(operands, (uintptr_t) result);
+                  mcc_StackPush(numbersToDelete, (uintptr_t) result);
+               }
+               else
+               {
+                  mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
+                     token->lineno,
+                     token->line_index,
+                     "wrong number of operands to operator '%s'\n",
+                     token->text);
+               }
+            }
+            break;
          }
       }
       else

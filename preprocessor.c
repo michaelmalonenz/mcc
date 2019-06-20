@@ -370,17 +370,14 @@ static void handleIf()
             maybeGetWhitespaceToken();
             mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
             bool_t defined = mcc_IsMacroDefined(currentToken->text);
-            //create number token
-            mcc_Number_t *number = (mcc_Number_t *) malloc(sizeof(mcc_Number_t));
-            char numberText[20] = {0};
-            snprintf(numberText, 20, "%d", defined);
-            mcc_Token_t *token = mcc_CreateToken(
-               numberText, strlen(numberText), TOK_NUMBER, TOK_UNSET_INDEX,
+            mcc_Number_t number;
+            number.number.integer_s = (int) defined;
+            number.numberType = SIGNED_INT;
+            mcc_Token_t *token = mcc_CreateNumberToken(
+               &number,
                currentToken->line_index,
                currentToken->lineno,
-               currentToken->fileno
-            );
-            memcpy(&token->number, number, sizeof(*number));
+               currentToken->fileno);
             mcc_DebugPrintToken(token);
             mcc_TokenListStandaloneAppend(list, token);
          }

@@ -70,6 +70,18 @@ mcc_Token_t *mcc_CopyToken(const mcc_Token_t *token)
    return result;
 }
 
+mcc_Token_t *mcc_CreateNumberToken(mcc_Number_t *number,
+   const unsigned int column, const int lineno, const unsigned short fileno)
+{
+   char numberText[20] = {0};
+   snprintf(numberText, 20, "%d", number->number.integer_s);
+   mcc_Token_t *result = mcc_CreateToken(
+      numberText, strlen(numberText), TOK_NUMBER, TOK_UNSET_INDEX,
+      column, lineno, fileno);
+   memcpy(&result->number, number, sizeof(*number));
+   return result;
+}
+
 mcc_List_t *mcc_TokenListDeepCopy(mcc_TokenList_t *list)
 {
    mcc_List_t *result = mcc_ListCreate();

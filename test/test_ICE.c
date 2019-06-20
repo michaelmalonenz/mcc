@@ -34,9 +34,12 @@
 #include "tokenList.h"
 #include "ICE.h"
 
-const char *ice_is_zero = "10 * (1 + 1 - 2)\n";
-const char *ice_is_nonzero_twenty = "10 * (1 + 3 - 2)\n";
-static const char *ice_shunting_yard_wiki_example = "3 + 4 * 2 / ( 1 - 5 ) ^ 2 ^ 3\n";
+const char *ice_is_zero = "10 * (1 + 1 - 2)";
+const char *ice_is_nonzero_twenty = "10 * (1 + 3 - 2)";
+static const char *ice_shunting_yard_wiki_example = "3 + 4 * 2 / ( 1 - 5 ) ^ 2 ^ 3";
+static const char *simple_logical_and = "1 && 1";
+static const char *simple_logical_or = "1 || 0";
+static const char *simple_logical_not = "!0";
 
 static void test_Implementation(const char *token_string, int expected_result)
 {
@@ -66,6 +69,9 @@ int main(void)
    test_Implementation(ice_is_nonzero_twenty, 20);
    test_Implementation(ice_shunting_yard_wiki_example, 1);
    test_Implementation(ice_is_zero, 0);
+   test_Implementation(simple_logical_and, 1);
+   test_Implementation(simple_logical_or, 1);
+   test_Implementation(simple_logical_not, 1);
 
    return EXIT_SUCCESS;
 }

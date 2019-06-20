@@ -88,6 +88,15 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
 mcc_Token_t *mcc_CopyToken(const mcc_Token_t *token);
 
 /**
+ * @param number   The number for the token
+ * @param column   The 1-based index of the line of text where this token is located
+ * @param lineno   The 1-based line number in the file where this token is located
+ * @param fileno   The file id for the file in which this token is located
+ */
+mcc_Token_t *mcc_CreateNumberToken(mcc_Number_t *number,
+   const unsigned int column, const int lineno, const unsigned short fileno);
+
+/**
  * @param token - the token to delete
  */
 void mcc_DeleteToken(uintptr_t token);
