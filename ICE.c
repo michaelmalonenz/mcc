@@ -85,6 +85,7 @@ static mcc_Number_t *evaluate_operands(mcc_Token_t *l_operand,
                                        mcc_Token_t *operator)
 {
    mcc_Number_t *result = (mcc_Number_t *) malloc(sizeof(mcc_Number_t));
+   result->numberType = SIGNED_INT;
 
    MCC_ASSERT(operator->tokenType == TOK_OPERATOR);
    MCC_ASSERT(l_operand->tokenType == TOK_NUMBER);
@@ -96,58 +97,68 @@ static mcc_Number_t *evaluate_operands(mcc_Token_t *l_operand,
       case OP_ADD:
       {
          result->number.integer_s = 
-            l_operand->number.number.integer_s +
-            r_operand->number.number.integer_s;
-         result->numberType = SIGNED_INT;
+            l_operand->number.number.integer_s + r_operand->number.number.integer_s;
       }
       break;
       case OP_MINUS:
       {
          result->number.integer_s = 
-            l_operand->number.number.integer_s -
-            r_operand->number.number.integer_s;
-         result->numberType = SIGNED_INT;
+            l_operand->number.number.integer_s - r_operand->number.number.integer_s;
       }
       break;
       case OP_DIVIDE:
       {
          result->number.integer_s = 
-            l_operand->number.number.integer_s /
-            r_operand->number.number.integer_s;
-         result->numberType = SIGNED_INT;
+            l_operand->number.number.integer_s / r_operand->number.number.integer_s;
       }
       break;
       case OP_DEREFERENCE: //this is a total lie!
       case OP_MULTIPLY:
       {
          result->number.integer_s = 
-            l_operand->number.number.integer_s *
-            r_operand->number.number.integer_s;
-         result->numberType = SIGNED_INT;
+            l_operand->number.number.integer_s * r_operand->number.number.integer_s;
       }
       break;
       case OP_BITWISE_EXCL_OR:
       {
          result->number.integer_s = 
-            l_operand->number.number.integer_s ^
-            r_operand->number.number.integer_s;
-         result->numberType = SIGNED_INT;
+            l_operand->number.number.integer_s ^ r_operand->number.number.integer_s;
       }
       break;
       case OP_LOGICAL_AND:
       {
          result->number.integer_s =
-            l_operand->number.number.integer_s &&
-            r_operand->number.number.integer_s;
-         result->numberType = SIGNED_INT;
+            l_operand->number.number.integer_s && r_operand->number.number.integer_s;
       }
       break;
       case OP_LOGICAL_INCL_OR:
       {
          result->number.integer_s =
-            l_operand->number.number.integer_s ||
-            r_operand->number.number.integer_s;
-         result->numberType = SIGNED_INT;
+            l_operand->number.number.integer_s || r_operand->number.number.integer_s;
+      }
+      break;
+      case OP_GREATER_THAN:
+      {
+         result->number.integer_s =
+            l_operand->number.number.integer_s > r_operand->number.number.integer_s;
+      }
+      break;
+      case OP_GREATER_EQUAL:
+      {
+         result->number.integer_s =
+            l_operand->number.number.integer_s >= r_operand->number.number.integer_s;
+      }
+      break;
+      case OP_LESS_THAN:
+      {
+         result->number.integer_s =
+            l_operand->number.number.integer_s < r_operand->number.number.integer_s;
+      }
+      break;
+      case OP_LESS_EQUAL:
+      {
+         result->number.integer_s =
+            l_operand->number.number.integer_s <= r_operand->number.number.integer_s;
       }
       break;
       default:
@@ -309,7 +320,7 @@ int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
       {
          temp = (mcc_Token_t *) mcc_StackPeek(operator_stack);
          while( temp != NULL && temp->tokenType == TOK_OPERATOR &&
-                (getRelativeOperatorPrecedence(token->tokenIndex) >= 
+                (getRelativeOperatorPrecedence(token->tokenIndex) >=
                  getRelativeOperatorPrecedence(temp->tokenIndex)) &&
                 getOperatorAssociativity(token) == TOK_ASSOC_LEFT)
          {

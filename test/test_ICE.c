@@ -40,6 +40,11 @@ static const char *ice_shunting_yard_wiki_example = "3 + 4 * 2 / ( 1 - 5 ) ^ 2 ^
 static const char *simple_logical_and = "1 && 1";
 static const char *simple_logical_or = "1 || 0";
 static const char *simple_logical_not = "!0";
+static const char *simple_greater_than = "4 > 3";
+static const char *simple_less_than = "3 < 8";
+static const char *simple_greater_equal = "4 >= 4";
+static const char *simple_less_equal = "3 <= 3";
+static const char *complex_precedence = "3 <= 3 && 8 > 4";
 
 static void test_Implementation(const char *token_string, int expected_result)
 {
@@ -72,6 +77,10 @@ int main(void)
    test_Implementation(simple_logical_and, 1);
    test_Implementation(simple_logical_or, 1);
    test_Implementation(simple_logical_not, 1);
-
+   test_Implementation(simple_greater_than, 1);
+   test_Implementation(simple_less_than, 1);
+   test_Implementation(simple_greater_equal, 1);
+   test_Implementation(simple_less_equal, 1);
+   test_Implementation(complex_precedence, 1);
    return EXIT_SUCCESS;
 }

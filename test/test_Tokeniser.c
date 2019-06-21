@@ -88,6 +88,11 @@ int main(void)
          {
             mcc_DebugPrintToken(token);
          }
+         if (token->tokenIndex != expected_token_indices[i][j])
+         {
+            printf("Expected index: %d, actual: %d\n",
+               token->tokenIndex, expected_token_indices[i][j]);
+         }
          MCC_ASSERT(token->tokenType == expected_token_types[i][j]);
          MCC_ASSERT(token->tokenIndex == expected_token_indices[i][j]);
       }
