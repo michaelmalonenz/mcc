@@ -92,26 +92,35 @@ static mcc_TokenListIterator_t *tokenListIter;
 static mcc_Token_t *currentToken;
 static mcc_List_t *output;
 
+static mcc_TokenList_t *resolveMacroTokens(const char *macroText)
+{
+   mcc_Macro_t *macro = mcc_ResolveMacro(macroText);
+   if (macro == NULL)
+   {
+      return NULL;
+   }
+
+   if (macro->is_function)
+   {
+      return handleMacroFunction(macro);
+   }
+   else
+   {
+      return handleMacroReplacement(macro);
+   }
+}
+
 static void emitToken(void)
 {
    if (currentToken->tokenType == TOK_IDENTIFIER)
    {
-      mcc_Macro_t *macro = mcc_ResolveMacro(currentToken->text);
-      if (macro == NULL)
+      mcc_TokenList_t *macroTokens = resolveMacroTokens(currentToken->text);
+      if (macroTokens == NULL)
       {
          mcc_TokenListStandaloneAppend(output, mcc_CopyToken(currentToken));
       }
       else
       {
-         mcc_TokenList_t *macroTokens;
-         if (macro->is_function)
-         {
-            macroTokens = handleMacroFunction(macro);
-         }
-         else
-         {
-            macroTokens = handleMacroReplacement(macro);
-         }
          mcc_TokenListIterator_t *macroTokensIter = mcc_TokenListStandaloneGetIterator(macroTokens);
          mcc_Token_t *token = mcc_GetNextToken(macroTokensIter);
          while (token != NULL)
@@ -360,7 +369,6 @@ static void handleIf()
    getToken();
    while (currentToken->tokenType != TOK_EOL)
    {
-      // Still need to replace the macros here.
       if (currentToken->tokenType == TOK_IDENTIFIER)
       {
          if (strncmp(currentToken->text, "defined", strlen(currentToken->text)) == 0)
@@ -377,8 +385,30 @@ static void handleIf()
                currentToken->line_index,
                currentToken->lineno,
                currentToken->fileno);
-            mcc_DebugPrintToken(token);
             mcc_TokenListStandaloneAppend(list, token);
+         }
+         else
+         {
+            mcc_TokenList_t *macroTokens = resolveMacroTokens(currentToken->text);
+            if (macroTokens != NULL)
+            {
+               mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(macroTokens);
+               mcc_Token_t *token = mcc_GetNextToken(iter);
+               while (token != NULL)
+               {
+                  mcc_TokenListStandaloneAppend(list, token);
+                  token = mcc_GetNextToken(iter);
+               }
+            }
+            else
+            {
+               mcc_PrettyError(
+                  mcc_ResolveFileNameFromNumber(currentToken->fileno),
+                  currentToken->lineno,
+                  currentToken->line_index,
+                  "Undefined macro: '%s'\n",
+                  currentToken->text);
+            }
          }
       }
       else
