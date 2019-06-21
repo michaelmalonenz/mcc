@@ -31,8 +31,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#if MCC_USE_HASH_TABLE_FOR_MACROS
-
 /* I'm told that a x^2 size is good for speed and a hash function
  * which produces uniform results is better than an average hash
  * and a prime number hash table size.
@@ -162,5 +160,3 @@ mcc_Macro_t *mcc_ResolveMacro(const char *text)
    }
    return result;
 }
-
-#endif

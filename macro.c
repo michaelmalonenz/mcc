@@ -73,12 +73,7 @@ mcc_Macro_t *create_macro(const char *text, mcc_TokenList_t *value, mcc_TokenLis
    result->tokens = value;
    result->arguments = arguments;
    result->is_function = (bool_t)(arguments != NULL);
-#if MCC_USE_HASH_TABLE_FOR_MACROS
    result->next = NULL;
-#elif MCC_USE_B_TREE_FOR_MACROS
-   result->left = NULL;
-   result->right = NULL;
-#endif
    return result;
 }
 
