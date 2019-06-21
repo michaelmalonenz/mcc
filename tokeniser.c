@@ -473,7 +473,9 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
       else if (isNumber(line->string[line->index]))
       {
          bool_t isUnsigned = FALSE;
+         bool_t isLong = FALSE;
          bool_t isDouble = FALSE;
+         bool_t hadSuffix = FALSE;
          int numLen = 1;
          while (isNumber(line->string[line->index + numLen]) &&
                  line->index + numLen < line->length)
@@ -491,6 +493,12 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
          if (toupper(line->string[line->index + numLen]) == 'U')
          {
             isUnsigned = TRUE;
+            hadSuffix = TRUE;
+         }
+         else if (toupper(line->string[line->index + numLen]) == 'L')
+         {
+            isLong = TRUE;
+            hadSuffix = TRUE;
          }
          else if (line->string[line->index + numLen] == '.')
          {
@@ -503,6 +511,7 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
                 toupper(line->string[line->index + numLen]) == 'D')
             {
                isDouble = TRUE;
+               hadSuffix = TRUE;
             }
          }
          
@@ -522,12 +531,22 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
             token->number.number.integer_u = strtoul(token->text, NULL, 10);
             token->number.numberType = UNSIGNED_INT;
          }
+         else if (isLong)
+         {
+            // Technically, this isn't true
+            token->number.number.integer_s = strtol(token->text, NULL, 10);
+            token->number.numberType = SIGNED_INT;
+         }
          else 
          {
             token->number.number.integer_s = strtol(token->text, NULL, 10);
             token->number.numberType = SIGNED_INT;
          }
          line->index += numLen;
+         if (hadSuffix)
+         {
+            line->index++;
+         }
       }
       else if (isWordChar(line->string[line->index]))
       {
