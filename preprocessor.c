@@ -56,6 +56,10 @@ static void handleJoin(void);
 static void handleWarning(void);
 static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro);
 static mcc_TokenList_t *handleMacroReplacement(mcc_Macro_t *macro);
+static void conditionalInnerImpl(bool_t initialConditionTrue, bool_t ignore);
+static void handleIfDefInner(bool_t ignore);
+static void handleIfNDefInner(bool_t ignore);
+static void handleIfInner(bool_t ignore);
 
 static void mcc_ExpectTokenType(mcc_Token_t *token, TOKEN_TYPE tokenType, int index)
 {
@@ -313,21 +317,39 @@ static void handleError()
                    "Error: %s\n", temp->text);
 }
 
-static void conditionalInnerImpl(bool_t initialConditionTrue)
+static void conditionalInnerImpl(bool_t initialConditionTrue, bool_t ignore)
 {
-   bool_t processMacro = initialConditionTrue;
+   bool_t processMacro = initialConditionTrue && !ignore;
    bool_t handled = FALSE;
 
    getToken();
-   while (currentToken->tokenType != TOK_PP_DIRECTIVE ||
-          (currentToken->tokenType == TOK_PP_DIRECTIVE &&
-           currentToken->tokenIndex != PP_ENDIF))
+   while (TRUE)
    {
       if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
-          currentToken->tokenIndex == PP_ELSE)
+          currentToken->tokenIndex == PP_ENDIF)
+      {
+         break;
+      }
+      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
+               currentToken->tokenIndex == PP_IFDEF)
+      {
+         handleIfDefInner(!processMacro);
+      }
+      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
+               currentToken->tokenIndex == PP_IFNDEF)
+      {
+         handleIfNDefInner(!processMacro);
+      }
+      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
+               currentToken->tokenIndex == PP_IF)
+      {
+         handleIfInner(!processMacro);
+      }
+      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
+               currentToken->tokenIndex == PP_ELSE)
       {
          handled = handled || processMacro;
-         processMacro = !processMacro;
+         processMacro = !processMacro && !ignore;
       }
       else if (processMacro && !handled)
       {
@@ -337,6 +359,7 @@ static void conditionalInnerImpl(bool_t initialConditionTrue)
          }
          else
          {
+            MCC_ASSERT(!ignore);
             emitToken();
          }
       }
@@ -347,28 +370,45 @@ static void conditionalInnerImpl(bool_t initialConditionTrue)
 
 static void handleIfdef()
 {
-   getToken();
-   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
-   getToken();
-   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
-   conditionalInnerImpl(mcc_IsMacroDefined(currentToken->text));
+   handleIfDefInner(FALSE);
 }
-
-static void handleIfndef()
+static void handleIfDefInner(bool_t ignore)
 {
    getToken();
    mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
    getToken();
    mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
-   conditionalInnerImpl(!mcc_IsMacroDefined(currentToken->text));
+   conditionalInnerImpl(mcc_IsMacroDefined(currentToken->text), ignore);
+}
+
+static void handleIfndef()
+{
+   handleIfNDefInner(FALSE);
+}
+static void handleIfNDefInner(bool_t ignore)
+{
+   getToken();
+   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
+   getToken();
+   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
+   conditionalInnerImpl(!mcc_IsMacroDefined(currentToken->text), ignore);
 }
 
 static void handleIf()
+{
+   handleIfInner(FALSE);
+}
+static void handleIfInner(bool_t ignore)
 {
    mcc_TokenList_t *list = mcc_TokenListCreateStandalone();
    getToken();
    while (currentToken->tokenType != TOK_EOL)
    {
+      if (ignore)
+      {
+         getToken();
+         continue;
+      }
       if (currentToken->tokenType == TOK_IDENTIFIER)
       {
          if (strncmp(currentToken->text, "defined", strlen(currentToken->text)) == 0)
@@ -417,10 +457,17 @@ static void handleIf()
       }
       getToken();
    }
-   mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);
-   int result = mcc_ICE_EvaluateTokenString(iter);
-   conditionalInnerImpl(result);
-   mcc_TokenListDeleteIterator(iter);
+   if (!ignore)
+   {
+      mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);
+      int result = mcc_ICE_EvaluateTokenString(iter);
+      conditionalInnerImpl(result, ignore);
+      mcc_TokenListDeleteIterator(iter);
+   }
+   else
+   {
+      conditionalInnerImpl(FALSE, ignore);
+   }
    mcc_TokenListDeleteStandalone(list);
 }
 
