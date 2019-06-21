@@ -436,18 +436,22 @@ static void handleIfInner(bool_t ignore)
                mcc_Token_t *token = mcc_GetNextToken(iter);
                while (token != NULL)
                {
-                  mcc_TokenListStandaloneAppend(list, token);
+                  mcc_TokenListStandaloneAppend(list, mcc_CopyToken(token));
                   token = mcc_GetNextToken(iter);
                }
+               mcc_TokenListDeleteIterator(iter);
+               mcc_TokenListDeleteStandalone(macroTokens);
             }
             else
             {
-               mcc_PrettyError(
-                  mcc_ResolveFileNameFromNumber(currentToken->fileno),
-                  currentToken->lineno,
-                  currentToken->line_index,
-                  "Undefined macro: '%s'\n",
-                  currentToken->text);
+               // This is super dumb.  I think I have to pretend this is 0 because of
+               // cases like (defined SOME_MACRO && SOME_MACRO || SOME_OTHER_MACRO)
+               mcc_Number_t number;
+               number.number.integer_s = 0;
+               number.numberType = SIGNED_INT;
+               mcc_Token_t *undefinedMacroToken = mcc_CreateNumberToken(&number,
+                  currentToken->line_index, currentToken->lineno, currentToken->fileno);
+               mcc_TokenListStandaloneAppend(list, undefinedMacroToken);
             }
          }
       }
