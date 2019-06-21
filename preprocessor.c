@@ -212,7 +212,6 @@ static void handleInclude()
    mcc_TokenListDeleteIterator(incIter);
 }
 
-//currently doesn't handle function-like macros
 static void handleDefine()
 {
    const char *macro_identifier;
@@ -390,7 +389,6 @@ static void handleIf()
    }
    mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);
    int result = mcc_ICE_EvaluateTokenString(iter);
-   printf("If Result: %d\n", result);
    conditionalInnerImpl(result);
    mcc_TokenListDeleteIterator(iter);
    mcc_TokenListDeleteStandalone(list);

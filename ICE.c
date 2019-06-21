@@ -57,7 +57,6 @@ static mcc_Number_t *evaluate_unary_operands(mcc_Token_t *operand, mcc_Token_t *
 
    MCC_ASSERT(operator->tokenType == TOK_OPERATOR);
    MCC_ASSERT(operand->tokenType == TOK_NUMBER);
-   printf("Evaluating '%s %s'\n", operator->text, operand->text);
 
    switch (operator->tokenIndex)
    {
@@ -91,7 +90,6 @@ static mcc_Number_t *evaluate_operands(mcc_Token_t *l_operand,
    MCC_ASSERT(l_operand->tokenType == TOK_NUMBER);
    MCC_ASSERT(r_operand->tokenType == TOK_NUMBER);
 
-   printf("Evaluating '%s %s %s'\n", l_operand->text, operator->text, r_operand->text);
    switch (operator->tokenIndex)
    {
       case OP_ADD:
@@ -386,14 +384,9 @@ int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
    mcc_StackDelete(operator_stack, NULL);
 
    output = mcc_StackReverse(output);
-#if MCC_DEBUG
-  printf("This is the RPN, ready for evaluation:\n");
-  mcc_DebugPrintStack(output, mcc_DebugPrintToken_Fn);
-#endif
    result = mcc_EvaluateRPN(output);
 
    mcc_StackDelete(output, NULL);
 
    return result;
 }
-
