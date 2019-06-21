@@ -46,6 +46,7 @@ int main(int argc, char **argv)
    mcc_ParseOptions(argc, argv);
 
    mcc_FileOpenerInitialise();
+   mcc_InitialiseMacros();
 
    fileIter = mcc_OptionsFileListGetIterator();
    currentFile = (char *) mcc_ListGetNextData(fileIter);
