@@ -45,6 +45,7 @@ static const char *simple_less_than = "3 < 8";
 static const char *simple_greater_equal = "4 >= 4";
 static const char *simple_less_equal = "3 <= 3";
 static const char *complex_precedence = "3 <= 3 && 8 > 4";
+static const char *simple_equality = "3 == 3";
 
 static void test_Implementation(const char *token_string, int expected_result)
 {
@@ -82,5 +83,6 @@ int main(void)
    test_Implementation(simple_greater_equal, 1);
    test_Implementation(simple_less_equal, 1);
    test_Implementation(complex_precedence, 1);
+   test_Implementation(simple_equality, 1);
    return EXIT_SUCCESS;
 }

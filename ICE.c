@@ -159,6 +159,12 @@ static mcc_Number_t *evaluate_operands(mcc_Token_t *l_operand,
             l_operand->number.number.integer_s <= r_operand->number.number.integer_s;
       }
       break;
+      case OP_COMPARE_TO:
+      {
+         result->number.integer_s =
+            l_operand->number.number.integer_s == r_operand->number.number.integer_s;
+      }
+      break;
       default:
       {
          mcc_DebugPrintToken(operator);
