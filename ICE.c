@@ -287,8 +287,13 @@ static int mcc_EvaluateRPN(mcc_Stack_t *input)
       }
       else
       {
-         printf("Something is borked\n");
-         MCC_ASSERT(FALSE);
+         mcc_PrettyError(
+            mcc_ResolveFileNameFromNumber(token->fileno),
+            token->lineno,
+            token->line_index,
+            "Unexpected token in integer constant expression: '%s'\n",
+            token->text
+         );
       }
       token = (mcc_Token_t *) mcc_StackPop(input);
    }
