@@ -135,6 +135,8 @@ MCC_OPERATOR mcc_GetOperator(mcc_LogicalLine_t *line);
 PREPROC_DIRECTIVE mcc_GetPreprocessorDirective(mcc_LogicalLine_t *line);
 MCC_KEYWORD mcc_GetKeyword(mcc_LogicalLine_t * line);
 
+void mcc_ExpectTokenType(mcc_Token_t *token, TOKEN_TYPE tokenType, int index);
+
 #define TOK_UNSET_INDEX -1
 
 #if MCC_DEBUG

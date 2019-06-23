@@ -193,6 +193,47 @@ MCC_KEYWORD mcc_GetKeyword(mcc_LogicalLine_t *line)
    }
 }
 
+void mcc_ExpectTokenType(mcc_Token_t *token, TOKEN_TYPE tokenType, int index)
+{
+   const char *expected;
+   switch(tokenType)
+   {
+      case TOK_PP_DIRECTIVE:
+      {
+         expected = preprocessor_directives[index];
+      }
+      break;
+      case TOK_OPERATOR:
+      {
+         expected = operators[index];
+      }
+      break;
+      case TOK_KEYWORD:
+      {
+         expected = keywords[index];
+      }
+      break;
+      default:
+      {
+         expected = token_types[tokenType];
+      }
+      break;
+   }
+   if (token == NULL)
+   {
+      mcc_Error("Encountered unexpected end of file while searching for %s\n", expected);
+   }
+   if (token->tokenType != tokenType)
+   {
+      mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
+                      token->lineno,
+                      token->line_index,
+                      "Preprocessor expected %s, but got %s (%s)\n",
+                      expected,
+                      token_types[token->tokenType],
+                      token->text);
+   }
+}
 
 #if MCC_DEBUG
 void mcc_DebugPrintToken_Fn(uintptr_t token_ptr)

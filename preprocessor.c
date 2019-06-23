@@ -61,28 +61,6 @@ static void handleIfDefInner(bool_t ignore);
 static void handleIfNDefInner(bool_t ignore);
 static void handleIfInner(bool_t ignore);
 
-static void mcc_ExpectTokenType(mcc_Token_t *token, TOKEN_TYPE tokenType, int index)
-{
-   const char *expected = token_types[tokenType];
-   if (tokenType == TOK_PP_DIRECTIVE)
-   {
-      expected = preprocessor_directives[index];
-   }
-   if (token == NULL)
-   {
-      mcc_Error("Encountered unexpected end of file while searching for %s\n", expected);
-   }
-   if (token->tokenType != tokenType)
-   {
-      mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
-                      token->lineno,
-                      token->line_index,
-                      "Preprocessor expected %s, but got %s (%s)\n",
-                      expected,
-                      token_types[token->tokenType],
-                      token->text);
-   }
-}
 
 static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = {
    &handleInclude, &handleDefine, &handleIfdef,
