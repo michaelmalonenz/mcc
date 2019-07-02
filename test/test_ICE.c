@@ -46,6 +46,10 @@ static const char *simple_greater_equal = "4 >= 4";
 static const char *simple_less_equal = "3 <= 3";
 static const char *complex_precedence = "3 <= 3 && 8 > 4";
 static const char *simple_equality = "3 == 3";
+static const char *ternary_if_if = "3 < 4 ? 2 : 42";
+static const char *ternary_if_else = "3 > 4 ? 2 : 42";
+static const char *complex_ternary = "1 && (2 ? (3 && 4) : (5 || 6))";
+static const char *complex_ternary_with_implicit_precedence = "0 ? 3 < 4 : 4 < 3";
 
 static void test_Implementation(const char *token_string, int expected_result)
 {
@@ -84,5 +88,9 @@ int main(void)
    test_Implementation(simple_less_equal, 1);
    test_Implementation(complex_precedence, 1);
    test_Implementation(simple_equality, 1);
+   test_Implementation(ternary_if_if, 2);
+   test_Implementation(ternary_if_else, 42);
+   test_Implementation(complex_ternary_with_implicit_precedence, 0);
+   test_Implementation(complex_ternary, 1);
    return EXIT_SUCCESS;
 }

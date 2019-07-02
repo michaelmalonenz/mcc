@@ -24,6 +24,8 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
+#include "config.h"
+#if MCC_USE_SHUNTING_YARD_ICE
 #include <string.h>
 #include "ICE.h"
 #include "stack.h"
@@ -185,7 +187,7 @@ static token_associativity_t getOperatorAssociativity(const mcc_Token_t *token)
        (token->tokenIndex == OP_BITWISE_EXCL_OR || token->tokenIndex == OP_DEREFERENCE ||
         token->tokenIndex == OP_ADDRESS_OF || token->tokenIndex == OP_NOT ||
         token->tokenIndex == OP_NEGATE || token->tokenIndex == OP_SIZEOF ||
-        token->tokenIndex == OP_TERNARY_IF || token->tokenIndex == OP_TERNARY_ELSE ||
+      //   token->tokenIndex == OP_TERNARY_IF || token->tokenIndex == OP_TERNARY_ELSE ||
         token->tokenIndex == OP_TIMES_EQUALS || token->tokenIndex == OP_DIVIDE_EQUALS ||
         token->tokenIndex == OP_MOD_EQUALS || token->tokenIndex == OP_PLUS_EQUALS || 
         token->tokenIndex == OP_MINUS_EQUALS || token->tokenIndex == OP_L_SHIFT_EQUALS ||
@@ -260,6 +262,33 @@ static int mcc_EvaluateRPN(mcc_Stack_t *input)
                }
             }
             break;
+            case OP_TERNARY_IF:
+            case OP_TERNARY_ELSE:
+            {
+               mcc_Token_t *r_operand = (mcc_Token_t *) mcc_StackPop(operands);
+               mcc_Token_t *l_operand = (mcc_Token_t *) mcc_StackPop(operands);
+               // mcc_Token_t *if_operator = (mcc_Token_t *) mcc_StackPop(input);
+               mcc_Token_t *else_operand = (mcc_Token_t *) mcc_StackPop(input);
+               // mcc_ExpectTokenType(if_operator, TOK_OPERATOR, OP_TERNARY_IF);
+               printf("Else operand:\n");
+               mcc_DebugPrintToken(else_operand);
+               if (l_operand->number.number.integer_s)
+               {
+                  mcc_StackPush(operands, (uintptr_t) r_operand);
+               }
+               else
+               {
+                  mcc_StackPush(operands, (uintptr_t) else_operand);  
+               }
+            }
+            break;
+            // {
+            //    mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
+            //          token->lineno,
+            //          token->line_index,
+            //          "Ternary if without else\n");
+            // }
+            // break;
             default:
             {
                if (numOperands >= 2)
@@ -307,6 +336,7 @@ static int mcc_EvaluateRPN(mcc_Stack_t *input)
       mcc_StackDelete(numbersToDelete, mcc_DeleteToken);
       return resultNum;
    }
+   mcc_DebugPrintStack(operands, mcc_DebugPrintToken_Fn);
    mcc_Error("Failed to evaluate the tokens correctly\n");
    return -1;
 }
@@ -327,16 +357,35 @@ int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
       }
       else if (token->tokenType == TOK_OPERATOR)
       {
-         temp = (mcc_Token_t *) mcc_StackPeek(operator_stack);
-         while( temp != NULL && temp->tokenType == TOK_OPERATOR &&
-                (getRelativeOperatorPrecedence(token->tokenIndex) >=
-                 getRelativeOperatorPrecedence(temp->tokenIndex)) &&
-                getOperatorAssociativity(token) == TOK_ASSOC_LEFT)
+         if (token->tokenIndex == OP_TERNARY_ELSE)
          {
-            mcc_StackPush(output, mcc_StackPop(operator_stack));
-            temp = (mcc_Token_t *) mcc_StackPeek(operator_stack);
+            // mcc_StackPush(output, (uintptr_t) token);
+            temp = (mcc_Token_t *) mcc_StackPop(operator_stack);
+            while(!mcc_StackEmpty(operator_stack))
+            {
+               if (temp->tokenType == TOK_OPERATOR &&
+                   temp->tokenIndex == OP_TERNARY_IF)
+               {
+                  mcc_StackPush(output, (uintptr_t) temp);
+                  break;
+               }
+               mcc_StackPush(output, (uintptr_t) temp);
+               temp = (mcc_Token_t *) mcc_StackPop(operator_stack);
+            }
          }
-         mcc_StackPush(operator_stack, (uintptr_t) token);
+         else
+         {
+            temp = (mcc_Token_t *) mcc_StackPeek(operator_stack);
+            while( temp != NULL && temp->tokenType == TOK_OPERATOR &&
+                  (getRelativeOperatorPrecedence(token->tokenIndex) >=
+                  getRelativeOperatorPrecedence(temp->tokenIndex)) &&
+                  getOperatorAssociativity(token) == TOK_ASSOC_LEFT)
+            {
+               mcc_StackPush(output, mcc_StackPop(operator_stack));
+               temp = (mcc_Token_t *) mcc_StackPeek(operator_stack);
+            }
+            mcc_StackPush(operator_stack, (uintptr_t) token);
+         }
       }
       else if (token->tokenType == TOK_SYMBOL)
       {
@@ -401,3 +450,4 @@ int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
 
    return result;
 }
+#endif
