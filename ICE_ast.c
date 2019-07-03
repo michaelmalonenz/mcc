@@ -42,6 +42,30 @@ static token_associativity_t getOperatorAssociativity(const mcc_Token_t *token)
 }
 */
 
+static int evaluate_unary_operands(int operand, mcc_Token_t *operator)
+{
+   MCC_ASSERT(operator->tokenType == TOK_OPERATOR);
+
+   switch (operator->tokenIndex)
+   {
+      case OP_NOT:
+      {
+         return !operand;
+      }
+      break;
+      default:
+      {
+         mcc_DebugPrintToken(operator);
+         mcc_PrettyError(mcc_ResolveFileNameFromNumber(operator->fileno),
+                         operator->lineno,
+                         operator->line_index,
+                         "Unimplemented Unary Operator in arithmetic statement: %s\n",
+                         operators[operator->tokenIndex]);
+      }
+   }
+   return 0;
+}
+
 static int evaluate_operands(int l_operand,
                              int r_operand,
                              mcc_Token_t *operator)
@@ -252,13 +276,27 @@ void parseExpression(mcc_TokenListIterator_t *iter)
     parseExpression(iter);
     if (node && node->data->tokenType == TOK_OPERATOR)
     {
-        if (node->right == NULL)
+        if (node->data->tokenIndex == OP_NOT)
         {
-            node->right = (mcc_ASTNode_t *) mcc_StackPop(numbers);
+            if (node->right == NULL)
+            {
+                node->right = (mcc_ASTNode_t *) mcc_StackPop(numbers);
+            }
+            else if (node->left == NULL)
+            {
+                node->left = (mcc_ASTNode_t *) mcc_StackPop(numbers);
+            }
         }
-        if (node->left == NULL)
+        else
         {
-            node->left = (mcc_ASTNode_t *) mcc_StackPop(numbers);
+            if (node->right == NULL)
+            {
+                node->right = (mcc_ASTNode_t *) mcc_StackPop(numbers);
+            }
+            if (node->left == NULL)
+            {
+                node->left = (mcc_ASTNode_t *) mcc_StackPop(numbers);
+            }
         }
         current = node;
     }
@@ -266,16 +304,6 @@ void parseExpression(mcc_TokenListIterator_t *iter)
 
 int evaluateInOrder(mcc_ASTNode_t *node)
 {
-    int lhs;
-    int rhs;
-    if (node->left)
-    {
-        lhs = evaluateInOrder(node->left);
-    }
-    if (node->right)
-    {
-        rhs = evaluateInOrder(node->right);
-    }
     if (node->left == NULL && node->right == NULL)
     {
         int result = node->data->number.number.integer_s;
@@ -285,7 +313,37 @@ int evaluateInOrder(mcc_ASTNode_t *node)
     else
     {
         MCC_ASSERT(node->data->tokenType == TOK_OPERATOR);
-        return evaluate_operands(lhs, rhs, node->data);
+        switch(node->data->tokenIndex)
+        {
+            case OP_NOT:
+            {
+                int operand;
+                if (node->right)
+                {
+                    operand = evaluateInOrder(node->right);
+                }
+                else if (node->left)
+                {
+                    operand = evaluateInOrder(node->left);
+                }
+                return evaluate_unary_operands(operand, node->data);
+            }
+            break;
+            default:
+            {
+                int lhs;
+                int rhs;
+                if (node->left)
+                {
+                    lhs = evaluateInOrder(node->left);
+                }
+                if (node->right)
+                {
+                    rhs = evaluateInOrder(node->right);
+                }
+                return evaluate_operands(lhs, rhs, node->data);
+            }
+        }
     }
 }
 
