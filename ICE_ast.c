@@ -139,7 +139,7 @@ static int evaluate_operands(int l_operand,
 
 int evaluatePostOrder(mcc_ASTNode_t *node)
 {
-    if (node->left == NULL && node->right == NULL)
+    if (node->data->tokenType == TOK_NUMBER)
     {
         return node->data->number.number.integer_s;
     }
@@ -184,6 +184,23 @@ int evaluatePostOrder(mcc_ASTNode_t *node)
     }
 }
 
+static void delete_ast_node_tree(mcc_ASTNode_t *root)
+{
+    if (root->left)
+    {
+        delete_ast_node_tree(root->left);
+    }
+    if (root->middle)
+    {
+        delete_ast_node_tree(root->middle);
+    }
+    if (root->right)
+    {
+        delete_ast_node_tree(root->right);
+    }
+    free(root);
+}
+
 static mcc_ASTNode_t *ast_node_create(mcc_Token_t *data)
 {
     mcc_ASTNode_t *result = (mcc_ASTNode_t *)malloc(sizeof(mcc_ASTNode_t));
@@ -195,8 +212,10 @@ static mcc_ASTNode_t *ast_node_create(mcc_Token_t *data)
 static void GetNonWhitespaceToken(void)
 {
     mcc_Token_t *token = mcc_GetNextToken(iterator);
-    if (token == NULL)
+    if (token == NULL) {
         currentToken = NULL;
+        return;
+    }
     if (token->tokenType == TOK_WHITESPACE)
     {
         token = mcc_GetNextToken(iterator);
@@ -403,8 +422,8 @@ int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
     iterator = iter;
     GetNonWhitespaceToken();
     mcc_ASTNode_t *root = parseTernaryExpression();
-    mcc_ExpectTokenType(currentToken, TOK_EOL, TOK_UNSET_INDEX);
-    // Need to clean up the AST memory after evaluating it.
-    return evaluatePostOrder(root);
+    int result = evaluatePostOrder(root);
+    delete_ast_node_tree(root);
+    return result;
 }
 #endif
