@@ -166,6 +166,26 @@ int evaluatePostOrder(mcc_ASTNode_t *node)
                     return evaluatePostOrder(node->right);
                 }
             }
+            break;
+            case OP_LOGICAL_AND:
+            {
+                int lhs = evaluatePostOrder(node->left);
+                if (!lhs)
+                {
+                    return 0;
+                }
+                return evaluate_operands(lhs, evaluatePostOrder(node->right), node->data);
+            }
+            break;
+            case OP_LOGICAL_INCL_OR:
+            {
+                int lhs = evaluatePostOrder(node->left);
+                if (lhs)
+                {
+                    return 1;
+                }
+                return evaluate_operands(lhs, evaluatePostOrder(node->right), node->data);
+            }
             default:
             {
                 int lhs;
