@@ -13,34 +13,24 @@ typedef struct ASTNode
     mcc_Token_t *data;
 } mcc_ASTNode_t;
 
-static mcc_Stack_t *numbers;
+static mcc_ASTNode_t *parseTernaryExpression(void);
+static mcc_ASTNode_t *parseLogicalExpression(void);
+static mcc_ASTNode_t *parseBitwiseExpression(void);
+static mcc_ASTNode_t *parseNotEqualExpression(void);
+static mcc_ASTNode_t *parseComparisonExpression(void);
+static mcc_ASTNode_t *parseStrictComparisonExpression(void);
+static mcc_ASTNode_t *parseExpression(void);
+static mcc_ASTNode_t *parseFactor(void);
+static mcc_ASTNode_t *parseTerm(void);
 
-/*
-typedef enum token_associativity
-{
-    TOK_ASSOC_RIGHT,
-    TOK_ASSOC_LEFT,
-    TOK_ASSOC_UNARY
-} token_associativity_t;
+static mcc_TokenListIterator_t *iterator;
+static mcc_Token_t *currentToken;
 
-static token_associativity_t getOperatorAssociativity(const mcc_Token_t *token)
-{
-    if (token->tokenType == TOK_OPERATOR &&
-        (token->tokenIndex == OP_BITWISE_EXCL_OR || token->tokenIndex == OP_DEREFERENCE ||
-         token->tokenIndex == OP_ADDRESS_OF || token->tokenIndex == OP_NOT ||
-         token->tokenIndex == OP_NEGATE || token->tokenIndex == OP_SIZEOF ||
-         token->tokenIndex == OP_TERNARY_IF || token->tokenIndex == OP_TERNARY_ELSE ||
-         token->tokenIndex == OP_TIMES_EQUALS || token->tokenIndex == OP_DIVIDE_EQUALS ||
-         token->tokenIndex == OP_MOD_EQUALS || token->tokenIndex == OP_PLUS_EQUALS ||
-         token->tokenIndex == OP_MINUS_EQUALS || token->tokenIndex == OP_L_SHIFT_EQUALS ||
-         token->tokenIndex == OP_R_SHIFT_EQUALS || token->tokenIndex == OP_BITWISE_AND_EQUALS ||
-         token->tokenIndex == OP_BITWISE_EXCL_OR_EQUALS || token->tokenIndex == OP_BITWISE_INCL_OR_EQUALS))
-    {
-        return TOK_ASSOC_RIGHT;
-    }
-    return TOK_ASSOC_LEFT;
-}
-*/
+#define ICE_Error(...) \
+    mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno), \
+        currentToken->lineno, \
+        currentToken->line_index, \
+        __VA_ARGS__)
 
 static int evaluate_unary_operands(int operand, mcc_Token_t *operator)
 {
@@ -55,7 +45,6 @@ static int evaluate_unary_operands(int operand, mcc_Token_t *operator)
       break;
       default:
       {
-         mcc_DebugPrintToken(operator);
          mcc_PrettyError(mcc_ResolveFileNameFromNumber(operator->fileno),
                          operator->lineno,
                          operator->line_index,
@@ -137,7 +126,6 @@ static int evaluate_operands(int l_operand,
       break;
       default:
       {
-         mcc_DebugPrintToken(operator);
          mcc_PrettyError(mcc_ResolveFileNameFromNumber(operator->fileno),
                          operator->lineno,
                          operator->line_index,
@@ -149,166 +137,11 @@ static int evaluate_operands(int l_operand,
    return 0;
 }
 
-static int getRelativeOperatorPrecedence(MCC_OPERATOR op)
-{
-    static const int precedents[NUM_OPERATORS] = {
-        [OP_MEMBER_OF] = 1,
-        [OP_DEREF_MEMBER_OF] = 2,
-        [OP_DECREMENT_POST] = 3,
-        [OP_INCREMENT_POST] = 3,
-        [OP_DEREFERENCE] = 4,
-        [OP_ADDRESS_OF] = 4,
-        [OP_NOT] = 5,
-        [OP_NEGATE] = 6,
-        [OP_SIZEOF] = 7,
-        [OP_MULTIPLY] = 8,
-        [OP_DIVIDE] = 8,
-        [OP_MODULO] = 9,
-        [OP_ADD] = 10,
-        [OP_MINUS] = 10,
-        [OP_R_SHIFT] = 11,
-        [OP_L_SHIFT] = 11,
-        [OP_LESS_THAN] = 12,
-        [OP_GREATER_THAN] = 12,
-        [OP_LESS_EQUAL] = 13,
-        [OP_GREATER_EQUAL] = 13,
-        [OP_COMPARE_TO] = 13,
-        [OP_NOT_EQUAL] = 14,
-        [OP_BITWISE_AND] = 15,
-        [OP_BITWISE_EXCL_OR] = 16,
-        [OP_BITWISE_INCL_OR] = 17,
-        [OP_LOGICAL_AND] = 18,
-        [OP_LOGICAL_INCL_OR] = 19,
-        [OP_TERNARY_IF] = 20,
-        [OP_TERNARY_ELSE] = 20,
-        [OP_EQUALS_ASSIGN] = 21,
-        [OP_PLUS_EQUALS] = 21,
-        [OP_MINUS_EQUALS] = 21,
-        [OP_TIMES_EQUALS] = 21,
-        [OP_DIVIDE_EQUALS] = 21,
-        [OP_MOD_EQUALS] = 21,
-        [OP_R_SHIFT_EQUALS] = 21,
-        [OP_L_SHIFT_EQUALS] = 21,
-        [OP_BITWISE_AND_EQUALS] = 21,
-        [OP_BITWISE_EXCL_OR_EQUALS] = 21,
-        [OP_BITWISE_INCL_OR_EQUALS] = 21,
-        [OP_COMMA] = 22,
-        [OP_DECREMENT_PRE] = 23,
-        [OP_INCREMENT_PRE] = 23,
-    };
-
-    return precedents[op];
-}
-
-
-mcc_ASTNode_t *ast_node_create(mcc_Token_t *data)
-{
-    mcc_ASTNode_t *result = (mcc_ASTNode_t *)malloc(sizeof(mcc_ASTNode_t));
-    memset(result, 0, sizeof(mcc_ASTNode_t));
-    result->data = data;
-    return result;
-}
-
-mcc_Token_t *GetNonWhitespaceToken(mcc_TokenListIterator_t *iter)
-{
-    mcc_Token_t *token = mcc_GetNextToken(iter);
-    if (token == NULL)
-        return NULL;
-    if (token->tokenType == TOK_WHITESPACE)
-    {
-        token = mcc_GetNextToken(iter);
-    }
-    return token;
-}
-
-static mcc_Stack_t *parens;
-static mcc_ASTNode_t *current;
-static bool_t first_paren = FALSE;
-void parseExpression(mcc_TokenListIterator_t *iter)
-{
-    mcc_Token_t *token = GetNonWhitespaceToken(iter);
-    if (token == NULL)
-        return;
-    mcc_ASTNode_t *node = ast_node_create(token);
-    if (token->tokenType == TOK_NUMBER)
-    {
-        mcc_StackPush(numbers, (uintptr_t) node);
-    }
-    else if (token->tokenType == TOK_OPERATOR)
-    {
-        if (current != NULL)
-        {
-            if (first_paren ||
-                getRelativeOperatorPrecedence(token->tokenIndex) >
-                getRelativeOperatorPrecedence(current->data->tokenIndex))
-            {
-                current->right = node;
-            }
-            else
-            {
-                current->left = node;
-            }
-        }
-        current = node;
-        first_paren = FALSE;
-    }
-    else if (token->tokenType == TOK_SYMBOL)
-    {
-        if (token->tokenIndex == SYM_OPEN_PAREN)
-        {
-            free(node);
-            node = NULL;
-            first_paren = TRUE;
-            mcc_StackPush(parens, (uintptr_t) token);
-        }
-        else if (token->tokenIndex == SYM_CLOSE_PAREN)
-        {
-            mcc_Token_t *open = (mcc_Token_t *) mcc_StackPop(parens);
-            if (open == NULL)
-            {
-                mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
-                               token->lineno,
-                               token->line_index,
-                               "Unmatched Parentheses\n");
-            }
-        }
-    }
-    parseExpression(iter);
-    if (node && node->data->tokenType == TOK_OPERATOR)
-    {
-        if (node->data->tokenIndex == OP_NOT)
-        {
-            if (node->right == NULL)
-            {
-                node->right = (mcc_ASTNode_t *) mcc_StackPop(numbers);
-            }
-            else if (node->left == NULL)
-            {
-                node->left = (mcc_ASTNode_t *) mcc_StackPop(numbers);
-            }
-        }
-        else
-        {
-            if (node->right == NULL)
-            {
-                node->right = (mcc_ASTNode_t *) mcc_StackPop(numbers);
-            }
-            if (node->left == NULL)
-            {
-                node->left = (mcc_ASTNode_t *) mcc_StackPop(numbers);
-            }
-        }
-        current = node;
-    }
-}
-
-int evaluateInOrder(mcc_ASTNode_t *node)
+int evaluatePostOrder(mcc_ASTNode_t *node)
 {
     if (node->left == NULL && node->right == NULL)
     {
-        int result = node->data->number.number.integer_s;
-        free(node);
-        return result;
+        return node->data->number.number.integer_s;
     }
     else
     {
@@ -317,29 +150,33 @@ int evaluateInOrder(mcc_ASTNode_t *node)
         {
             case OP_NOT:
             {
-                int operand;
-                if (node->right)
-                {
-                    operand = evaluateInOrder(node->right);
-                }
-                else if (node->left)
-                {
-                    operand = evaluateInOrder(node->left);
-                }
+                int operand = evaluatePostOrder(node->middle);
                 return evaluate_unary_operands(operand, node->data);
             }
             break;
+            case OP_TERNARY_IF:
+            {
+                int operand = evaluatePostOrder(node->left);
+                if (operand)
+                {
+                    return evaluatePostOrder(node->middle);
+                }
+                else
+                {
+                    return evaluatePostOrder(node->right);
+                }
+            }
             default:
             {
                 int lhs;
                 int rhs;
-                if (node->left)
-                {
-                    lhs = evaluateInOrder(node->left);
-                }
                 if (node->right)
                 {
-                    rhs = evaluateInOrder(node->right);
+                    rhs = evaluatePostOrder(node->right);
+                }
+                if (node->left)
+                {
+                    lhs = evaluatePostOrder(node->left);
                 }
                 return evaluate_operands(lhs, rhs, node->data);
             }
@@ -347,23 +184,227 @@ int evaluateInOrder(mcc_ASTNode_t *node)
     }
 }
 
+static mcc_ASTNode_t *ast_node_create(mcc_Token_t *data)
+{
+    mcc_ASTNode_t *result = (mcc_ASTNode_t *)malloc(sizeof(mcc_ASTNode_t));
+    memset(result, 0, sizeof(mcc_ASTNode_t));
+    result->data = data;
+    return result;
+}
+
+static void GetNonWhitespaceToken(void)
+{
+    mcc_Token_t *token = mcc_GetNextToken(iterator);
+    if (token == NULL)
+        currentToken = NULL;
+    if (token->tokenType == TOK_WHITESPACE)
+    {
+        token = mcc_GetNextToken(iterator);
+    }
+    currentToken = token;
+}
+
+static mcc_ASTNode_t *parseFactor(void)
+{
+    mcc_ASTNode_t *result;
+    if (currentToken == NULL)
+    {
+        mcc_Error("Unexpected end of expression\n");
+    }
+    if (currentToken->tokenType == TOK_OPERATOR &&
+        currentToken->tokenIndex == OP_NOT)
+    {
+        result = ast_node_create(currentToken);
+        GetNonWhitespaceToken();
+        result->middle = parseFactor();
+        return result;
+    }
+    else if (currentToken->tokenType == TOK_NUMBER)
+    {
+        result = ast_node_create(currentToken);
+        GetNonWhitespaceToken();
+        return result;
+    }
+    else if (currentToken->tokenType == TOK_SYMBOL &&
+             currentToken->tokenIndex == SYM_OPEN_PAREN)
+    {
+        GetNonWhitespaceToken();
+        result = parseTernaryExpression();
+        if (currentToken->tokenType != TOK_SYMBOL &&
+            currentToken->tokenIndex != SYM_CLOSE_PAREN)
+        {
+            ICE_Error(
+                "Unmatched parentheses! Expected ')' but got '%s'\n",
+                currentToken->text);
+        }
+        GetNonWhitespaceToken();
+        return result;
+    }
+    ICE_Error(
+        "Unknown token in arithmetic expression '%s'\n",
+        currentToken->text);
+    return NULL;
+}
+
+static mcc_ASTNode_t *parseTerm(void)
+{
+    mcc_ASTNode_t *node = parseFactor();
+    while (currentToken &&
+        currentToken->tokenType == TOK_OPERATOR &&
+        (currentToken->tokenIndex == OP_MULTIPLY ||
+         currentToken->tokenIndex == OP_DIVIDE ||
+         currentToken->tokenIndex == OP_DEREFERENCE)) // Still don't know what to do here.
+    {
+        mcc_ASTNode_t *op_node = ast_node_create(currentToken);
+        GetNonWhitespaceToken();
+        op_node->left = node;
+        op_node->right = parseFactor();
+        node = op_node;
+    }
+
+    return node;
+}
+
+static mcc_ASTNode_t *parseExpression()
+{
+    mcc_ASTNode_t *node = parseTerm();
+    while (currentToken &&
+        currentToken->tokenType == TOK_OPERATOR &&
+        (currentToken->tokenIndex == OP_ADD ||
+         currentToken->tokenIndex == OP_MINUS))
+    {
+        mcc_ASTNode_t *op_node = ast_node_create(currentToken);
+        GetNonWhitespaceToken();
+        op_node->left = node;
+        op_node->right = parseTerm();
+        node = op_node;
+    }
+
+    return node;
+}
+
+static mcc_ASTNode_t *parseStrictComparisonExpression(void)
+{
+    mcc_ASTNode_t *node = parseExpression();
+    while (currentToken &&
+        currentToken->tokenType == TOK_OPERATOR &&
+        (currentToken->tokenIndex == OP_LESS_THAN ||
+         currentToken->tokenIndex == OP_GREATER_THAN))
+    {
+        mcc_ASTNode_t *op_node = ast_node_create(currentToken);
+        GetNonWhitespaceToken();
+        op_node->left = node;
+        op_node->right = parseExpression();
+        node = op_node;
+    }
+
+    return node;
+}
+
+static mcc_ASTNode_t *parseComparisonExpression(void)
+{
+    mcc_ASTNode_t *node = parseStrictComparisonExpression();
+    while (currentToken &&
+        currentToken->tokenType == TOK_OPERATOR &&
+        (currentToken->tokenIndex == OP_LESS_EQUAL ||
+         currentToken->tokenIndex == OP_GREATER_EQUAL ||
+         currentToken->tokenIndex == OP_COMPARE_TO))
+    {
+        mcc_ASTNode_t *op_node = ast_node_create(currentToken);
+        GetNonWhitespaceToken();
+        op_node->left = node;
+        op_node->right = parseStrictComparisonExpression();
+        node = op_node;
+    }
+
+    return node;
+}
+
+static mcc_ASTNode_t *parseNotEqualExpression(void)
+{
+    mcc_ASTNode_t *node = parseComparisonExpression();
+    while (currentToken && 
+           currentToken->tokenType == TOK_OPERATOR &&
+           currentToken->tokenIndex == OP_NOT_EQUAL)
+    {
+        mcc_ASTNode_t *op_node = ast_node_create(currentToken);
+        GetNonWhitespaceToken();
+        op_node->left = node;
+        op_node->right = parseComparisonExpression();
+        node = op_node;
+    }
+
+    return node;
+}
+
+static mcc_ASTNode_t *parseBitwiseExpression(void)
+{
+    mcc_ASTNode_t *node = parseNotEqualExpression();
+    while (currentToken &&
+        currentToken->tokenType == TOK_OPERATOR &&
+        (currentToken->tokenIndex == OP_BITWISE_AND ||
+         currentToken->tokenIndex == OP_BITWISE_EXCL_OR ||
+         currentToken->tokenIndex == OP_BITWISE_INCL_OR))
+    {
+        mcc_ASTNode_t *op_node = ast_node_create(currentToken);
+        GetNonWhitespaceToken();
+        op_node->left = node;
+        op_node->right = parseNotEqualExpression();
+        node = op_node;
+    }
+
+    return node;
+}
+
+static mcc_ASTNode_t *parseLogicalExpression(void)
+{
+    mcc_ASTNode_t *node = parseBitwiseExpression();
+    while (currentToken &&
+        currentToken->tokenType == TOK_OPERATOR &&
+        (currentToken->tokenIndex == OP_LOGICAL_AND ||
+         currentToken->tokenIndex == OP_LOGICAL_INCL_OR))
+    {
+        mcc_ASTNode_t *op_node = ast_node_create(currentToken);
+        GetNonWhitespaceToken();
+        op_node->left = node;
+        op_node->right = parseBitwiseExpression();
+        node = op_node;
+    }
+
+    return node;
+}
+
+static mcc_ASTNode_t *parseTernaryExpression(void)
+{
+    mcc_ASTNode_t *node = parseLogicalExpression();
+    while (currentToken &&
+           currentToken->tokenType == TOK_OPERATOR &&
+           currentToken->tokenIndex == OP_TERNARY_IF)
+    {
+        mcc_ASTNode_t *op_node = ast_node_create(currentToken);
+        GetNonWhitespaceToken();
+        op_node->left = node;
+        op_node->middle = parseLogicalExpression();
+        if (currentToken->tokenType != TOK_OPERATOR &&
+            currentToken->tokenIndex != OP_TERNARY_ELSE)
+        {
+            ICE_Error("Expected ':' after '?' instead of '%s'\n", currentToken->text);
+        }
+        GetNonWhitespaceToken();
+        op_node->right = parseLogicalExpression();
+        node = op_node;
+    }
+
+    return node;
+}
+
 int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
 {
-    parens = mcc_StackCreate();
-    numbers = mcc_StackCreate();
-    parseExpression(iter);
-    MCC_ASSERT(mcc_StackEmpty(numbers));
-    mcc_StackDelete(numbers, NULL);
-    mcc_Token_t *open = (mcc_Token_t *) mcc_StackPop(parens);
-    if (open != NULL)
-    {
-        mcc_PrettyError(mcc_ResolveFileNameFromNumber(open->fileno),
-                        open->lineno,
-                        open->line_index,
-                        "Unmatched Parentheses\n");
-    }
-    mcc_StackDelete(parens, NULL);
-
-    return evaluateInOrder(current);
+    iterator = iter;
+    GetNonWhitespaceToken();
+    mcc_ASTNode_t *root = parseTernaryExpression();
+    mcc_ExpectTokenType(currentToken, TOK_EOL, TOK_UNSET_INDEX);
+    // Need to clean up the AST memory after evaluating it.
+    return evaluatePostOrder(root);
 }
 #endif

@@ -34,8 +34,8 @@
 #include "tokenList.h"
 #include "ICE.h"
 
-const char *ice_is_zero = "10 * (1 + 1 - 2)";
-const char *ice_is_nonzero_twenty = "10 * (1 + 3 - 2)";
+static const char *ice_is_zero = "10 * (1 + 1 - 2)";
+static const char *ice_is_nonzero_twenty = "10 * (1 + 3 - 2)";
 static const char *ice_shunting_yard_wiki_example = "3 + 4 * 2 / ( 1 - 5 ) ^ 2 ^ 3";
 static const char *simple_logical_and = "1 && 1";
 static const char *simple_logical_or = "1 || 0";
@@ -45,6 +45,7 @@ static const char *simple_less_than = "3 < 8";
 static const char *simple_greater_equal = "4 >= 4";
 static const char *simple_less_equal = "3 <= 3";
 static const char *complex_precedence = "3 <= 3 && 8 > 4";
+static const char *logical_precedence = "0 || 1 && 0 || 1";
 static const char *simple_equality = "3 == 3";
 static const char *ternary_if_if = "3 < 4 ? 2 : 42";
 static const char *ternary_if_else = "3 > 4 ? 2 : 42";
@@ -77,7 +78,7 @@ static void test_Implementation(const char *token_string, int expected_result)
 int main(void)
 {
    test_Implementation(ice_is_nonzero_twenty, 20);
-   test_Implementation(ice_shunting_yard_wiki_example, 1);
+   test_Implementation(ice_shunting_yard_wiki_example, 0);
    test_Implementation(ice_is_zero, 0);
    test_Implementation(simple_logical_and, 1);
    test_Implementation(simple_logical_or, 1);
@@ -87,6 +88,7 @@ int main(void)
    test_Implementation(simple_greater_equal, 1);
    test_Implementation(simple_less_equal, 1);
    test_Implementation(complex_precedence, 1);
+   test_Implementation(logical_precedence, 1);
    test_Implementation(simple_equality, 1);
    test_Implementation(ternary_if_if, 2);
    test_Implementation(ternary_if_else, 42);
