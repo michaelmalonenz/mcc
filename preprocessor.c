@@ -169,6 +169,12 @@ static void handleInclude()
    getToken();
    mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
    getToken();
+#if MCC_DEBUG
+   printf("Including file from %s:%d: %s\n",
+      mcc_ResolveFileNameFromNumber(currentToken->fileno),
+      currentToken->lineno,
+      currentToken->text);
+#endif
    if (currentToken->tokenType == TOK_LOCAL_FILE_INC)
    {
       include_path = mcc_FindLocalInclude(currentToken->text);
