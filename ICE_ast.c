@@ -291,8 +291,7 @@ static mcc_ASTNode_t *parseTerm(void)
     while (currentToken &&
         currentToken->tokenType == TOK_OPERATOR &&
         (currentToken->tokenIndex == OP_MULTIPLY ||
-         currentToken->tokenIndex == OP_DIVIDE ||
-         currentToken->tokenIndex == OP_DEREFERENCE)) // Still don't know what to do here.
+         currentToken->tokenIndex == OP_DIVIDE))
     {
         mcc_ASTNode_t *op_node = ast_node_create(currentToken);
         GetNonWhitespaceToken();

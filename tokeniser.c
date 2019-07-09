@@ -412,6 +412,13 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
             PREPROC_DIRECTIVE pp_dir;
             handle_whitespace(line, fileBuffer, iter);
             pp_dir = mcc_GetPreprocessorDirective(line);
+            if (pp_dir == PP_NONE)
+            {
+               printf("%s:%d %s\n",
+               mcc_GetFileBufferFilename(fileBuffer),
+               mcc_GetFileBufferCurrentLineNo(fileBuffer),
+               line->string);
+            }
             MCC_ASSERT(pp_dir != PP_NONE);
             token = mcc_CreateToken(preprocessor_directives[pp_dir], 
                                     pp_strlens[pp_dir], TOK_PP_DIRECTIVE,
@@ -461,6 +468,19 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
       }
       else if ((current_operator = mcc_GetOperator(line)) != OP_NONE)
       {
+         // We can't tell the difference between * and * without a little
+         // more context.  (Dereference and multiply)
+         if (current_operator == OP_DEREFERENCE)
+         {
+            const mcc_Token_t *temp = mcc_PeekPreviousNonWhitespaceToken(iter);
+            if (temp &&
+                  (temp->tokenType == TOK_NUMBER ||
+                   temp->tokenType == TOK_IDENTIFIER ||
+                   (temp->tokenType == TOK_SYMBOL && temp->tokenIndex == SYM_CLOSE_PAREN)))
+            {
+               current_operator = OP_MULTIPLY;
+            }
+         }
          token = mcc_CreateToken(operators[current_operator],
                                  operator_strlens[current_operator], 
                                  TOK_OPERATOR,

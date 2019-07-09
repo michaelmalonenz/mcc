@@ -180,6 +180,18 @@ mcc_Token_t *mcc_GetNextToken(mcc_TokenListIterator_t *iter)
    return (mcc_Token_t *) mcc_ListGetNextData((mcc_ListIterator_t *) iter);
 }
 
+const mcc_Token_t *mcc_PeekPreviousNonWhitespaceToken(mcc_TokenListIterator_t *iter)
+{
+   const mcc_Token_t *tok = (mcc_Token_t *) mcc_ListPeekCurrentData(iter);
+   if (tok && tok->tokenType != TOK_WHITESPACE)
+      return tok;
+   mcc_TokenListIterator_t *temp = mcc_ListCopyIterator(iter);
+   while (tok && tok->tokenType == TOK_WHITESPACE)
+      tok = (mcc_Token_t *) mcc_ListGetPrevData(temp);
+   mcc_ListDeleteIterator(temp);
+   return tok;
+}
+
 mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, mcc_Token_t *second, TOKEN_TYPE newType)
 {
    int newLength = strlen(first->text) + strlen(second->text);
