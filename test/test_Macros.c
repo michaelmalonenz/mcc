@@ -118,6 +118,25 @@ static void test_BulkMacros(void)
    printf("ok\n");
 }
 
+void test_BuiltinDefine(void)
+{
+   printf("Testing builtins...");
+   mcc_InitialiseMacros();
+
+   mcc_Macro_t *stdcVersion = mcc_ResolveMacro("__STDC_VERSION__");
+   MCC_ASSERT(stdcVersion != NULL);
+   mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(stdcVersion->tokens);
+   mcc_Token_t *version = mcc_GetNextToken(iter);
+   MCC_ASSERT(version->number.number.integer_s == 199901L);
+
+   mcc_Macro_t *stdc = mcc_ResolveMacro("__STDC__");
+   MCC_ASSERT(stdc != NULL);
+
+   mcc_TokenListDeleteIterator(iter);
+   mcc_DeleteAllMacros();
+   printf("ok!\n");
+}
+
 int main(void)
 {
    test_Define();
@@ -125,5 +144,6 @@ int main(void)
    test_Undefine();
    test_Undefined();
    test_BulkMacros();
+   test_BuiltinDefine();
    return 0;
 }

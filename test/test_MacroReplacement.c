@@ -50,7 +50,7 @@ static void test_SimpleReplacement(void)
    mcc_FileOpenerInitialise();
    mcc_TokeniseFile(file, iter);
    mcc_TokenListDeleteIterator(iter);
-   printf("Test Simple Replacement\n");
+   printf("Test Simple Replacement...");
 
    mcc_TokenList_t *output = mcc_PreprocessCurrentTokens();
    mcc_TokenListIterator_t *outputIter = mcc_TokenListStandaloneGetIterator(output);
@@ -92,7 +92,7 @@ int meaningOfLife = max(42, 4);\n";
    mcc_FileOpenerInitialise();
    mcc_TokeniseFile(file, iter);
    mcc_TokenListDeleteIterator(iter);
-   printf("Test Function Macro Replacement\n");
+   printf("Test Function Macro Replacement...");
 
    mcc_TokenList_t *output = mcc_PreprocessCurrentTokens();
    mcc_TokenListIterator_t *outputIter = mcc_TokenListStandaloneGetIterator(output);
@@ -119,9 +119,51 @@ int meaningOfLife = max(42, 4);\n";
    mcc_DeleteAllMacros();
 }
 
+void test_BuiltinReplacement(void)
+{
+  const char *token_string = "int i = __STDC_VERSION__;";
+  const TOKEN_TYPE expectedOutputTokenTypes[9] = {
+     TOK_KEYWORD, TOK_WHITESPACE, TOK_IDENTIFIER, TOK_WHITESPACE, TOK_OPERATOR, TOK_WHITESPACE,
+     TOK_NUMBER, TOK_SYMBOL, TOK_EOL
+   };
+   const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
+                                                         strlen(token_string));
+   mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator();
+   mcc_InitialiseMacros();
+   mcc_FileOpenerInitialise();
+   mcc_TokeniseFile(file, iter);
+   mcc_TokenListDeleteIterator(iter);
+   printf("Test Builtin Macro Replacement...");
+
+   mcc_TokenList_t *output = mcc_PreprocessCurrentTokens();
+   mcc_TokenListIterator_t *outputIter = mcc_TokenListStandaloneGetIterator(output);
+   mcc_Token_t *token;
+   int i;
+
+   for (i = 0; i < 9; i++)
+   {
+     token = mcc_GetNextToken(outputIter);
+     if (token->tokenType != expectedOutputTokenTypes[i])
+     {
+        printf("Expected token type: %s\n", token_types[expectedOutputTokenTypes[i]]);
+        mcc_DebugPrintToken(token);
+     }
+     MCC_ASSERT(token->tokenType == expectedOutputTokenTypes[i]);
+   }
+   mcc_TokenListDeleteIterator(outputIter);
+   printf("ok\n");
+
+   mcc_TokenListDeleteStandalone(output);
+   mcc_FreeTokens();
+   mcc_FileOpenerDelete();
+   unlink(file);
+   mcc_DeleteAllMacros();
+}
+
 int main(int UNUSED(argc), char UNUSED(**argv))
 {
    test_SimpleReplacement();
    test_FunctionReplacement();
+   test_BuiltinReplacement();
    return 0;
 }

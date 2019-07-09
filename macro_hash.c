@@ -68,9 +68,10 @@ void mcc_InitialiseMacros(void)
    mcc_DefineMacro("__STDC__", NULL, NULL);
 #if MCC_C99_COMPATIBLE
    mcc_TokenList_t *value = mcc_TokenListCreateStandalone();
-   mcc_Number_t number;
-   number.number.integer_s = 199901L;
-   number.numberType = SIGNED_INT;
+   mcc_Number_t number = {
+      .number = { .integer_s = 199901L },
+      .numberType = SIGNED_INT
+   };
    mcc_TokenListStandaloneAppend(value, mcc_CreateNumberToken(&number, 0, 0, 255));
    mcc_DefineMacro("__STDC_VERSION__", value, NULL);
 #endif
