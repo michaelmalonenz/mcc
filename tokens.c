@@ -42,7 +42,7 @@ const char *token_types[NUM_TOK_TYPES] = { "Preprocessor directive", "Identifier
 
 const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES] = { "include", "define", "ifdef", "ifndef", "if",
                                                                      "endif", "else", "elif", "undef", "error", "pragma",
-                                                                     "#", "warning"};
+                                                                     "#", "warning", ""};
 
 size_t pp_strlens[NUM_PREPROCESSOR_DIRECTIVES];
 
@@ -76,8 +76,10 @@ size_t operator_strlens[NUM_OPERATORS];
 const char *symbols[NUM_SYMBOLS] = { "{", "}", "[", "]", ";", "(", ")", "\"", "'", "\\"};
 size_t symbol_strlens[NUM_SYMBOLS];
 
-const char *number_types[NUMBER_OF_NUMBER_TYPES] = { "signed integer", "unsigned integer", "single precision float", "double precision float"};
-
+const char *number_types[NUMBER_OF_NUMBER_TYPES] = {
+   "signed integer", "unsigned integer", "single precision float",
+   "double precision float"
+};
 
 static bool_t initialised;
 

@@ -229,6 +229,8 @@ uint32_t mcc_ListGetLength(mcc_List_t *list)
 
 uintptr_t mcc_ListPeekCurrentData(mcc_ListIterator_t *iter)
 {
+   if (iter->current == NULL)
+      return NULL_DATA;
    return iter->current->data;
 }
 

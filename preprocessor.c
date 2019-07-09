@@ -54,6 +54,7 @@ static void handleError(void);
 static void handlePragma(void);
 static void handleJoin(void);
 static void handleWarning(void);
+static void handleStringify(void);
 static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro);
 static mcc_TokenList_t *handleMacroReplacement(mcc_Macro_t *macro);
 static void conditionalInnerImpl(bool_t initialConditionTrue, bool_t ignore);
@@ -67,7 +68,7 @@ static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] =
    &handleIfndef, &handleIf, &handleEndif,
    &handleElse, &handleElif, &handleUndef,
    &handleError, &handlePragma, &handleJoin,
-   &handleWarning,
+   &handleWarning, &handleStringify
 };
 
 static mcc_TokenListIterator_t *tokenListIter;
@@ -576,4 +577,9 @@ static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro)
    mcc_TokenList_t *result = replaceMacroTokens(macro, parameters);
    mcc_ListDelete(parameters, mcc_MacroParameterDelete);
    return result;
+}
+
+static void handleStringify(void)
+{
+   MCC_ASSERT(FALSE);
 }
