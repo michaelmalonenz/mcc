@@ -1,5 +1,3 @@
-#include "config.h"
-#if MCC_USE_AST_ICE
 #include <stdlib.h>
 #include <string.h>
 #include "ICE.h"
@@ -14,7 +12,8 @@ typedef struct ASTNode
 } mcc_ASTNode_t;
 
 static mcc_ASTNode_t *parseTernaryExpression(void);
-static mcc_ASTNode_t *parseLogicalExpression(void);
+static mcc_ASTNode_t *parseLogicalAndExpression(void);
+static mcc_ASTNode_t *parseLogicalOrExpression(void);
 static mcc_ASTNode_t *parseBitwiseExpression(void);
 static mcc_ASTNode_t *parseNotEqualExpression(void);
 static mcc_ASTNode_t *parseComparisonExpression(void);
@@ -394,13 +393,12 @@ static mcc_ASTNode_t *parseBitwiseExpression(void)
     return node;
 }
 
-static mcc_ASTNode_t *parseLogicalExpression(void)
+static mcc_ASTNode_t *parseLogicalAndExpression(void)
 {
     mcc_ASTNode_t *node = parseBitwiseExpression();
     while (currentToken &&
         currentToken->tokenType == TOK_OPERATOR &&
-        (currentToken->tokenIndex == OP_LOGICAL_AND ||
-         currentToken->tokenIndex == OP_LOGICAL_INCL_OR))
+        currentToken->tokenIndex == OP_LOGICAL_AND)
     {
         mcc_ASTNode_t *op_node = ast_node_create(currentToken);
         GetNonWhitespaceToken();
@@ -412,9 +410,26 @@ static mcc_ASTNode_t *parseLogicalExpression(void)
     return node;
 }
 
+static mcc_ASTNode_t *parseLogicalOrExpression(void)
+{
+    mcc_ASTNode_t *node = parseLogicalAndExpression();
+    while (currentToken &&
+        currentToken->tokenType == TOK_OPERATOR &&
+        currentToken->tokenIndex == OP_LOGICAL_INCL_OR)
+    {
+        mcc_ASTNode_t *op_node = ast_node_create(currentToken);
+        GetNonWhitespaceToken();
+        op_node->left = node;
+        op_node->right = parseLogicalAndExpression();
+        node = op_node;
+    }
+
+    return node;
+}
+
 static mcc_ASTNode_t *parseTernaryExpression(void)
 {
-    mcc_ASTNode_t *node = parseLogicalExpression();
+    mcc_ASTNode_t *node = parseLogicalOrExpression();
     while (currentToken &&
            currentToken->tokenType == TOK_OPERATOR &&
            currentToken->tokenIndex == OP_TERNARY_IF)
@@ -422,14 +437,14 @@ static mcc_ASTNode_t *parseTernaryExpression(void)
         mcc_ASTNode_t *op_node = ast_node_create(currentToken);
         GetNonWhitespaceToken();
         op_node->left = node;
-        op_node->middle = parseLogicalExpression();
+        op_node->middle = parseLogicalOrExpression();
         if (currentToken->tokenType != TOK_OPERATOR &&
             currentToken->tokenIndex != OP_TERNARY_ELSE)
         {
             ICE_Error("Expected ':' after '?' instead of '%s'\n", currentToken->text);
         }
         GetNonWhitespaceToken();
-        op_node->right = parseLogicalExpression();
+        op_node->right = parseLogicalOrExpression();
         node = op_node;
     }
 
@@ -445,4 +460,3 @@ int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
     delete_ast_node_tree(root);
     return result;
 }
-#endif
