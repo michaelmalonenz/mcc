@@ -36,6 +36,5 @@
 #define MCC_C99_COMPATIBLE (1)
 
 #define MCC_USE_AST_ICE (1)
-#define MCC_USE_SHUNTING_YARD_ICE (0)
 
 #endif
