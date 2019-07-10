@@ -66,6 +66,31 @@ static void test_Define(void)
    mcc_DeleteAllMacros();
 }
 
+static void test_Undef(void)
+{
+   const char *token_string  = "#define TEST_MACRO 42\n#undef TEST_MACRO";
+   const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
+                                                         strlen(token_string));
+   mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator();
+   mcc_InitialiseMacros();
+   mcc_FileOpenerInitialise();
+   mcc_TokeniseFile(file, iter);
+   mcc_TokenListDeleteIterator(iter);
+   printf("Test Undef...");
+
+   mcc_TokenList_t *output = mcc_PreprocessCurrentTokens();
+
+   mcc_Macro_t *macro = mcc_ResolveMacro("TEST_MACRO");
+   MCC_ASSERT(macro == NULL);
+   printf("ok\n");
+
+   mcc_TokenListDeleteStandalone(output);
+   mcc_FreeTokens();
+   mcc_FileOpenerDelete();
+   unlink(file);
+   mcc_DeleteAllMacros();
+}
+
 static void test_NestedIf(void)
 {
    const char *token_string  = "\
@@ -404,6 +429,7 @@ static void test_If_BuiltinDefines(void)
 int main(int UNUSED(argc), char UNUSED(**argv))
 {
    test_Define();
+   test_Undef();
    test_IfDef();
    test_IfDef_Else();
    test_IfDef_If();
