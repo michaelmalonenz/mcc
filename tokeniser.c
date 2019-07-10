@@ -412,13 +412,6 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
             PREPROC_DIRECTIVE pp_dir;
             handle_whitespace(line, fileBuffer, iter);
             pp_dir = mcc_GetPreprocessorDirective(line);
-            if (pp_dir == PP_NONE)
-            {
-               printf("%s:%d %s\n",
-               mcc_GetFileBufferFilename(fileBuffer),
-               mcc_GetFileBufferCurrentLineNo(fileBuffer),
-               line->string);
-            }
             MCC_ASSERT(pp_dir != PP_NONE);
             token = mcc_CreateToken(preprocessor_directives[pp_dir], 
                                     pp_strlens[pp_dir], TOK_PP_DIRECTIVE,

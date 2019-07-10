@@ -104,10 +104,6 @@ unsigned long mcc_GetStringBufferLength(mcc_StringBuffer_t *buffer)
 
 int mcc_StringBufferStrncmp(mcc_StringBuffer_t *buffer, const char *string, size_t length)
 {
-#if MCC_DEBUG
-   printf("Comparing: '%s'\nwith\n'%s'\n",
-          buffer->string, string);
-#endif /* MCC_DBUG */
    return strncmp((const char *)buffer->string, string, length);
 }
 
