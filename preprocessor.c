@@ -510,10 +510,16 @@ static void handleElif()
                      "elif without if\n");
 }
 
-static void handleJoin() {}
+static void handleJoin()
+{
+   MCC_ASSERT(FALSE);
+}
 
 //What shall I do with #pragmas???
-static void handlePragma() {}
+static void handlePragma()
+{
+   MCC_ASSERT(FALSE);
+}
 
 static void handleWarning()
 {

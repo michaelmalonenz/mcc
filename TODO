@@ -5,38 +5,21 @@ options
 Use stopper for the unit tests??
 See if I can unit test for an assertion being hit (hopefully without the complcated jmpbuf thingy at work)
 
-Unit Tests I really should write:
-test_Tokeniser //extend and make more complex situations
-test_Macros // I still need to write a test which deletes a macro in the middle of the tree somewhere 
-            // and maintains the integrity.  Perhaps I should write a function that asserts the invariant.
-test_Preprocessor
-
 Config:
 Start adding some more options and potentially make (with some macro magic?) a better way to add new options
 
 Preprocessor:
-change the macro definitions to be a hash table?  It seems unnecessarily limiting to do it this way.
-Fix the b-tree after a macro deletion
- - Maybe just dump the b-tree implementation altogether?  It's slower for search and insert.
-macro replacement
-evaluate macro expressions (like #if etc)
- - Create an Integer Constant Expression parser/evaluator module?
-  - Boolean expressions can be evaluated just like integer constant expresseions.
-support function macros
+support function macros - arguments can be expressions
 Need to handle the ## operator
-handle if-like constructs
+Need to handle the # operator
+Need to handle #pragma (and figure out what to do with it)
 
 Tokeniser:
-Need to figure out the difference between unary and binary operators.
+Need to figure out the difference between unary and binary operators - general solution.
 
 Parser:
 Assert that the input file conforms to the c(99) standard
 create an AST
 walk the tree
-output an intermediate representation
+output an intermediate representation (LLVM)
 
-Assembler
-output ELF files and DWARF (4?)
-
-linker - (Do I actually want to write this myself or should I attempt to write object files which are compatible with binutils' linker/gold and use that?)
-Do I want to distribute a C library (like uClibc or Newlib etc) with this? probably.
