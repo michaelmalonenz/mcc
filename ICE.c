@@ -187,8 +187,8 @@ int evaluatePostOrder(mcc_ASTNode_t *node)
             }
             default:
             {
-                int lhs;
-                int rhs;
+                int lhs = 0;
+                int rhs = 0;
                 if (node->right)
                 {
                     rhs = evaluatePostOrder(node->right);
