@@ -58,6 +58,17 @@ static uint32_t elf_hash(const void *key, uint16_t len)
    return hash % HASH_TABLE_LENGTH;
 }
 
+static void mcc_DefineMacroAsNumber(const char *ident, int value)
+{
+   mcc_TokenList_t *tokens = mcc_TokenListCreateStandalone();
+   mcc_Number_t number = {
+      .number = { .integer_s = value },
+      .numberType = SIGNED_INT
+   };
+   mcc_TokenListStandaloneAppend(tokens, mcc_CreateNumberToken(&number, 0, 0, 255));
+   mcc_DefineMacro(ident, tokens, NULL);
+}
+
 void mcc_InitialiseMacros(void)
 {
    int i;
@@ -66,14 +77,10 @@ void mcc_InitialiseMacros(void)
       macro_table[i] = NULL;
    }
    mcc_DefineMacro("__STDC__", NULL, NULL);
+   mcc_DefineMacroAsNumber("__x86_64__", 1);
+   mcc_DefineMacroAsNumber("__LP64__", 1);
 #if MCC_C99_COMPATIBLE
-   mcc_TokenList_t *value = mcc_TokenListCreateStandalone();
-   mcc_Number_t number = {
-      .number = { .integer_s = 199901L },
-      .numberType = SIGNED_INT
-   };
-   mcc_TokenListStandaloneAppend(value, mcc_CreateNumberToken(&number, 0, 0, 255));
-   mcc_DefineMacro("__STDC_VERSION__", value, NULL);
+   mcc_DefineMacroAsNumber("__STDC_VERSION__", 199901L);
 #endif
 }
 
