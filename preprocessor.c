@@ -61,6 +61,7 @@ static void conditionalInnerImpl(bool_t initialConditionTrue, bool_t ignore);
 static void handleIfDefInner(bool_t ignore);
 static void handleIfNDefInner(bool_t ignore);
 static void handleIfInner(bool_t ignore);
+static bool_t handleElIfInner(bool_t ignore);
 
 
 static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = {
@@ -302,88 +303,7 @@ static void handleError()
                    "Error: %s\n", temp->text);
 }
 
-static void conditionalInnerImpl(bool_t initialConditionTrue, bool_t ignore)
-{
-   bool_t processMacro = initialConditionTrue && !ignore;
-   bool_t handled = FALSE;
-
-   getToken();
-   while (TRUE)
-   {
-      if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
-          currentToken->tokenIndex == PP_ENDIF)
-      {
-         break;
-      }
-      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
-               currentToken->tokenIndex == PP_IFDEF)
-      {
-         handleIfDefInner(!processMacro);
-      }
-      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
-               currentToken->tokenIndex == PP_IFNDEF)
-      {
-         handleIfNDefInner(!processMacro);
-      }
-      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
-               currentToken->tokenIndex == PP_IF)
-      {
-         handleIfInner(!processMacro);
-      }
-      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
-               currentToken->tokenIndex == PP_ELSE)
-      {
-         handled = handled || processMacro;
-         processMacro = !processMacro && !ignore;
-      }
-      else if (processMacro && !handled)
-      {
-         if (currentToken->tokenType == TOK_PP_DIRECTIVE)
-         {
-            handlePreprocessorDirective(currentToken, tokenListIter);
-         }
-         else
-         {
-            MCC_ASSERT(!ignore);
-            emitToken();
-         }
-      }
-      getToken();
-   }
-   mcc_ExpectTokenType(currentToken, TOK_PP_DIRECTIVE, PP_ENDIF);
-}
-
-static void handleIfdef()
-{
-   handleIfDefInner(FALSE);
-}
-static void handleIfDefInner(bool_t ignore)
-{
-   getToken();
-   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
-   getToken();
-   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
-   conditionalInnerImpl(mcc_IsMacroDefined(currentToken->text), ignore);
-}
-
-static void handleIfndef()
-{
-   handleIfNDefInner(FALSE);
-}
-static void handleIfNDefInner(bool_t ignore)
-{
-   getToken();
-   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
-   getToken();
-   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
-   conditionalInnerImpl(!mcc_IsMacroDefined(currentToken->text), ignore);
-}
-
-static void handleIf()
-{
-   handleIfInner(FALSE);
-}
-static void handleIfInner(bool_t ignore)
+static mcc_List_t *parseConditionalExpression(bool_t ignore)
 {
    mcc_TokenList_t *list = mcc_TokenListCreateStandalone();
    getToken();
@@ -446,6 +366,98 @@ static void handleIfInner(bool_t ignore)
       }
       getToken();
    }
+   return list;
+}
+
+static void conditionalInnerImpl(bool_t initialConditionTrue, bool_t ignore)
+{
+   bool_t processMacro = initialConditionTrue && !ignore;
+   bool_t handled = FALSE;
+
+   getToken();
+   while (TRUE)
+   {
+      if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
+          currentToken->tokenIndex == PP_ENDIF)
+      {
+         break;
+      }
+      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
+               currentToken->tokenIndex == PP_IFDEF)
+      {
+         handleIfDefInner(!processMacro);
+      }
+      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
+               currentToken->tokenIndex == PP_IFNDEF)
+      {
+         handleIfNDefInner(!processMacro);
+      }
+      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
+               currentToken->tokenIndex == PP_IF)
+      {
+         handleIfInner(!processMacro);
+      }
+      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
+               currentToken->tokenIndex == PP_ELIF)
+      {
+         processMacro = handleElIfInner(!processMacro);
+      }
+      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
+               currentToken->tokenIndex == PP_ELSE)
+      {
+         handled = handled || processMacro;
+         processMacro = !processMacro && !ignore;
+      }
+      else if (processMacro && !handled)
+      {
+         if (currentToken->tokenType == TOK_PP_DIRECTIVE)
+         {
+            handlePreprocessorDirective(currentToken, tokenListIter);
+         }
+         else
+         {
+            MCC_ASSERT(!ignore);
+            emitToken();
+         }
+      }
+      getToken();
+   }
+   mcc_ExpectTokenType(currentToken, TOK_PP_DIRECTIVE, PP_ENDIF);
+}
+
+static void handleIfdef()
+{
+   handleIfDefInner(FALSE);
+}
+static void handleIfDefInner(bool_t ignore)
+{
+   getToken();
+   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
+   getToken();
+   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
+   conditionalInnerImpl(mcc_IsMacroDefined(currentToken->text), ignore);
+}
+
+static void handleIfndef()
+{
+   handleIfNDefInner(FALSE);
+}
+static void handleIfNDefInner(bool_t ignore)
+{
+   getToken();
+   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
+   getToken();
+   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
+   conditionalInnerImpl(!mcc_IsMacroDefined(currentToken->text), ignore);
+}
+
+static void handleIf()
+{
+   handleIfInner(FALSE);
+}
+static void handleIfInner(bool_t ignore)
+{
+   mcc_TokenList_t *list = parseConditionalExpression(ignore);
    if (!ignore)
    {
       mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);
@@ -458,6 +470,20 @@ static void handleIfInner(bool_t ignore)
       conditionalInnerImpl(FALSE, ignore);
    }
    mcc_TokenListDeleteStandalone(list);
+}
+
+static bool_t handleElIfInner(bool_t ignore)
+{
+   mcc_TokenList_t *list = parseConditionalExpression(ignore);
+   bool_t result = FALSE;
+   if (!ignore)
+   {
+      mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);
+      result = mcc_ICE_EvaluateTokenString(iter);
+      mcc_TokenListDeleteIterator(iter);
+   }
+   mcc_TokenListDeleteStandalone(list);
+   return result;
 }
 
 static void handleEndif()
