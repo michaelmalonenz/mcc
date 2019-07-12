@@ -1,5 +1,5 @@
 bin/*.o
 bin/mcc
-bin
+bin/
 mcc.log
 .vscode/
