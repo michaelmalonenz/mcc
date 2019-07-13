@@ -3,7 +3,7 @@ project (Mcc)
 enable_language(C)
 enable_testing()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g -ggdb -Wall -Wextra -Werror")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g -ggdb3 -Wall -Wextra -Werror")
 add_subdirectory(eral)
 include_directories("eral" ${PROJECT_SOURCE_DIR})
 

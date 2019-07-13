@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 3.0)
 project (Mcc)
 enable_language(C)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g -ggdb3 -Wall -Wextra -Werror")
 
 include(CTest)
 add_custom_target(test_valgrind

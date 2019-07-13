@@ -25,13 +25,24 @@ static mcc_ASTNode_t *parseTerm(void);
 static mcc_TokenListIterator_t *iterator;
 static mcc_Token_t *currentToken;
 
+#define get_number(x) x->number.number.integer_s
+
 #define ICE_Error(...) \
     mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno), \
         currentToken->lineno, \
         currentToken->line_index, \
         __VA_ARGS__)
 
-static int evaluate_unary_operands(int operand, mcc_Token_t *operator)
+static mcc_Token_t *create_number_token(int number)
+{
+    mcc_Number_t num = {
+        .number = { .integer_s = number },
+        .numberType = SIGNED_INT
+    };
+    return mcc_CreateNumberToken(&num, 0, 0, 0);
+}
+
+static mcc_Token_t *evaluate_unary_operands(mcc_Token_t *operand, mcc_Token_t *operator)
 {
    MCC_ASSERT(operator->tokenType == TOK_OPERATOR);
 
@@ -39,7 +50,7 @@ static int evaluate_unary_operands(int operand, mcc_Token_t *operator)
    {
       case OP_NOT:
       {
-         return !operand;
+         return create_number_token(!get_number(operand));
       }
       break;
       default:
@@ -51,12 +62,13 @@ static int evaluate_unary_operands(int operand, mcc_Token_t *operator)
                          operators[operator->tokenIndex]);
       }
    }
-   return 0;
+   return NULL;
 }
 
-static int evaluate_operands(int l_operand,
-                             int r_operand,
-                             mcc_Token_t *operator)
+static  mcc_Token_t *evaluate_operands(
+    mcc_Token_t *l_operand,
+    mcc_Token_t *r_operand,
+    mcc_Token_t *operator)
 {
    MCC_ASSERT(operator->tokenType == TOK_OPERATOR);
 
@@ -64,63 +76,62 @@ static int evaluate_operands(int l_operand,
    {
       case OP_ADD:
       {
-        return l_operand + r_operand;
+        return create_number_token(get_number(l_operand) + get_number(r_operand));
       }
       break;
       case OP_MINUS:
       {
-        return l_operand - r_operand;
+        return create_number_token(get_number(l_operand) - get_number(r_operand));
       }
       break;
       case OP_DIVIDE:
       {
-          return l_operand / r_operand;
+          return create_number_token(get_number(l_operand) / get_number(r_operand));
       }
       break;
-      case OP_DEREFERENCE: //this is a total lie!
       case OP_MULTIPLY:
       {
-          return l_operand * r_operand;
+          return create_number_token(get_number(l_operand) * get_number(r_operand));
       }
       break;
       case OP_BITWISE_EXCL_OR:
       {
-          return l_operand ^ r_operand;
+          return create_number_token(get_number(l_operand) ^ get_number(r_operand));
       }
       break;
       case OP_LOGICAL_AND:
       {
-          return l_operand && r_operand;
+          return create_number_token(get_number(l_operand) && get_number(r_operand));
       }
       break;
       case OP_LOGICAL_INCL_OR:
       {
-          return l_operand || r_operand;
+          return create_number_token(get_number(l_operand) || get_number(r_operand));
       }
       break;
       case OP_GREATER_THAN:
       {
-          return l_operand > r_operand;
+          return create_number_token(get_number(l_operand) > get_number(r_operand));
       }
       break;
       case OP_GREATER_EQUAL:
       {
-          return l_operand >= r_operand;
+          return create_number_token(get_number(l_operand) >= get_number(r_operand));
       }
       break;
       case OP_LESS_THAN:
       {
-          return l_operand < r_operand;
+          return create_number_token(get_number(l_operand) < get_number(r_operand));
       }
       break;
       case OP_LESS_EQUAL:
       {
-          return l_operand <= r_operand;
+          return create_number_token(get_number(l_operand) <= get_number(r_operand));
       }
       break;
       case OP_COMPARE_TO:
       {
-          return l_operand == r_operand;
+          return create_number_token(get_number(l_operand) == get_number(r_operand));
       }
       break;
       default:
@@ -133,73 +144,89 @@ static int evaluate_operands(int l_operand,
       }
    }
 
-   return 0;
+   return NULL;
 }
 
-int evaluatePostOrder(mcc_ASTNode_t *node)
+mcc_Token_t *evaluatePostOrder(mcc_ASTNode_t *node)
 {
-    if (node->data->tokenType == TOK_NUMBER)
+    if (node->data->tokenType == TOK_NUMBER ||
+        node->data->tokenType == TOK_IDENTIFIER)
     {
-        return node->data->number.number.integer_s;
+        return node->data;
     }
     else
     {
+        mcc_Token_t *result = NULL;
+        mcc_Token_t *lhs = NULL;
+        mcc_Token_t *rhs = NULL;
         MCC_ASSERT(node->data->tokenType == TOK_OPERATOR);
         switch(node->data->tokenIndex)
         {
             case OP_NOT:
             {
-                int operand = evaluatePostOrder(node->middle);
-                return evaluate_unary_operands(operand, node->data);
+                lhs = evaluatePostOrder(node->middle);
+                result = evaluate_unary_operands(lhs, node->data);
             }
             break;
             case OP_TERNARY_IF:
             {
-                int operand = evaluatePostOrder(node->left);
-                if (operand)
+                lhs = evaluatePostOrder(node->left);
+                if (get_number(lhs))
                 {
-                    return evaluatePostOrder(node->middle);
+                    result = evaluatePostOrder(node->middle);
                 }
                 else
                 {
-                    return evaluatePostOrder(node->right);
+                    result = evaluatePostOrder(node->right);
                 }
             }
             break;
             case OP_LOGICAL_AND:
             {
-                int lhs = evaluatePostOrder(node->left);
-                if (!lhs)
+                lhs = evaluatePostOrder(node->left);
+                if (!get_number(lhs))
                 {
-                    return 0;
+                    result = create_number_token(FALSE);
                 }
-                return evaluate_operands(lhs, evaluatePostOrder(node->right), node->data);
+                else
+                {
+                    rhs = evaluatePostOrder(node->right);
+                    result = evaluate_operands(lhs, rhs, node->data);
+                }
             }
             break;
             case OP_LOGICAL_INCL_OR:
             {
-                int lhs = evaluatePostOrder(node->left);
-                if (lhs)
+                lhs = evaluatePostOrder(node->left);
+                if (get_number(lhs))
                 {
-                    return 1;
+                    result = create_number_token(TRUE);
                 }
-                return evaluate_operands(lhs, evaluatePostOrder(node->right), node->data);
-            }
-            default:
-            {
-                int lhs = 0;
-                int rhs = 0;
-                if (node->right)
+                else
                 {
                     rhs = evaluatePostOrder(node->right);
+                    result = evaluate_operands(lhs, rhs, node->data);
                 }
-                if (node->left)
-                {
-                    lhs = evaluatePostOrder(node->left);
-                }
-                return evaluate_operands(lhs, rhs, node->data);
             }
+            break;
+            default:
+            {
+                if (!node->right || !node->left)
+                {
+                    mcc_PrettyError(
+                        mcc_ResolveFileNameFromNumber(node->data->fileno),
+                        node->data->lineno,
+                        node->data->line_index,
+                        "Wrong number of operands for operator %s\n",
+                        node->data->text);
+                }
+                rhs = evaluatePostOrder(node->right);
+                lhs = evaluatePostOrder(node->left);
+                result = evaluate_operands(lhs, rhs, node->data);
+            }
+            break;
         }
+        return result;
     }
 }
 
@@ -257,7 +284,8 @@ static mcc_ASTNode_t *parseFactor(void)
         result->middle = parseFactor();
         return result;
     }
-    else if (currentToken->tokenType == TOK_NUMBER)
+    else if (currentToken->tokenType == TOK_NUMBER ||
+             currentToken->tokenType == TOK_IDENTIFIER)
     {
         result = ast_node_create(currentToken);
         GetNonWhitespaceToken();
@@ -451,12 +479,12 @@ static mcc_ASTNode_t *parseTernaryExpression(void)
     return node;
 }
 
-int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
+mcc_Token_t *mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
 {
     iterator = iter;
     GetNonWhitespaceToken();
     mcc_ASTNode_t *root = parseTernaryExpression();
-    int result = evaluatePostOrder(root);
+    mcc_Token_t *result = evaluatePostOrder(root);
     delete_ast_node_tree(root);
     return result;
 }

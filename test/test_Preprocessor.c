@@ -398,7 +398,7 @@ static void test_If_BuiltinDefines(void)
    const char *token_string  = "\
 #if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L \n\
  #define IF_MACRO\n\
-#elif FALSE\n\
+#elif 0\n\
  #define ELSE_MACRO\n\
 #endif";
    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,

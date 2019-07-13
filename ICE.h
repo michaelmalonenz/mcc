@@ -43,7 +43,7 @@
  * @remarks If there is a token which doesn't make up and ICE, the function will
  *          error and terminate execution of the program.
  */
-int mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter);
+mcc_Token_t *mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter);
 
 
 #endif /* _MCC_ICE_H_ */

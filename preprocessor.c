@@ -461,8 +461,9 @@ static void handleIfInner(bool_t ignore)
    if (!ignore)
    {
       mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);
-      int result = mcc_ICE_EvaluateTokenString(iter);
-      conditionalInnerImpl(result, ignore);
+      mcc_Token_t *result = mcc_ICE_EvaluateTokenString(iter);
+      conditionalInnerImpl(result->number.number.integer_s, ignore);
+      mcc_DeleteToken((uintptr_t) result);
       mcc_TokenListDeleteIterator(iter);
    }
    else
@@ -475,11 +476,12 @@ static void handleIfInner(bool_t ignore)
 static bool_t handleElIfInner(bool_t ignore)
 {
    mcc_TokenList_t *list = parseConditionalExpression(ignore);
-   bool_t result = FALSE;
+   bool_t result;
    if (!ignore)
    {
       mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);
-      result = mcc_ICE_EvaluateTokenString(iter);
+      mcc_Token_t *tok = mcc_ICE_EvaluateTokenString(iter);
+      result = tok->number.number.integer_s;
       mcc_TokenListDeleteIterator(iter);
    }
    mcc_TokenListDeleteStandalone(list);

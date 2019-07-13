@@ -57,7 +57,7 @@ static void test_Implementation(const char *token_string, int expected_result)
    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
                                                          strlen(token_string));
    mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator();
-   int actual_result;
+   mcc_Token_t *actual_result;
    mcc_FileOpenerInitialise();
    mcc_TokeniseFile(file, iter);
    mcc_TokenListDeleteIterator(iter);
@@ -66,8 +66,8 @@ static void test_Implementation(const char *token_string, int expected_result)
    iter = mcc_TokenListGetIterator();
    actual_result = mcc_ICE_EvaluateTokenString(iter);
    printf("Token string: %s Expected: %d, got: %d\n", 
-          token_string, expected_result, actual_result);
-   MCC_ASSERT(actual_result == expected_result);
+          token_string, expected_result, actual_result->number.number.integer_s);
+   MCC_ASSERT(actual_result->number.number.integer_s == expected_result);
    mcc_TokenListDeleteIterator(iter);
 
    mcc_FreeTokens();
