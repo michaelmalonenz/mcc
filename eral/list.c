@@ -234,6 +234,13 @@ uintptr_t mcc_ListPeekCurrentData(mcc_ListIterator_t *iter)
    return iter->current->data;
 }
 
+uintptr_t mcc_ListPeekNextData(mcc_ListIterator_t *iter)
+{
+   if (iter->current == NULL || iter->current->next == NULL)
+      return NULL_DATA;
+   return iter->current->next->data;
+}
+
 uintptr_t mcc_ListGetNextData(mcc_ListIterator_t *iter)
 {
    if (iter->current == iter->list->tail)

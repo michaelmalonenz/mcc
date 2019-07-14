@@ -140,6 +140,11 @@ const mcc_Token_t *mcc_TokenListPeekCurrentToken(mcc_TokenListIterator_t *iter)
    return (const mcc_Token_t *) mcc_ListPeekCurrentData((mcc_ListIterator_t *) iter);
 }
 
+const mcc_Token_t *mcc_TokenListPeekNextToken(mcc_TokenListIterator_t *iter)
+{
+   return (const mcc_Token_t *) mcc_ListPeekNextData((mcc_ListIterator_t *)iter);
+}
+
 void mcc_FreeTokens(void)
 {
    mcc_ListDelete(token_list, &mcc_DeleteToken);

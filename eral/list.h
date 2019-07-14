@@ -125,6 +125,16 @@ uintptr_t mcc_ListReplaceCurrentData(mcc_ListIterator_t *iter, uintptr_t data);
 uintptr_t mcc_ListPeekCurrentData(mcc_ListIterator_t *iter);
 
 /**
+ * This shows what data would be returned if the function mcc_ListGetNextData
+ * were called.  This does not alter the iterator position and callers
+ * *must not* free the memory associated with the data returned.
+ * 
+ * NULL is returned if the iterator is not pointing at anything, or
+ * the iterator is pointing at the tail of the list.
+ */
+uintptr_t mcc_ListPeekNextData(mcc_ListIterator_t *iter);
+
+/**
  * This returns a copy of the head data. This differs from the
  * Peek Current Data, 
  */

@@ -585,22 +585,33 @@ static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro)
    getToken();
    maybeGetWhitespaceToken();
    mcc_ExpectTokenType(currentToken, TOK_SYMBOL, SYM_OPEN_PAREN);
-   getToken();
    mcc_List_t *parameters = mcc_ListCreate();
-   mcc_TokenListIterator_t *argumentsIter = mcc_TokenListStandaloneGetIterator(macro->arguments);
-   while (currentToken->tokenType != TOK_SYMBOL &&
-          currentToken->tokenIndex != SYM_CLOSE_PAREN)
-   {
-      mcc_MacroParameter_t *param = mcc_MacroParameterCreate();
-      maybeGetWhitespaceToken();
-      param->argument = mcc_GetNextToken(argumentsIter);
-      param->parameter = currentToken;
+   const mcc_Token_t *temp = mcc_TokenListPeekNextToken(tokenListIter);
+   if (temp->tokenType == TOK_WHITESPACE)
       getToken();
-      if (currentToken->tokenType == TOK_OPERATOR && currentToken->tokenIndex == OP_COMMA)
+   if (temp && temp->tokenType == TOK_SYMBOL && temp->tokenIndex == SYM_CLOSE_PAREN)
+   {
+      getToken();
+   }
+   else
+   {
+      mcc_TokenListIterator_t *argumentsIter = mcc_TokenListStandaloneGetIterator(macro->arguments);
+      while (!(currentToken->tokenType == TOK_SYMBOL &&
+               currentToken->tokenIndex == SYM_CLOSE_PAREN))
       {
-         getToken();
+         mcc_MacroParameter_t *param = mcc_MacroParameterCreate();
+         mcc_Token_t *parameter_token = mcc_ICE_EvaluateTokenString(tokenListIter);
+         param->argument = mcc_GetNextToken(argumentsIter);
+         param->parameter = parameter_token;
+         currentToken = (mcc_Token_t *) mcc_TokenListPeekCurrentToken(tokenListIter);
+         maybeGetWhitespaceToken();
+         if (currentToken->tokenType == TOK_OPERATOR && currentToken->tokenIndex == OP_COMMA)
+         {
+            getToken();
+         }
+         mcc_ListAppendData(parameters, (uintptr_t)param);
       }
-      mcc_ListAppendData(parameters, (uintptr_t)param);
+      mcc_TokenListDeleteIterator(argumentsIter);
    }
    if (mcc_ListGetLength(parameters) != mcc_ListGetLength(macro->arguments))
    {
@@ -613,7 +624,6 @@ static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro)
          mcc_ListGetLength(macro->arguments),
          mcc_ListGetLength(parameters));
    }
-   mcc_TokenListDeleteIterator(argumentsIter);
    mcc_TokenList_t *result = replaceMacroTokens(macro, parameters);
    mcc_ListDelete(parameters, mcc_MacroParameterDelete);
    return result;

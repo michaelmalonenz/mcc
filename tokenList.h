@@ -127,6 +127,7 @@ void mcc_AddEndOfLineToken(const unsigned int column, const int lineno, const un
 
 void mcc_InsertToken(mcc_Token_t *token, mcc_TokenListIterator_t *iter);
 const mcc_Token_t *mcc_TokenListPeekCurrentToken(mcc_TokenListIterator_t *iter);
+const mcc_Token_t *mcc_TokenListPeekNextToken(mcc_TokenListIterator_t *iter);
 
 /**
  * Starting at the head of the list, work backwards until we find
