@@ -24,6 +24,7 @@ static mcc_ASTNode_t *parseTerm(void);
 
 static mcc_TokenListIterator_t *iterator;
 static mcc_Token_t *currentToken;
+static mcc_List_t *numbers_to_delete;
 
 #define get_number(x) x->number.number.integer_s
 
@@ -39,7 +40,9 @@ static mcc_Token_t *create_number_token(int number)
         .number = { .integer_s = number },
         .numberType = SIGNED_INT
     };
-    return mcc_CreateNumberToken(&num, 0, 0, 0);
+    mcc_Token_t *result = mcc_CreateNumberToken(&num, 0, 0, 0);
+    mcc_ListAppendData(numbers_to_delete, (uintptr_t) result);
+    return result;
 }
 
 static mcc_Token_t *evaluate_unary_operands(mcc_Token_t *operand, mcc_Token_t *operator)
@@ -481,10 +484,23 @@ static mcc_ASTNode_t *parseTernaryExpression(void)
 
 mcc_Token_t *mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
 {
+    numbers_to_delete = mcc_ListCreate();
     iterator = iter;
     GetNonWhitespaceToken();
     mcc_ASTNode_t *root = parseTernaryExpression();
     mcc_Token_t *result = evaluatePostOrder(root);
     delete_ast_node_tree(root);
+    mcc_ListIterator_t *number_iter = mcc_ListGetIterator(numbers_to_delete);
+    uintptr_t death_row = mcc_ListGetNextData(number_iter);
+    while(death_row != NULL_DATA)
+    {
+        if (death_row != (uintptr_t) result)
+        {
+            mcc_DeleteToken(death_row);
+        }
+        death_row = mcc_ListGetNextData(number_iter);
+    }
+    mcc_ListDeleteIterator(number_iter);
+    mcc_ListDelete(numbers_to_delete, NULL);
     return result;
 }
