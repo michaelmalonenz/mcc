@@ -92,6 +92,16 @@ void mcc_StringBufferAppendChar(mcc_StringBuffer_t *buffer, const char c)
       buffer->stringLength++;
 }
 
+void mcc_StringBufferAppendString(mcc_StringBuffer_t *buffer, const char *string)
+{
+   int len = strlen(string);
+   int i;
+   for (i = 0; i < len; i++)
+   {
+      mcc_StringBufferAppendChar(buffer, string[i]);
+   }
+}
+
 void mcc_StringBufferUnappendChar(mcc_StringBuffer_t *buffer)
 {
    buffer->stringLength--;

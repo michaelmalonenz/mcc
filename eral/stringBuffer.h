@@ -40,6 +40,8 @@ char *mcc_DestroyBufferNotString(mcc_StringBuffer_t *buffer);
 
 void mcc_StringBufferAppendChar(mcc_StringBuffer_t *buffer, const char c);
 
+void mcc_StringBufferAppendString(mcc_StringBuffer_t *buffer, const char *string);
+
 void mcc_StringBufferUnappendChar(mcc_StringBuffer_t *buffer);
 
 unsigned long mcc_GetStringBufferLength(mcc_StringBuffer_t *buffer);

@@ -289,18 +289,18 @@ static void handleUndef()
 
 static void handleError()
 {
-   mcc_Token_t *temp;
+   const mcc_Token_t *first = currentToken;
+   mcc_StringBuffer_t *buffer = mcc_CreateStringBuffer();
    getToken();
-   temp = (mcc_Token_t *) currentToken;
    while (currentToken->tokenType != TOK_EOL)
    {
-      temp = mcc_ConCatTokens(temp, currentToken, TOK_STR_CONST);
+      mcc_StringBufferAppendString(buffer, currentToken->text);
       getToken();
    }
-   mcc_PrettyError(mcc_ResolveFileNameFromNumber(temp->fileno),
-                   temp->lineno,
-                   temp->line_index,
-                   "Error: %s\n", temp->text);
+   mcc_PrettyError(mcc_ResolveFileNameFromNumber(first->fileno),
+                   first->lineno,
+                   first->line_index,
+                   "Error: %s\n", mcc_StringBufferGetString(buffer));
 }
 
 static mcc_List_t *parseConditionalExpression(bool_t ignore)
@@ -525,17 +525,19 @@ static void handlePragma()
 
 static void handleWarning()
 {
-   mcc_Token_t *temp;
+   const mcc_Token_t *first = currentToken;
+   mcc_StringBuffer_t *buffer = mcc_CreateStringBuffer();
    getToken();
-   temp = (mcc_Token_t *) currentToken;
    while (currentToken->tokenType != TOK_EOL)
    {
-      temp = mcc_ConCatTokens(temp, currentToken, TOK_STR_CONST);
+      mcc_StringBufferAppendString(buffer, currentToken->text);
       getToken();
    }
-   printf(mcc_ResolveFileNameFromNumber(temp->fileno),
-          temp->lineno,
-          "Warning: %s\n", temp->text);
+   printf("%s:%d Warning: %s\n",
+      mcc_ResolveFileNameFromNumber(first->fileno),
+      first->lineno,
+      mcc_StringBufferGetString(buffer));
+   mcc_DeleteStringBuffer(buffer);
 }
 
 static mcc_TokenList_t *handleMacroReplacement(mcc_Macro_t *macro)
