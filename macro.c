@@ -89,5 +89,10 @@ mcc_MacroParameter_t *mcc_MacroParameterCreate(void)
 
 void mcc_MacroParameterDelete(uintptr_t param)
 {
-   free((mcc_MacroParameter_t *)param);
+   mcc_MacroParameter_t *temp = (mcc_MacroParameter_t *) param;
+   if (temp->parameter)
+   {
+      mcc_DeleteToken((uintptr_t) temp->parameter);
+   }
+   free(temp);
 }

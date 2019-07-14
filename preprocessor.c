@@ -482,6 +482,7 @@ static bool_t handleElIfInner(bool_t ignore)
       mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);
       mcc_Token_t *tok = mcc_ICE_EvaluateTokenString(iter);
       result = tok->number.number.integer_s;
+      mcc_DeleteToken((uintptr_t) tok);
       mcc_TokenListDeleteIterator(iter);
    }
    mcc_TokenListDeleteStandalone(list);

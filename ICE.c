@@ -488,16 +488,13 @@ mcc_Token_t *mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
     iterator = iter;
     GetNonWhitespaceToken();
     mcc_ASTNode_t *root = parseTernaryExpression();
-    mcc_Token_t *result = evaluatePostOrder(root);
+    mcc_Token_t *result = mcc_CopyToken(evaluatePostOrder(root));
     delete_ast_node_tree(root);
     mcc_ListIterator_t *number_iter = mcc_ListGetIterator(numbers_to_delete);
     uintptr_t death_row = mcc_ListGetNextData(number_iter);
     while(death_row != NULL_DATA)
     {
-        if (death_row != (uintptr_t) result)
-        {
-            mcc_DeleteToken(death_row);
-        }
+        mcc_DeleteToken(death_row);
         death_row = mcc_ListGetNextData(number_iter);
     }
     mcc_ListDeleteIterator(number_iter);

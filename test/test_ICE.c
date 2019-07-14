@@ -69,6 +69,7 @@ static void test_Implementation(const char *token_string, int expected_result)
           token_string, expected_result, actual_result->number.number.integer_s);
    MCC_ASSERT(actual_result->number.number.integer_s == expected_result);
    mcc_TokenListDeleteIterator(iter);
+   mcc_DeleteToken((uintptr_t)actual_result);
 
    mcc_FreeTokens();
    mcc_FileOpenerDelete();
