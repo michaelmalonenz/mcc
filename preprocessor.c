@@ -73,7 +73,7 @@ static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] =
 };
 
 static mcc_TokenListIterator_t *tokenListIter;
-static mcc_Token_t *currentToken;
+static const mcc_Token_t *currentToken;
 static mcc_List_t *output;
 
 static mcc_TokenList_t *resolveMacroTokens(const char *macroText)
@@ -291,7 +291,7 @@ static void handleError()
 {
    mcc_Token_t *temp;
    getToken();
-   temp = currentToken;
+   temp = (mcc_Token_t *) currentToken;
    while (currentToken->tokenType != TOK_EOL)
    {
       temp = mcc_ConCatTokens(temp, currentToken, TOK_STR_CONST);
@@ -527,7 +527,7 @@ static void handleWarning()
 {
    mcc_Token_t *temp;
    getToken();
-   temp = currentToken;
+   temp = (mcc_Token_t *) currentToken;
    while (currentToken->tokenType != TOK_EOL)
    {
       temp = mcc_ConCatTokens(temp, currentToken, TOK_STR_CONST);
@@ -603,7 +603,7 @@ static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro)
          mcc_Token_t *parameter_token = mcc_ICE_EvaluateTokenString(tokenListIter);
          param->argument = mcc_GetNextToken(argumentsIter);
          param->parameter = parameter_token;
-         currentToken = (mcc_Token_t *) mcc_TokenListPeekCurrentToken(tokenListIter);
+         currentToken = mcc_TokenListPeekCurrentToken(tokenListIter);
          maybeGetWhitespaceToken();
          if (currentToken->tokenType == TOK_OPERATOR && currentToken->tokenIndex == OP_COMMA)
          {

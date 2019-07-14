@@ -197,7 +197,7 @@ const mcc_Token_t *mcc_PeekPreviousNonWhitespaceToken(mcc_TokenListIterator_t *i
    return tok;
 }
 
-mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, mcc_Token_t *second, TOKEN_TYPE newType)
+mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, const mcc_Token_t *second, TOKEN_TYPE newType)
 {
    int newLength = strlen(first->text) + strlen(second->text);
    //it really only makes sense to be concatenating tokens which are on the same line.

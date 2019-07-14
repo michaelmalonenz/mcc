@@ -195,7 +195,7 @@ MCC_KEYWORD mcc_GetKeyword(mcc_LogicalLine_t *line)
    }
 }
 
-void mcc_ExpectTokenType(mcc_Token_t *token, TOKEN_TYPE tokenType, int index)
+void mcc_ExpectTokenType(const mcc_Token_t *token, TOKEN_TYPE tokenType, int index)
 {
    const char *expected;
    switch(tokenType)
