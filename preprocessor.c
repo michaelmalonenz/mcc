@@ -607,12 +607,8 @@ static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro)
          param->argument = mcc_GetNextToken(argumentsIter);
          param->parameter = parameter_token;
          currentToken = mcc_TokenListPeekCurrentToken(tokenListIter);
-         maybeGetWhitespaceToken();
-         if (currentToken->tokenType == TOK_OPERATOR && currentToken->tokenIndex == OP_COMMA)
-         {
-            getToken();
-         }
          mcc_ListAppendData(parameters, (uintptr_t)param);
+         maybeGetWhitespaceToken();
       }
       mcc_TokenListDeleteIterator(argumentsIter);
    }

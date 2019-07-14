@@ -426,6 +426,36 @@ static void test_If_BuiltinDefines(void)
    mcc_DeleteAllMacros();
 }
 
+static void test_NoWhitespaceFunctionCall(void)
+{
+   const char *token_string  = "\
+#define __GNUC_PREREQ(a,b) a+b\n\
+#if __GNUC_PREREQ (4,3)\n\
+   #define IF_MACRO\n\
+#endif";
+   const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
+                                                         strlen(token_string));
+   mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator();
+   mcc_InitialiseMacros();
+   mcc_FileOpenerInitialise();
+   mcc_TokeniseFile(file, iter);
+   mcc_TokenListDeleteIterator(iter);
+
+   printf("Test No Whitespace function call\n");
+   mcc_TokenList_t *output = mcc_PreprocessCurrentTokens();
+
+   mcc_Macro_t *macro = mcc_ResolveMacro("IF_MACRO");
+   MCC_ASSERT(macro != NULL);
+
+   printf("ok\n");
+
+   mcc_TokenListDeleteStandalone(output);
+   mcc_FreeTokens();
+   mcc_FileOpenerDelete();
+   unlink(file);
+   mcc_DeleteAllMacros();
+}
+
 int main(int UNUSED(argc), char UNUSED(**argv))
 {
    test_Define();
@@ -441,5 +471,6 @@ int main(int UNUSED(argc), char UNUSED(**argv))
    test_If_Else();
    test_If_ComplexMacroCondition();
    test_If_BuiltinDefines();
+   test_NoWhitespaceFunctionCall();
    return 0;
 }
