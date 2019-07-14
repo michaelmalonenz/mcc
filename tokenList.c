@@ -197,21 +197,6 @@ const mcc_Token_t *mcc_PeekPreviousNonWhitespaceToken(mcc_TokenListIterator_t *i
    return tok;
 }
 
-mcc_Token_t *mcc_ConCatTokens(mcc_Token_t *first, const mcc_Token_t *second, TOKEN_TYPE newType)
-{
-   int newLength = strlen(first->text) + strlen(second->text);
-   //it really only makes sense to be concatenating tokens which are on the same line.
-   MCC_ASSERT(first->lineno == second->lineno);
-   first->text = (char *) realloc(first->text, newLength);
-   strncat(first->text, second->text, newLength);
-   first->tokenType = newType;
-#if MCC_DEBUG
-   printf("Concatenated two tokens to make '%s' of type %d\n",
-          first->text, first->tokenType);
-#endif
-   return first;
-}
-
 mcc_TokenList_t *mcc_TokenListCreateStandalone(void)
 {
    return (mcc_TokenList_t*) mcc_ListCreate();
