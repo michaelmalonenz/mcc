@@ -30,6 +30,8 @@
 #include "tokenList.h"
 #include "tokens.h"
 
+typedef struct syntax_tree mcc_AST_t;
+
 /**
  * @brief An Integer Constant Expression is a compile-time expression which
  * results in an integer.  This function takes a string of tokens which make up
@@ -45,5 +47,6 @@
  */
 mcc_Token_t *mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter);
 
+mcc_AST_t *mcc_ParseExpression(mcc_TokenListIterator_t *iter);
 
 #endif /* _MCC_ICE_H_ */
