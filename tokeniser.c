@@ -32,8 +32,7 @@
 
 #include "config.h"
 #include "mcc.h"
-#include "fileBuffer.h"
-#include "stringBuffer.h"
+#include "liberal.h"
 #include "tokens.h"
 #include "tokenList.h"
 

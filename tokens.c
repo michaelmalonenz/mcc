@@ -32,7 +32,7 @@
  * in several places)
  */
 #include "tokens.h"
-#include "fileBuffer.h"
+#include "liberal.h"
 #include "tokenList.h"
 
 const char *token_types[NUM_TOK_TYPES] = { "Preprocessor directive", "Identifier", "Keyword", "Symbol",

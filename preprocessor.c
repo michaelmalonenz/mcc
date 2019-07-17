@@ -30,14 +30,12 @@
 
 #include "config.h"
 #include "mcc.h"
-#include "fileBuffer.h"
-#include "stringBuffer.h"
+#include "liberal.h"
 #include "macro.h"
 #include "tokens.h"
 #include "tokenList.h"
 #include "toolChainCommands.h"
 #include "ICE.h"
-#include "list.h"
 
 typedef void (preprocessorDirectiveHandler_t)(void);
 

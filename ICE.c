@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ICE.h"
-#include "stack.h"
+#include "liberal.h"
 
 typedef struct ASTNode
 {

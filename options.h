@@ -30,7 +30,7 @@
 #include <stdint.h>
 
 #include "mcc.h"
-#include "list.h"
+#include "liberal.h"
 
 enum { PREPROCESS = 1,
        COMPILE    = (1 << 1),

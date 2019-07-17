@@ -27,7 +27,7 @@
 #ifndef MCC_MACRO_H
 #define MCC_MACRO_H
 
-#include "fileBuffer.h"
+#include "liberal.h"
 #include "config.h"
 #include "tokenList.h"
 

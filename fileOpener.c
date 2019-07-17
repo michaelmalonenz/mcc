@@ -30,7 +30,7 @@
 #include <unistd.h>
 
 #include "mcc.h"
-#include "list.h"
+#include "liberal.h"
 
 //A list is probably fine here.  If we need to resolve the filename, it's probably an error condition
 typedef struct file_info {

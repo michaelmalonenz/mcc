@@ -53,8 +53,7 @@
 */
 #include "config.h"
 #include "mcc.h"
-#include "list.h"
-#include "fileBuffer.h"
+#include "liberal.h"
 
 typedef enum TYPE { TOK_PP_DIRECTIVE, TOK_IDENTIFIER, TOK_KEYWORD, TOK_SYMBOL,
                     TOK_OPERATOR, TOK_NUMBER, TOK_STR_CONST, TOK_CHAR_CONST,
