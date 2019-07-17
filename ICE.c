@@ -498,7 +498,7 @@ static mcc_AST_t *create_syntax_tree(mcc_TokenListIterator_t *iter)
     return result;
 }
 
-static void delete_syntax_tree(mcc_AST_t *tree)
+void mcc_DeleteAST(mcc_AST_t *tree)
 {
     mcc_ListIterator_t *number_iter = mcc_ListGetIterator(tree->numbers_to_delete);
     uintptr_t death_row = mcc_ListGetNextData(number_iter);
@@ -510,20 +510,20 @@ static void delete_syntax_tree(mcc_AST_t *tree)
     mcc_ListDeleteIterator(number_iter);
     mcc_ListDelete(tree->numbers_to_delete, NULL);
     delete_ast_node_tree(tree->root);
+    free(tree);
 }
 
-mcc_Token_t *mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter)
+mcc_Token_t *mcc_ICE_EvaluateAST(mcc_AST_t *tree)
 {
-    mcc_AST_t *tree = create_syntax_tree(iter);
-    GetNonWhitespaceToken(tree);
-    tree->root = parseTernaryExpression(tree);
     mcc_Token_t *result = mcc_CopyToken(evaluatePostOrder(tree, tree->root));
-    delete_syntax_tree(tree);
+    mcc_DeleteAST(tree);
     return result;
 }
 
 mcc_AST_t *mcc_ParseExpression(mcc_TokenListIterator_t *iter)
 {
     mcc_AST_t *tree = create_syntax_tree(iter);
+    GetNonWhitespaceToken(tree);
+    tree->root = parseTernaryExpression(tree);
     return tree;
 }

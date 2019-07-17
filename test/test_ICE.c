@@ -64,7 +64,8 @@ static void test_Implementation(const char *token_string, int expected_result)
 
    printf("About to evaluate: '%s'\n", token_string);
    iter = mcc_TokenListGetIterator();
-   actual_result = mcc_ICE_EvaluateTokenString(iter);
+   mcc_AST_t *tree = mcc_ParseExpression(iter);
+   actual_result = mcc_ICE_EvaluateAST(tree);
    printf("Token string: %s Expected: %d, got: %d\n", 
           token_string, expected_result, actual_result->number.number.integer_s);
    MCC_ASSERT(actual_result->number.number.integer_s == expected_result);

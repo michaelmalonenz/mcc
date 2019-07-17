@@ -461,7 +461,8 @@ static void handleIfInner(bool_t ignore)
    if (!ignore)
    {
       mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);
-      mcc_Token_t *result = mcc_ICE_EvaluateTokenString(iter);
+      mcc_AST_t *tree = mcc_ParseExpression(iter);
+      mcc_Token_t *result = mcc_ICE_EvaluateAST(tree);
       conditionalInnerImpl(result->number.number.integer_s, ignore);
       mcc_DeleteToken((uintptr_t) result);
       mcc_TokenListDeleteIterator(iter);
@@ -480,7 +481,8 @@ static bool_t handleElIfInner(bool_t ignore)
    if (!ignore)
    {
       mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);
-      mcc_Token_t *tok = mcc_ICE_EvaluateTokenString(iter);
+      mcc_AST_t *tree = mcc_ParseExpression(iter);
+      mcc_Token_t *tok = mcc_ICE_EvaluateAST(tree);
       result = tok->number.number.integer_s;
       mcc_DeleteToken((uintptr_t) tok);
       mcc_TokenListDeleteIterator(iter);
@@ -603,7 +605,8 @@ static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro)
                currentToken->tokenIndex == SYM_CLOSE_PAREN))
       {
          mcc_MacroParameter_t *param = mcc_MacroParameterCreate();
-         mcc_Token_t *parameter_token = mcc_ICE_EvaluateTokenString(tokenListIter);
+         mcc_AST_t *tree = mcc_ParseExpression(tokenListIter);
+         mcc_Token_t *parameter_token = mcc_ICE_EvaluateAST(tree);
          param->argument = mcc_GetNextToken(argumentsIter);
          param->parameter = parameter_token;
          currentToken = mcc_TokenListPeekCurrentToken(tokenListIter);

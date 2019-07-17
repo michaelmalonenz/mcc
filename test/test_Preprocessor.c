@@ -409,7 +409,7 @@ static void test_If_BuiltinDefines(void)
    mcc_TokeniseFile(file, iter);
    mcc_TokenListDeleteIterator(iter);
 
-   printf("Test IF Builtin macros\n");
+   printf("Test IF Builtin Defines\n");
    mcc_TokenList_t *output = mcc_PreprocessCurrentTokens();
 
    mcc_Macro_t *macro = mcc_ResolveMacro("IF_MACRO");

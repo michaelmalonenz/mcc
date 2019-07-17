@@ -45,8 +45,10 @@ typedef struct syntax_tree mcc_AST_t;
  * @remarks If there is a token which doesn't make up and ICE, the function will
  *          error and terminate execution of the program.
  */
-mcc_Token_t *mcc_ICE_EvaluateTokenString(mcc_TokenListIterator_t *iter);
+mcc_Token_t *mcc_ICE_EvaluateAST(mcc_AST_t *tree);
 
 mcc_AST_t *mcc_ParseExpression(mcc_TokenListIterator_t *iter);
+
+void mcc_DeleteAST(mcc_AST_t *tree);
 
 #endif /* _MCC_ICE_H_ */
