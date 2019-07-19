@@ -64,6 +64,8 @@ static void test_Implementation(const char *token_string, int expected_result)
 
    printf("About to evaluate: '%s'\n", token_string);
    iter = mcc_TokenListGetIterator();
+   if (mcc_GetNextToken(iter)->tokenType == TOK_WHITESPACE)
+         (void)mcc_GetNextToken(iter);
    mcc_AST_t *tree = mcc_ParseExpression(iter);
    actual_result = mcc_ICE_EvaluateAST(tree);
    printf("Token string: %s Expected: %d, got: %d\n", 

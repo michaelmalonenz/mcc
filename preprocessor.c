@@ -459,6 +459,8 @@ static void handleIfInner(bool_t ignore)
    if (!ignore)
    {
       mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);
+      if (mcc_GetNextToken(iter)->tokenType == TOK_WHITESPACE)
+         (void)mcc_GetNextToken(iter);
       mcc_AST_t *tree = mcc_ParseExpression(iter);
       mcc_Token_t *result = mcc_ICE_EvaluateAST(tree);
       conditionalInnerImpl(result->number.number.integer_s, ignore);
@@ -479,6 +481,8 @@ static bool_t handleElIfInner(bool_t ignore)
    if (!ignore)
    {
       mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);
+      if (mcc_GetNextToken(iter)->tokenType == TOK_WHITESPACE)
+         (void)mcc_GetNextToken(iter);
       mcc_AST_t *tree = mcc_ParseExpression(iter);
       mcc_Token_t *tok = mcc_ICE_EvaluateAST(tree);
       result = tok->number.number.integer_s;
@@ -589,14 +593,11 @@ static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro)
    maybeGetWhitespaceToken();
    mcc_ExpectTokenType(currentToken, TOK_SYMBOL, SYM_OPEN_PAREN);
    mcc_List_t *parameters = mcc_ListCreate();
-   const mcc_Token_t *temp = mcc_TokenListPeekNextToken(tokenListIter);
-   if (temp->tokenType == TOK_WHITESPACE)
-      getToken();
-   if (temp && temp->tokenType == TOK_SYMBOL && temp->tokenIndex == SYM_CLOSE_PAREN)
-   {
-      getToken();
-   }
-   else
+   getToken();
+   maybeGetWhitespaceToken();
+   if (currentToken &&
+      (currentToken->tokenType != TOK_SYMBOL ||
+       currentToken->tokenIndex != SYM_CLOSE_PAREN))
    {
       mcc_TokenListIterator_t *argumentsIter = mcc_TokenListStandaloneGetIterator(macro->arguments);
       while (!(currentToken->tokenType == TOK_SYMBOL &&

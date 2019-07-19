@@ -8,17 +8,18 @@ typedef struct ASTNode
     struct ASTNode *left;
     struct ASTNode *middle;
     struct ASTNode *right;
-    mcc_Token_t *data;
+    const mcc_Token_t *data;
 } mcc_ASTNode_t;
 
 struct syntax_tree {
     mcc_ASTNode_t *root;
     mcc_TokenListIterator_t *iterator;
-    mcc_Token_t *currentToken;
+    const mcc_Token_t *currentToken;
     mcc_List_t *numbers_to_delete;
 };
 
-static mcc_ASTNode_t *parseTernaryExpression(mcc_AST_t *tree);
+static mcc_ASTNode_t *parseCommaExpression(mcc_AST_t *tree);
+static mcc_ASTNode_t *parseConditionalExpression(mcc_AST_t *tree);
 static mcc_ASTNode_t *parseLogicalAndExpression(mcc_AST_t *tree);
 static mcc_ASTNode_t *parseLogicalOrExpression(mcc_AST_t *tree);
 static mcc_ASTNode_t *parseBitwiseExpression(mcc_AST_t *tree);
@@ -49,8 +50,8 @@ static mcc_Token_t *create_number_token(mcc_AST_t *tree, int number)
     return result;
 }
 
-static mcc_Token_t *evaluate_unary_operands(
-    mcc_AST_t *tree, mcc_Token_t *operand, mcc_Token_t *operator)
+static const mcc_Token_t *evaluate_unary_operands(
+    mcc_AST_t *tree, const mcc_Token_t *operand, const mcc_Token_t *operator)
 {
    MCC_ASSERT(operator->tokenType == TOK_OPERATOR);
 
@@ -75,9 +76,9 @@ static mcc_Token_t *evaluate_unary_operands(
 
 static  mcc_Token_t *evaluate_operands(
     mcc_AST_t *tree,
-    mcc_Token_t *l_operand,
-    mcc_Token_t *r_operand,
-    mcc_Token_t *operator)
+    const mcc_Token_t *l_operand,
+    const mcc_Token_t *r_operand,
+    const mcc_Token_t *operator)
 {
    MCC_ASSERT(operator->tokenType == TOK_OPERATOR);
 
@@ -156,7 +157,7 @@ static  mcc_Token_t *evaluate_operands(
    return NULL;
 }
 
-mcc_Token_t *evaluatePostOrder(mcc_AST_t *tree, mcc_ASTNode_t *node)
+const mcc_Token_t *evaluatePostOrder(mcc_AST_t *tree, mcc_ASTNode_t *node)
 {
     if (node->data->tokenType == TOK_NUMBER ||
         node->data->tokenType == TOK_IDENTIFIER)
@@ -165,9 +166,9 @@ mcc_Token_t *evaluatePostOrder(mcc_AST_t *tree, mcc_ASTNode_t *node)
     }
     else
     {
-        mcc_Token_t *result = NULL;
-        mcc_Token_t *lhs = NULL;
-        mcc_Token_t *rhs = NULL;
+        const mcc_Token_t *result = NULL;
+        const mcc_Token_t *lhs = NULL;
+        const mcc_Token_t *rhs = NULL;
         MCC_ASSERT(node->data->tokenType == TOK_OPERATOR);
         switch(node->data->tokenIndex)
         {
@@ -256,7 +257,7 @@ static void delete_ast_node_tree(mcc_ASTNode_t *root)
     free(root);
 }
 
-static mcc_ASTNode_t *ast_node_create(mcc_Token_t *data)
+static mcc_ASTNode_t *ast_node_create(const mcc_Token_t *data)
 {
     mcc_ASTNode_t *result = (mcc_ASTNode_t *)malloc(sizeof(mcc_ASTNode_t));
     memset(result, 0, sizeof(mcc_ASTNode_t));
@@ -304,7 +305,7 @@ static mcc_ASTNode_t *parseFactor(mcc_AST_t *tree)
              tree->currentToken->tokenIndex == SYM_OPEN_PAREN)
     {
         GetNonWhitespaceToken(tree);
-        result = parseTernaryExpression(tree);
+        result = parseCommaExpression(tree);
         if (tree->currentToken->tokenType != TOK_SYMBOL &&
             tree->currentToken->tokenIndex != SYM_CLOSE_PAREN)
         {
@@ -464,7 +465,7 @@ static mcc_ASTNode_t *parseLogicalOrExpression(mcc_AST_t *tree)
     return node;
 }
 
-static mcc_ASTNode_t *parseTernaryExpression(mcc_AST_t *tree)
+static mcc_ASTNode_t *parseConditionalExpression(mcc_AST_t *tree)
 {
     mcc_ASTNode_t *node = parseLogicalOrExpression(tree);
     while (tree->currentToken &&
@@ -474,17 +475,29 @@ static mcc_ASTNode_t *parseTernaryExpression(mcc_AST_t *tree)
         mcc_ASTNode_t *op_node = ast_node_create(tree->currentToken);
         GetNonWhitespaceToken(tree);
         op_node->left = node;
-        op_node->middle = parseLogicalOrExpression(tree);
+        op_node->middle = parseCommaExpression(tree);
         if (tree->currentToken->tokenType != TOK_OPERATOR &&
             tree->currentToken->tokenIndex != OP_TERNARY_ELSE)
         {
             ICE_Error(tree, "Expected ':' after '?' instead of '%s'\n", tree->currentToken->text);
         }
         GetNonWhitespaceToken(tree);
-        op_node->right = parseLogicalOrExpression(tree);
+        op_node->right = parseConditionalExpression(tree);
         node = op_node;
     }
 
+    return node;
+}
+
+static mcc_ASTNode_t *parseCommaExpression(mcc_AST_t *tree)
+{
+    mcc_ASTNode_t *node = parseConditionalExpression(tree);
+    if (tree->currentToken &&
+        tree->currentToken->tokenType == TOK_OPERATOR &&
+        tree->currentToken->tokenIndex == OP_COMMA)
+    {
+        GetNonWhitespaceToken(tree);
+    }
     return node;
 }
 
@@ -523,7 +536,7 @@ mcc_Token_t *mcc_ICE_EvaluateAST(mcc_AST_t *tree)
 mcc_AST_t *mcc_ParseExpression(mcc_TokenListIterator_t *iter)
 {
     mcc_AST_t *tree = create_syntax_tree(iter);
-    GetNonWhitespaceToken(tree);
-    tree->root = parseTernaryExpression(tree);
+    tree->currentToken = mcc_TokenListPeekCurrentToken(iter);
+    tree->root = parseCommaExpression(tree);
     return tree;
 }
