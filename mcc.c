@@ -60,8 +60,8 @@ int main(int argc, char **argv)
       {
          mcc_WriteTokensToOutputFile(output);
       }
-      mcc_TokenListDeleteStandalone(output);
-      mcc_TokenListDeleteStandalone(tokens);
+      mcc_TokenListDelete(output);
+      mcc_TokenListDelete(tokens);
       mcc_DeleteAllMacros();
       currentFile = (char *) mcc_ListGetNextData(fileIter);
    }

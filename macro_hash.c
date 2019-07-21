@@ -60,12 +60,12 @@ static uint32_t elf_hash(const void *key, uint16_t len)
 
 static void mcc_DefineMacroAsNumber(const char *ident, int value)
 {
-   mcc_TokenList_t *tokens = mcc_TokenListCreateStandalone();
+   mcc_TokenList_t *tokens = mcc_TokenListCreate();
    mcc_Number_t number = {
       .number = { .integer_s = value },
       .numberType = SIGNED_INT
    };
-   mcc_TokenListStandaloneAppend(tokens, mcc_CreateNumberToken(&number, 0, 0, 255));
+   mcc_TokenListAppend(tokens, mcc_CreateNumberToken(&number, 0, 0, 255));
    mcc_DefineMacro(ident, tokens, NULL);
 }
 

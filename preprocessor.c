@@ -99,24 +99,24 @@ static void emitToken(void)
       mcc_TokenList_t *macroTokens = resolveMacroTokens(currentToken->text);
       if (macroTokens == NULL)
       {
-         mcc_TokenListStandaloneAppend(output, mcc_CopyToken(currentToken));
+         mcc_TokenListAppend(output, mcc_CopyToken(currentToken));
       }
       else
       {
-         mcc_TokenListIterator_t *macroTokensIter = mcc_TokenListStandaloneGetIterator(macroTokens);
+         mcc_TokenListIterator_t *macroTokensIter = mcc_TokenListGetIterator(macroTokens);
          mcc_Token_t *token = mcc_GetNextToken(macroTokensIter);
          while (token != NULL)
          {
-            mcc_TokenListStandaloneAppend(output, mcc_CopyToken(token));
+            mcc_TokenListAppend(output, mcc_CopyToken(token));
             token = mcc_GetNextToken(macroTokensIter);
          }
          mcc_TokenListDeleteIterator(macroTokensIter);
-         mcc_TokenListDeleteStandalone(macroTokens);
+         mcc_TokenListDelete(macroTokens);
       }
    }
    else
    {
-      mcc_TokenListStandaloneAppend(output, mcc_CopyToken(currentToken));
+      mcc_TokenListAppend(output, mcc_CopyToken(currentToken));
    }
 }
 
@@ -142,7 +142,7 @@ static void handlePreprocessorDirective()
 mcc_List_t *mcc_PreprocessTokens(mcc_TokenList_t *tokens)
 {
    output = mcc_ListCreate();
-   tokenListIter = mcc_TokenListStandaloneGetIterator(tokens);
+   tokenListIter = mcc_TokenListGetIterator(tokens);
    getToken();
 
    while(currentToken != NULL)
@@ -206,13 +206,13 @@ static void handleInclude()
    free(include_path);
    //I could pop the path onto a stack here, or something.
    mcc_PreprocessTokens(tokens);
-   mcc_TokenListDeleteStandalone(tokens);
+   mcc_TokenListDelete(tokens);
 }
 
 static void handleDefine()
 {
    const char *macro_identifier;
-   mcc_TokenList_t *tokens = mcc_TokenListCreateStandalone();
+   mcc_TokenList_t *tokens = mcc_TokenListCreate();
    mcc_TokenList_t *arguments = NULL;
    getToken();
    mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
@@ -223,7 +223,7 @@ static void handleDefine()
    if (currentToken->tokenType == TOK_SYMBOL &&
        currentToken->tokenIndex == SYM_OPEN_PAREN)
    {
-      arguments = mcc_TokenListCreateStandalone();
+      arguments = mcc_TokenListCreate();
       getToken();
       while (currentToken->tokenType != TOK_SYMBOL &&
              currentToken->tokenIndex != SYM_CLOSE_PAREN)
@@ -248,7 +248,7 @@ static void handleDefine()
          }
          if (currentToken->tokenType == TOK_IDENTIFIER)
          {
-            mcc_TokenListStandaloneAppend(arguments, mcc_CopyToken(currentToken));
+            mcc_TokenListAppend(arguments, mcc_CopyToken(currentToken));
          }
          getToken();
       }
@@ -260,7 +260,7 @@ static void handleDefine()
    }
    while (currentToken->tokenType != TOK_EOL)
    {
-      mcc_TokenListStandaloneAppend(tokens, mcc_CopyToken(currentToken));
+      mcc_TokenListAppend(tokens, mcc_CopyToken(currentToken));
       getToken();
    }
    mcc_DefineMacro(macro_identifier, tokens, arguments);
@@ -303,7 +303,7 @@ static void handleError()
 
 static mcc_List_t *parseConditionalExpression(bool_t ignore)
 {
-   mcc_TokenList_t *list = mcc_TokenListCreateStandalone();
+   mcc_TokenList_t *list = mcc_TokenListCreate();
    getToken();
    while (currentToken->tokenType != TOK_EOL)
    {
@@ -328,22 +328,22 @@ static mcc_List_t *parseConditionalExpression(bool_t ignore)
                currentToken->line_index,
                currentToken->lineno,
                currentToken->fileno);
-            mcc_TokenListStandaloneAppend(list, token);
+            mcc_TokenListAppend(list, token);
          }
          else
          {
             mcc_TokenList_t *macroTokens = resolveMacroTokens(currentToken->text);
             if (macroTokens != NULL)
             {
-               mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(macroTokens);
+               mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator(macroTokens);
                mcc_Token_t *token = mcc_GetNextToken(iter);
                while (token != NULL)
                {
-                  mcc_TokenListStandaloneAppend(list, mcc_CopyToken(token));
+                  mcc_TokenListAppend(list, mcc_CopyToken(token));
                   token = mcc_GetNextToken(iter);
                }
                mcc_TokenListDeleteIterator(iter);
-               mcc_TokenListDeleteStandalone(macroTokens);
+               mcc_TokenListDelete(macroTokens);
             }
             else
             {
@@ -354,13 +354,13 @@ static mcc_List_t *parseConditionalExpression(bool_t ignore)
                number.numberType = SIGNED_INT;
                mcc_Token_t *undefinedMacroToken = mcc_CreateNumberToken(&number,
                   currentToken->line_index, currentToken->lineno, currentToken->fileno);
-               mcc_TokenListStandaloneAppend(list, undefinedMacroToken);
+               mcc_TokenListAppend(list, undefinedMacroToken);
             }
          }
       }
       else
       {
-         mcc_TokenListStandaloneAppend(list, mcc_CopyToken(currentToken));
+         mcc_TokenListAppend(list, mcc_CopyToken(currentToken));
       }
       getToken();
    }
@@ -458,7 +458,7 @@ static void handleIfInner(bool_t ignore)
    mcc_TokenList_t *list = parseConditionalExpression(ignore);
    if (!ignore)
    {
-      mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);
+      mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator(list);
       if (mcc_GetNextToken(iter)->tokenType == TOK_WHITESPACE)
          (void)mcc_GetNextToken(iter);
       mcc_AST_t *tree = mcc_ParseExpression(iter);
@@ -471,7 +471,7 @@ static void handleIfInner(bool_t ignore)
    {
       conditionalInnerImpl(FALSE, ignore);
    }
-   mcc_TokenListDeleteStandalone(list);
+   mcc_TokenListDelete(list);
 }
 
 static bool_t handleElIfInner(bool_t ignore)
@@ -480,7 +480,7 @@ static bool_t handleElIfInner(bool_t ignore)
    bool_t result;
    if (!ignore)
    {
-      mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);
+      mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator(list);
       if (mcc_GetNextToken(iter)->tokenType == TOK_WHITESPACE)
          (void)mcc_GetNextToken(iter);
       mcc_AST_t *tree = mcc_ParseExpression(iter);
@@ -489,7 +489,7 @@ static bool_t handleElIfInner(bool_t ignore)
       mcc_DeleteToken((uintptr_t) tok);
       mcc_TokenListDeleteIterator(iter);
    }
-   mcc_TokenListDeleteStandalone(list);
+   mcc_TokenListDelete(list);
    return result;
 }
 
@@ -547,12 +547,12 @@ static void handleWarning()
 
 static mcc_TokenList_t *handleMacroReplacement(mcc_Macro_t *macro)
 {
-   mcc_TokenList_t *result = mcc_TokenListCreateStandalone();
-   mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(macro->tokens);
+   mcc_TokenList_t *result = mcc_TokenListCreate();
+   mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator(macro->tokens);
    mcc_Token_t *macroToken = mcc_GetNextToken(iter);
    while (macroToken != NULL)
    {
-      mcc_TokenListStandaloneAppend(result, mcc_CopyToken(macroToken));
+      mcc_TokenListAppend(result, mcc_CopyToken(macroToken));
       macroToken = mcc_GetNextToken(iter);
    }
    mcc_TokenListDeleteIterator(iter);
@@ -562,11 +562,11 @@ static mcc_TokenList_t *handleMacroReplacement(mcc_Macro_t *macro)
 mcc_TokenList_t *replaceMacroTokens(mcc_Macro_t *macro, mcc_TokenList_t *parameters)
 {
    mcc_TokenList_t *functionTokens = mcc_TokenListDeepCopy(macro->tokens);
-   mcc_TokenListIterator_t *parametersIter = mcc_TokenListStandaloneGetIterator(parameters);
+   mcc_TokenListIterator_t *parametersIter = mcc_TokenListGetIterator(parameters);
    mcc_MacroParameter_t *param = (mcc_MacroParameter_t *) mcc_ListGetNextData(parametersIter);
    while (param != NULL)
    {
-      mcc_TokenListIterator_t *tokensIter = mcc_TokenListStandaloneGetIterator(functionTokens);
+      mcc_TokenListIterator_t *tokensIter = mcc_TokenListGetIterator(functionTokens);
       mcc_Token_t *functionToken = mcc_GetNextToken(tokensIter);
       while (functionToken != NULL)
       {
@@ -574,7 +574,7 @@ mcc_TokenList_t *replaceMacroTokens(mcc_Macro_t *macro, mcc_TokenList_t *paramet
              strncmp(functionToken->text, param->argument->text, strlen(functionToken->text)))
          {
             mcc_TokenList_t *paramTokens = mcc_TokenListDeepCopy(param->parameterTokens);
-            mcc_Token_t *result = mcc_TokenListStandaloneReplaceCurrent(tokensIter, paramTokens);
+            mcc_Token_t *result = mcc_TokenListReplaceCurrent(tokensIter, paramTokens);
             mcc_DeleteToken((uintptr_t) result);
             mcc_ListDelete(paramTokens, NULL);
          }
@@ -599,7 +599,7 @@ static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro)
       (currentToken->tokenType != TOK_SYMBOL ||
        currentToken->tokenIndex != SYM_CLOSE_PAREN))
    {
-      mcc_TokenListIterator_t *argumentsIter = mcc_TokenListStandaloneGetIterator(macro->arguments);
+      mcc_TokenListIterator_t *argumentsIter = mcc_TokenListGetIterator(macro->arguments);
       while (!(currentToken->tokenType == TOK_SYMBOL &&
                currentToken->tokenIndex == SYM_CLOSE_PAREN))
       {
@@ -607,7 +607,7 @@ static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro)
          mcc_AST_t *tree = mcc_ParseExpression(tokenListIter);
          mcc_Token_t *parameter_token = mcc_ICE_EvaluateAST(tree);
          param->argument = mcc_GetNextToken(argumentsIter);
-         mcc_TokenListStandaloneAppend(param->parameterTokens, parameter_token);
+         mcc_TokenListAppend(param->parameterTokens, parameter_token);
          currentToken = mcc_TokenListPeekCurrentToken(tokenListIter);
          mcc_ListAppendData(parameters, (uintptr_t)param);
          maybeGetWhitespaceToken();

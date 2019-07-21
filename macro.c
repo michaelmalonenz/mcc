@@ -39,11 +39,11 @@ void delete_macro(mcc_Macro_t *macro)
    MCC_ASSERT(macro->text != NULL);
    if (macro->arguments != NULL)
    {
-      mcc_TokenListDeleteStandalone(macro->arguments);
+      mcc_TokenListDelete(macro->arguments);
    }
    if (macro->tokens != NULL)
    {
-      mcc_TokenListDeleteStandalone(macro->tokens);
+      mcc_TokenListDelete(macro->tokens);
    }
    free(macro->text);
    free(macro);
@@ -85,7 +85,7 @@ bool_t mcc_IsMacroDefined(const char *text)
 mcc_MacroParameter_t *mcc_MacroParameterCreate(void)
 {
    mcc_MacroParameter_t * result = (mcc_MacroParameter_t *) malloc(sizeof(mcc_MacroParameter_t));
-   result->parameterTokens = mcc_TokenListCreateStandalone();
+   result->parameterTokens = mcc_TokenListCreate();
    return result;
 }
 
@@ -94,7 +94,7 @@ void mcc_MacroParameterDelete(uintptr_t param)
    mcc_MacroParameter_t *temp = (mcc_MacroParameter_t *) param;
    if (temp->parameterTokens)
    {
-      mcc_TokenListDeleteStandalone(temp->parameterTokens);
+      mcc_TokenListDelete(temp->parameterTokens);
    }
    free(temp);
 }

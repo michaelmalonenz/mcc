@@ -74,7 +74,7 @@ static void test_Implementation(void)
         printf("Test Macro Replacement %d...", i + 1);
 
         mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
-        mcc_TokenListIterator_t *outputIter = mcc_TokenListStandaloneGetIterator(output);
+        mcc_TokenListIterator_t *outputIter = mcc_TokenListGetIterator(output);
         mcc_Token_t *token;
         int j;
 
@@ -88,8 +88,8 @@ static void test_Implementation(void)
         mcc_TokenListDeleteIterator(outputIter);
         printf("ok\n");
 
-        mcc_TokenListDeleteStandalone(output);
-        mcc_TokenListDeleteStandalone(tokens);
+        mcc_TokenListDelete(output);
+        mcc_TokenListDelete(tokens);
         mcc_FileOpenerDelete();
         unlink(file);
         mcc_DeleteAllMacros();

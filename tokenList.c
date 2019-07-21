@@ -82,12 +82,12 @@ mcc_Token_t *mcc_CreateNumberToken(mcc_Number_t *number,
 
 mcc_TokenList_t *mcc_TokenListDeepCopy(mcc_TokenList_t *list)
 {
-   mcc_TokenList_t *result = mcc_TokenListCreateStandalone();
-   mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(list);
+   mcc_TokenList_t *result = mcc_TokenListCreate();
+   mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator(list);
    mcc_Token_t *token = mcc_GetNextToken(iter);
    while (token != NULL)
    {
-      mcc_TokenListStandaloneAppend(result, mcc_CopyToken(token));
+      mcc_TokenListAppend(result, mcc_CopyToken(token));
       token = mcc_GetNextToken(iter);
    }
    mcc_TokenListDeleteIterator(iter);
@@ -128,7 +128,7 @@ void mcc_InsertToken(mcc_Token_t *token, mcc_TokenListIterator_t *iter)
    mcc_ListInsertDataAtCurrentPosition((mcc_ListIterator_t *) iter, (uintptr_t) token);
 }
 
-mcc_Token_t *mcc_TokenListStandaloneReplaceCurrent(
+mcc_Token_t *mcc_TokenListReplaceCurrent(
    mcc_TokenListIterator_t *iter, mcc_TokenList_t *list)
 {
    return (mcc_Token_t *)mcc_ListReplaceCurrentData(
@@ -150,12 +150,12 @@ void mcc_TokenListDeleteIterator(mcc_TokenListIterator_t *iter)
    mcc_ListDeleteIterator((mcc_TokenListIterator_t *) iter);
 }
 
-mcc_TokenListIterator_t *mcc_TokenListStandaloneGetIterator(mcc_TokenList_t *list)
+mcc_TokenListIterator_t *mcc_TokenListGetIterator(mcc_TokenList_t *list)
 {
    return (mcc_TokenListIterator_t *) mcc_ListGetIterator(list);
 }
 
-void mcc_TokenListStandaloneAppend(mcc_TokenList_t *list, mcc_Token_t *token)
+void mcc_TokenListAppend(mcc_TokenList_t *list, mcc_Token_t *token)
 {
    mcc_ListAppendData((mcc_List_t *)list, (uintptr_t)token);
 }
@@ -182,12 +182,12 @@ const mcc_Token_t *mcc_PeekPreviousNonWhitespaceToken(mcc_TokenListIterator_t *i
    return tok;
 }
 
-mcc_TokenList_t *mcc_TokenListCreateStandalone(void)
+mcc_TokenList_t *mcc_TokenListCreate(void)
 {
    return (mcc_TokenList_t*) mcc_ListCreate();
 }
 
-void mcc_TokenListDeleteStandalone(mcc_TokenList_t *list)
+void mcc_TokenListDelete(mcc_TokenList_t *list)
 {
    mcc_ListDelete(list, &mcc_DeleteToken);
 }
@@ -202,7 +202,7 @@ void mcc_WriteTokensToOutputFile(mcc_TokenList_t *tokens)
       mcc_Error("Couldn't open output file '%s' for writing\n", 
                 mcc_global_options.outputFilename);
    }
-   iter = mcc_TokenListStandaloneGetIterator(tokens);
+   iter = mcc_TokenListGetIterator(tokens);
    tok = mcc_GetNextToken(iter);
    while (tok != NULL)
    {

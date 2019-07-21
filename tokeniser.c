@@ -325,8 +325,8 @@ static char handle_hex_integer_const(mcc_LogicalLine_t *line,
 mcc_TokenList_t *mcc_TokeniseFile(const char *inFilename)
 {
    mcc_FileBuffer_t *fileBuffer = mcc_CreateFileBuffer(inFilename);
-   mcc_TokenList_t *tokens = mcc_TokenListCreateStandalone();
-   mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(tokens);
+   mcc_TokenList_t *tokens = mcc_TokenListCreate();
+   mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator(tokens);
    mcc_LogicalLine_t *logicalLine = NULL;
 
    while(!mcc_FileBufferEOFReached(fileBuffer))

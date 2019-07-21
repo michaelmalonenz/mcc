@@ -120,9 +120,9 @@ const mcc_Token_t *mcc_TokenListPeekNextToken(mcc_TokenListIterator_t *iter);
 const mcc_Token_t *mcc_PeekPreviousNonWhitespaceToken(mcc_TokenListIterator_t *iter);
 
 
-mcc_TokenList_t *mcc_TokenListCreateStandalone(void);
-void mcc_TokenListDeleteStandalone(mcc_TokenList_t *list);
-mcc_TokenListIterator_t *mcc_TokenListStandaloneGetIterator(mcc_TokenList_t *list);
+mcc_TokenList_t *mcc_TokenListCreate(void);
+void mcc_TokenListDelete(mcc_TokenList_t *list);
+mcc_TokenListIterator_t *mcc_TokenListGetIterator(mcc_TokenList_t *list);
 
 /**
  * Add a token to the end of a list.
@@ -133,7 +133,7 @@ mcc_TokenListIterator_t *mcc_TokenListStandaloneGetIterator(mcc_TokenList_t *lis
  * @param list The list to append to
  * @param token The token to append to the list
  * */
-void mcc_TokenListStandaloneAppend(mcc_TokenList_t *list, mcc_Token_t *token);
+void mcc_TokenListAppend(mcc_TokenList_t *list, mcc_Token_t *token);
 
 
 /**
@@ -148,7 +148,7 @@ mcc_List_t *mcc_TokenListDeepCopy(mcc_TokenList_t *list);
  * Replace the current token as defined by the iterator with the given
  * list of data.  Return existing current.
  */
-mcc_Token_t *mcc_TokenListStandaloneReplaceCurrent(mcc_TokenListIterator_t *iter,
+mcc_Token_t *mcc_TokenListReplaceCurrent(mcc_TokenListIterator_t *iter,
                                                    mcc_TokenList_t *list);
 
 mcc_TokenListIterator_t *mcc_TokenListCopyIterator(mcc_TokenListIterator_t *iter);

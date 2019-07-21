@@ -82,7 +82,7 @@ int main(void)
       mcc_FileOpenerInitialise();
 
       mcc_TokenList_t *tokens = mcc_TokeniseFile(tmp_filename);
-      tokenListIter = mcc_TokenListStandaloneGetIterator(tokens);
+      tokenListIter = mcc_TokenListGetIterator(tokens);
 
       for (j = 0; j < expected_num_tokens[i]; j++)
       {
@@ -111,7 +111,7 @@ int main(void)
       }
       MCC_ASSERT(tok == NULL);
       mcc_TokenListDeleteIterator(tokenListIter);
-      mcc_TokenListDeleteStandalone(tokens);
+      mcc_TokenListDelete(tokens);
       mcc_FileOpenerDelete();
 
       unlink(tmp_filename);

@@ -45,7 +45,7 @@ static void test_Define(void)
    mcc_TokenList_t *tokens = mcc_ListCreate();
    mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, TOK_UNSET_INDEX, 1, 1, 1);
    printf("Testing Define...");
-   mcc_TokenListStandaloneAppend(tokens, tok);
+   mcc_TokenListAppend(tokens, tok);
    mcc_DefineMacro(MACRO_NAME, tokens, NULL);
    mcc_DeleteAllMacros();
    printf("ok\n");
@@ -56,7 +56,7 @@ static void test_Find(void)
    mcc_TokenList_t *tokens = mcc_ListCreate();
    mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, TOK_UNSET_INDEX, 1, 1, 1);
    printf("Testing Find...");
-   mcc_TokenListStandaloneAppend(tokens, tok);
+   mcc_TokenListAppend(tokens, tok);
    mcc_DefineMacro(MACRO_NAME, tokens, NULL);
    mcc_Macro_t *result = mcc_ResolveMacro(MACRO_NAME);
    MCC_ASSERT(result != NULL);
@@ -71,7 +71,7 @@ static void test_Undefine(void)
    printf("Testing undefine...");
    mcc_TokenList_t *tokens = mcc_ListCreate();
    mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, TOK_UNSET_INDEX, 1, 1, 1);
-   mcc_TokenListStandaloneAppend(tokens, tok);
+   mcc_TokenListAppend(tokens, tok);
    mcc_DefineMacro(MACRO_NAME, tokens, NULL);
    mcc_UndefineMacro(MACRO_NAME);
    bool_t defined = mcc_IsMacroDefined(MACRO_NAME);
@@ -105,7 +105,7 @@ static void test_BulkMacros(void)
       mcc_DefineMacro(test_Macros[i], mcc_TokenListDeepCopy(tokenList), NULL);
 
       unlink(tempFilename);
-      mcc_TokenListDeleteStandalone(tokenList);
+      mcc_TokenListDelete(tokenList);
    }
    mcc_FileOpenerDelete();
    mcc_DeleteAllMacros();
@@ -119,7 +119,7 @@ void test_BuiltinDefine(void)
 
    mcc_Macro_t *stdcVersion = mcc_ResolveMacro("__STDC_VERSION__");
    MCC_ASSERT(stdcVersion != NULL);
-   mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(stdcVersion->tokens);
+   mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator(stdcVersion->tokens);
    mcc_Token_t *version = mcc_GetNextToken(iter);
    MCC_ASSERT(version->number.number.integer_s == 199901L);
 
