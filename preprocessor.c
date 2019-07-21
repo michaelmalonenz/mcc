@@ -139,10 +139,10 @@ static void handlePreprocessorDirective()
    ppHandlers[currentToken->tokenIndex]();
 }
 
-mcc_List_t *mcc_PreprocessCurrentTokens(void)
+mcc_List_t *mcc_PreprocessTokens(mcc_TokenList_t *tokens)
 {
    output = mcc_ListCreate();
-   tokenListIter = mcc_TokenListGetIterator();
+   tokenListIter = mcc_TokenListStandaloneGetIterator(tokens);
    getToken();
 
    while(currentToken != NULL)
@@ -163,7 +163,6 @@ mcc_List_t *mcc_PreprocessCurrentTokens(void)
 
 static void handleInclude()
 {
-   mcc_TokenListIterator_t *incIter;
    char *include_path;
    getToken();
    mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
@@ -203,10 +202,11 @@ static void handleInclude()
    {
       getToken();
    }
-   incIter = mcc_TokenListCopyIterator(tokenListIter);
-   mcc_TokeniseFile(include_path, incIter);
+   mcc_TokenList_t *tokens = mcc_TokeniseFile(include_path);
    free(include_path);
-   mcc_TokenListDeleteIterator(incIter);
+   //I could pop the path onto a stack here, or something.
+   mcc_PreprocessTokens(tokens);
+   mcc_TokenListDeleteStandalone(tokens);
 }
 
 static void handleDefine()

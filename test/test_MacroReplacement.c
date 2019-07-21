@@ -68,14 +68,12 @@ static void test_Implementation(void)
         const char *token_string = token_strings[i];
         const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
                                                               strlen(token_string));
-        mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator();
         mcc_InitialiseMacros();
         mcc_FileOpenerInitialise();
-        mcc_TokeniseFile(file, iter);
-        mcc_TokenListDeleteIterator(iter);
+        mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
         printf("Test Macro Replacement %d...", i + 1);
 
-        mcc_TokenList_t *output = mcc_PreprocessCurrentTokens();
+        mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
         mcc_TokenListIterator_t *outputIter = mcc_TokenListStandaloneGetIterator(output);
         mcc_Token_t *token;
         int j;
@@ -91,7 +89,7 @@ static void test_Implementation(void)
         printf("ok\n");
 
         mcc_TokenListDeleteStandalone(output);
-        mcc_FreeTokens();
+        mcc_TokenListDeleteStandalone(tokens);
         mcc_FileOpenerDelete();
         unlink(file);
         mcc_DeleteAllMacros();

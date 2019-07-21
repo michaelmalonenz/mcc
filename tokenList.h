@@ -39,21 +39,6 @@
 typedef mcc_ListIterator_t mcc_TokenListIterator_t;
 typedef mcc_List_t mcc_TokenList_t;
 
-/**
- * Can't be used with a Standalone token list.
- */
-void mcc_FreeTokens(void);
-
-/**
- * Can't be used with a Standalone token list.
- */
-mcc_TokenListIterator_t *mcc_TokenListGetIterator(void);
-
-/**
- * This is the global token list, not just any token list.
- */
-mcc_TokenList_t *mcc_GetTokenList(void);
-
 #if MCC_DEBUG
 void mcc_DebugPrintToken(const mcc_Token_t *token);
 void mcc_DebugPrintTokenList(mcc_TokenListIterator_t *iter);

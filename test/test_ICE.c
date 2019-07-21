@@ -56,14 +56,13 @@ static void test_Implementation(const char *token_string, int expected_result)
 {
    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
                                                          strlen(token_string));
-   mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator();
+   mcc_TokenListIterator_t *iter;
    mcc_Token_t *actual_result;
    mcc_FileOpenerInitialise();
-   mcc_TokeniseFile(file, iter);
-   mcc_TokenListDeleteIterator(iter);
+   mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
 
    printf("About to evaluate: '%s'\n", token_string);
-   iter = mcc_TokenListGetIterator();
+   iter = mcc_TokenListStandaloneGetIterator(tokens);
    if (mcc_GetNextToken(iter)->tokenType == TOK_WHITESPACE)
          (void)mcc_GetNextToken(iter);
    mcc_AST_t *tree = mcc_ParseExpression(iter);
@@ -74,7 +73,7 @@ static void test_Implementation(const char *token_string, int expected_result)
    mcc_TokenListDeleteIterator(iter);
    mcc_DeleteToken((uintptr_t)actual_result);
 
-   mcc_FreeTokens();
+   mcc_TokenListDeleteStandalone(tokens);
    mcc_FileOpenerDelete();
    unlink(file);
 }

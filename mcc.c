@@ -34,7 +34,7 @@
 
 int main(int argc, char **argv)
 {
-   mcc_TokenListIterator_t *tokenListIter;
+   mcc_TokenList_t *tokens;
    mcc_ListIterator_t *fileIter;
    char *currentFile;
    
@@ -52,18 +52,16 @@ int main(int argc, char **argv)
    currentFile = (char *) mcc_ListGetNextData(fileIter);
    while (currentFile != NULL)
    {
-      tokenListIter = mcc_TokenListGetIterator();
       fprintf(stderr, "Tokenising %s...\n", currentFile);
-      mcc_TokeniseFile(currentFile, tokenListIter);
+      tokens = mcc_TokeniseFile(currentFile);
       fprintf(stderr, "Preprocessing %s...\n", currentFile);
-      mcc_List_t *output = mcc_PreprocessCurrentTokens();
-      mcc_TokenListDeleteIterator(tokenListIter);
+      mcc_List_t *output = mcc_PreprocessTokens(tokens);
       if (mcc_global_options.stages == PREPROCESS)
       {
          mcc_WriteTokensToOutputFile(output);
       }
       mcc_TokenListDeleteStandalone(output);
-      mcc_FreeTokens();
+      mcc_TokenListDeleteStandalone(tokens);
       mcc_DeleteAllMacros();
       currentFile = (char *) mcc_ListGetNextData(fileIter);
    }

@@ -81,10 +81,8 @@ int main(void)
       printf("***** Beginning Tokeniser test %d ******\n", i+1);
       mcc_FileOpenerInitialise();
 
-      tokenListIter = mcc_TokenListGetIterator();
-      mcc_TokeniseFile(tmp_filename, tokenListIter);
-      mcc_TokenListDeleteIterator(tokenListIter);
-      tokenListIter = mcc_TokenListGetIterator();
+      mcc_TokenList_t *tokens = mcc_TokeniseFile(tmp_filename);
+      tokenListIter = mcc_TokenListStandaloneGetIterator(tokens);
 
       for (j = 0; j < expected_num_tokens[i]; j++)
       {
@@ -113,7 +111,7 @@ int main(void)
       }
       MCC_ASSERT(tok == NULL);
       mcc_TokenListDeleteIterator(tokenListIter);
-      mcc_FreeTokens();
+      mcc_TokenListDeleteStandalone(tokens);
       mcc_FileOpenerDelete();
 
       unlink(tmp_filename);

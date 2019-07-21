@@ -35,8 +35,6 @@
 #include "liberal.h"
 #include "mcc.h"
 
-static mcc_TokenList_t *token_list = NULL;
-
 static const char whitespaceText = ' ';
 
 mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
@@ -147,24 +145,9 @@ const mcc_Token_t *mcc_TokenListPeekNextToken(mcc_TokenListIterator_t *iter)
    return (const mcc_Token_t *) mcc_ListPeekNextData((mcc_ListIterator_t *)iter);
 }
 
-void mcc_FreeTokens(void)
-{
-   mcc_ListDelete(token_list, &mcc_DeleteToken);
-   token_list = NULL;
-}
-
 void mcc_TokenListDeleteIterator(mcc_TokenListIterator_t *iter)
 {
    mcc_ListDeleteIterator((mcc_TokenListIterator_t *) iter);
-}
-
-mcc_TokenListIterator_t *mcc_TokenListGetIterator(void)
-{
-   if (token_list == NULL)
-   {
-      token_list = mcc_ListCreate();
-   }
-   return (mcc_TokenListIterator_t *) mcc_ListGetIterator(token_list);
 }
 
 mcc_TokenListIterator_t *mcc_TokenListStandaloneGetIterator(mcc_TokenList_t *list)
@@ -207,11 +190,6 @@ mcc_TokenList_t *mcc_TokenListCreateStandalone(void)
 void mcc_TokenListDeleteStandalone(mcc_TokenList_t *list)
 {
    mcc_ListDelete(list, &mcc_DeleteToken);
-}
-
-mcc_TokenList_t *mcc_GetTokenList(void)
-{
-   return token_list;
 }
 
 void mcc_WriteTokensToOutputFile(mcc_TokenList_t *tokens)

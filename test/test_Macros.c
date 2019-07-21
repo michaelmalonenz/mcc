@@ -71,7 +71,6 @@ static void test_Undefine(void)
    printf("Testing undefine...");
    mcc_TokenList_t *tokens = mcc_ListCreate();
    mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, TOK_UNSET_INDEX, 1, 1, 1);
-   printf("Testing Define...");
    mcc_TokenListStandaloneAppend(tokens, tok);
    mcc_DefineMacro(MACRO_NAME, tokens, NULL);
    mcc_UndefineMacro(MACRO_NAME);
@@ -93,27 +92,22 @@ static void test_BulkMacros(void)
 {
    int i;
    printf("Testing Bulk Macro Definitions...");
+   mcc_FileOpenerInitialise();
    for(i = 0; i < NUM_BULK_MACROS; i++)
    {
       mcc_TokenList_t *tokenList;
-      mcc_TokenListIterator_t *tokenListIter;
       const char *tempFilename = mcc_TestUtils_DumpStringToTempFile(
          test_MacroValues[i],
          strlen(test_MacroValues[i]));
 
-      mcc_FileOpenerInitialise();
+      tokenList = mcc_TokeniseFile(tempFilename);
 
-      tokenList = mcc_TokenListCreateStandalone();
-      tokenListIter = mcc_TokenListStandaloneGetIterator(tokenList);
-      mcc_TokeniseFile(tempFilename, tokenListIter);
-      mcc_TokenListDeleteIterator(tokenListIter);
-
-      mcc_DefineMacro(test_Macros[i], mcc_GetTokenList(), NULL);
+      mcc_DefineMacro(test_Macros[i], mcc_TokenListDeepCopy(tokenList), NULL);
 
       unlink(tempFilename);
       mcc_TokenListDeleteStandalone(tokenList);
-      mcc_FileOpenerDelete();
    }
+   mcc_FileOpenerDelete();
    mcc_DeleteAllMacros();
    printf("ok\n");
 }

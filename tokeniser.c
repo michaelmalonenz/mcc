@@ -322,10 +322,11 @@ static char handle_hex_integer_const(mcc_LogicalLine_t *line,
    return (char) number;
 }
                                        
-void mcc_TokeniseFile(const char *inFilename, 
-                      mcc_TokenListIterator_t *iter)
+mcc_TokenList_t *mcc_TokeniseFile(const char *inFilename)
 {
    mcc_FileBuffer_t *fileBuffer = mcc_CreateFileBuffer(inFilename);
+   mcc_TokenList_t *tokens = mcc_TokenListCreateStandalone();
+   mcc_TokenListIterator_t *iter = mcc_TokenListStandaloneGetIterator(tokens);
    mcc_LogicalLine_t *logicalLine = NULL;
 
    while(!mcc_FileBufferEOFReached(fileBuffer))
@@ -342,6 +343,8 @@ void mcc_TokeniseFile(const char *inFilename,
          iter);
    }
    mcc_DeleteFileBuffer(fileBuffer);
+   mcc_TokenListDeleteIterator(iter);
+   return tokens;
 }
 
 //by providing a logical line, we are guaranteed to only have whole tokens.
