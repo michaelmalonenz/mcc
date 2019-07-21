@@ -276,8 +276,11 @@ void test_RemoveThenAdd(void)
    }
    MCC_ASSERT(result == 5);
 
-   result = (int) mcc_ListReplaceCurrentData(iter, 42);
+   mcc_List_t *temp = mcc_ListCreate();
+   mcc_ListAppendData(temp, 42);
+   result = (int) mcc_ListReplaceCurrentData(iter, temp);
    MCC_ASSERT(result == 5);
+   mcc_ListDelete(temp, NULL);
 
    mcc_ListDeleteIterator(iter);
 

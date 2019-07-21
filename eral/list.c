@@ -87,6 +87,7 @@ void mcc_ListDelete(mcc_List_t *list, mcc_NodeDestructor_fn destructorFn)
       current = next;
    }
 
+   printf("%d\n", list->nItems);
    MCC_ASSERT(list->nItems == 0);
    list->head = NULL;
    list->tail = NULL;
@@ -209,11 +210,31 @@ void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, uintptr_t dat
    iter->list->nItems++;
 }
 
-uintptr_t mcc_ListReplaceCurrentData(mcc_ListIterator_t *iter, uintptr_t data)
+uintptr_t mcc_ListReplaceCurrentData(mcc_ListIterator_t *iter, mcc_List_t *data)
 {
    MCC_ASSERT(iter->current != NULL);
    uintptr_t previous = iter->current->data;
-   iter->current->data = data;
+   data->tail->next = iter->current->next;
+   if (iter->current->next != NULL)
+      iter->current->next->prev = data->tail;
+   
+   data->head->prev = iter->current->prev;
+   if (iter->current->prev != NULL)
+      iter->current->prev->next = data->head;
+
+   if (iter->current == iter->list->head)
+      iter->list->head = data->head;
+
+   if (iter->current == iter->list->tail)
+      iter->list->tail = data->tail;
+
+   data->head = NULL;
+   data->tail = NULL;
+   data->nItems = 0;
+
+   iter->list->nItems += data->nItems;
+   free(iter->current);
+   iter->current = data->tail;
    return previous;
 }
 

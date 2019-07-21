@@ -559,9 +559,9 @@ static mcc_TokenList_t *handleMacroReplacement(mcc_Macro_t *macro)
    return result;
 }
 
-mcc_List_t *replaceMacroTokens(mcc_Macro_t *macro, mcc_List_t *parameters)
+mcc_TokenList_t *replaceMacroTokens(mcc_Macro_t *macro, mcc_TokenList_t *parameters)
 {
-   mcc_List_t *functionTokens = mcc_TokenListDeepCopy(macro->tokens);
+   mcc_TokenList_t *functionTokens = mcc_TokenListDeepCopy(macro->tokens);
    mcc_TokenListIterator_t *parametersIter = mcc_TokenListStandaloneGetIterator(parameters);
    mcc_MacroParameter_t *param = (mcc_MacroParameter_t *) mcc_ListGetNextData(parametersIter);
    while (param != NULL)
@@ -573,10 +573,10 @@ mcc_List_t *replaceMacroTokens(mcc_Macro_t *macro, mcc_List_t *parameters)
          if (functionToken->tokenType == TOK_IDENTIFIER &&
              strncmp(functionToken->text, param->argument->text, strlen(functionToken->text)))
          {
-            mcc_Token_t *result;
-            mcc_Token_t *copy = mcc_CopyToken(param->parameter);
-            result = mcc_TokenListStandaloneReplaceCurrent(tokensIter, copy);
+            mcc_TokenList_t *paramTokens = mcc_TokenListDeepCopy(param->parameterTokens);
+            mcc_Token_t *result = mcc_TokenListStandaloneReplaceCurrent(tokensIter, paramTokens);
             mcc_DeleteToken((uintptr_t) result);
+            mcc_ListDelete(paramTokens, NULL);
          }
          functionToken = mcc_GetNextToken(tokensIter);
       }
@@ -607,7 +607,7 @@ static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro)
          mcc_AST_t *tree = mcc_ParseExpression(tokenListIter);
          mcc_Token_t *parameter_token = mcc_ICE_EvaluateAST(tree);
          param->argument = mcc_GetNextToken(argumentsIter);
-         param->parameter = parameter_token;
+         mcc_TokenListStandaloneAppend(param->parameterTokens, parameter_token);
          currentToken = mcc_TokenListPeekCurrentToken(tokenListIter);
          mcc_ListAppendData(parameters, (uintptr_t)param);
          maybeGetWhitespaceToken();

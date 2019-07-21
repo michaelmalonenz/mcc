@@ -84,15 +84,17 @@ bool_t mcc_IsMacroDefined(const char *text)
 
 mcc_MacroParameter_t *mcc_MacroParameterCreate(void)
 {
-   return (mcc_MacroParameter_t *) malloc(sizeof(mcc_MacroParameter_t));
+   mcc_MacroParameter_t * result = (mcc_MacroParameter_t *) malloc(sizeof(mcc_MacroParameter_t));
+   result->parameterTokens = mcc_TokenListCreateStandalone();
+   return result;
 }
 
 void mcc_MacroParameterDelete(uintptr_t param)
 {
    mcc_MacroParameter_t *temp = (mcc_MacroParameter_t *) param;
-   if (temp->parameter)
+   if (temp->parameterTokens)
    {
-      mcc_DeleteToken((uintptr_t) temp->parameter);
+      mcc_TokenListDeleteStandalone(temp->parameterTokens);
    }
    free(temp);
 }
