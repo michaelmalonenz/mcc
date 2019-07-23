@@ -87,7 +87,6 @@ void mcc_ListDelete(mcc_List_t *list, mcc_NodeDestructor_fn destructorFn)
       current = next;
    }
 
-   printf("%d\n", list->nItems);
    MCC_ASSERT(list->nItems == 0);
    list->head = NULL;
    list->tail = NULL;

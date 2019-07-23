@@ -371,7 +371,6 @@ static void conditionalInnerImpl(bool_t initialConditionTrue, bool_t ignore)
 {
    bool_t processMacro = initialConditionTrue && !ignore;
    bool_t handled = FALSE;
-
    getToken();
    while (TRUE)
    {
@@ -604,11 +603,37 @@ static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro)
                currentToken->tokenIndex == SYM_CLOSE_PAREN))
       {
          mcc_MacroParameter_t *param = mcc_MacroParameterCreate();
-         mcc_AST_t *tree = mcc_ParseExpression(tokenListIter);
-         mcc_Token_t *parameter_token = mcc_ICE_EvaluateAST(tree);
          param->argument = mcc_GetNextToken(argumentsIter);
-         mcc_TokenListAppend(param->parameterTokens, parameter_token);
-         currentToken = mcc_TokenListPeekCurrentToken(tokenListIter);
+         maybeGetWhitespaceToken();
+         if (currentToken->tokenType == TOK_SYMBOL &&
+             currentToken->tokenIndex == SYM_OPEN_PAREN)
+         {
+            getToken();
+            while (!(currentToken->tokenType == TOK_SYMBOL &&
+                     currentToken->tokenIndex == SYM_CLOSE_PAREN))
+            {
+               mcc_TokenListAppend(param->parameterTokens, mcc_CopyToken(currentToken));
+               getToken();
+               MCC_ASSERT(currentToken != NULL);
+            }
+         }
+         else
+         {
+            while (!(currentToken->tokenType == TOK_OPERATOR &&
+                     currentToken->tokenIndex == OP_COMMA) &&
+                   !(currentToken->tokenType == TOK_SYMBOL &&
+                     currentToken->tokenIndex == SYM_CLOSE_PAREN))
+            {
+               mcc_TokenListAppend(param->parameterTokens, mcc_CopyToken(currentToken));
+               getToken();
+               MCC_ASSERT(currentToken != NULL);
+            }
+         }
+         if (currentToken->tokenType == TOK_OPERATOR &&
+             currentToken->tokenIndex == OP_COMMA)
+         {
+            getToken();
+         }
          mcc_ListAppendData(parameters, (uintptr_t)param);
          maybeGetWhitespaceToken();
       }
