@@ -7,7 +7,8 @@ add_custom_target(test_valgrind
     COMMAND ${CMAKE_CTEST_COMMAND} 
         --force-new-ctest-process --test-action memcheck)
 
-include_directories("${PROJECT_SOURCE_DIR}/..")
+include_directories("${PROJECT_SOURCE_DIR}/../src")
+include_directories("${PROJECT_SOURCE_DIR}/../src/eral")
 add_library(testutils TestUtils.c TestUtils.h)
 
 add_executable(test_ICE test_ICE.c)
