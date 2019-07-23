@@ -15,3 +15,5 @@ set(SOURCE
 )
 
 add_library(eral STATIC ${SOURCE})
+
+add_subdirectory(test)
