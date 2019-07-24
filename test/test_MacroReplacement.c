@@ -96,8 +96,37 @@ static void test_Implementation(void)
     }
 }
 
+static void test_SemiRecursiveMacroFunction(void)
+{
+    const char *token_string = "\
+#define __FEAT_USE(F) __FEAT_USE_ ## F\n\
+__FEAT_USE(SEMI_MACRO)";
+    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
+                                                          strlen(token_string));
+    mcc_InitialiseMacros();
+    mcc_FileOpenerInitialise();
+    mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
+    printf("Test Semi Recursive Macro Function...");
+
+    mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
+    mcc_TokenListIterator_t *outputIter = mcc_TokenListGetIterator(output);
+
+    mcc_Token_t *token = mcc_GetNextToken(outputIter);
+    MCC_ASSERT(token->tokenType == TOK_IDENTIFIER);
+    MCC_ASSERT(strncmp(token->text, "__FEAT_USE_SEMI_MACRO", strlen(token->text)) == 0);
+
+    mcc_TokenListDeleteIterator(outputIter);
+    mcc_TokenListDelete(output);
+    mcc_TokenListDelete(tokens);
+    mcc_FileOpenerDelete();
+    unlink(file);
+    mcc_DeleteAllMacros();
+    printf("ok\n");
+}
+
 int main(int UNUSED(argc), char UNUSED(**argv))
 {
     test_Implementation();
+    test_SemiRecursiveMacroFunction();
     return 0;
 }
