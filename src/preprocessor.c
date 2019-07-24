@@ -37,29 +37,35 @@
 #include "toolChainCommands.h"
 #include "ICE.h"
 
-typedef void (preprocessorDirectiveHandler_t)(void);
+typedef struct preprocessor {
+   mcc_TokenListIterator_t *tokenListIter;
+   const mcc_Token_t *currentToken;
+   mcc_List_t *output;
+} preprocessor_t;
 
-static void handleInclude(void);
-static void handleDefine(void);
-static void handleIfdef(void);
-static void handleIfndef(void);
-static void handleIf(void);
-static void handleEndif(void);
-static void handleElse(void);
-static void handleElif(void);
-static void handleUndef(void);
-static void handleError(void);
-static void handlePragma(void);
-static void handleJoin(void);
-static void handleWarning(void);
-static void handleStringify(void);
-static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro);
+typedef void (preprocessorDirectiveHandler_t)(preprocessor_t *preprocessor);
+
+static void handleInclude(preprocessor_t *preprocessor);
+static void handleDefine(preprocessor_t *preprocessor);
+static void handleIfdef(preprocessor_t *preprocessor);
+static void handleIfndef(preprocessor_t *preprocessor);
+static void handleIf(preprocessor_t *preprocessor);
+static void handleEndif(preprocessor_t *preprocessor);
+static void handleElse(preprocessor_t *preprocessor);
+static void handleElif(preprocessor_t *preprocessor);
+static void handleUndef(preprocessor_t *preprocessor);
+static void handleError(preprocessor_t *preprocessor);
+static void handlePragma(preprocessor_t *preprocessor);
+static void handleJoin(preprocessor_t *preprocessor);
+static void handleWarning(preprocessor_t *preprocessor);
+static void handleStringify(preprocessor_t *preprocessor);
+static mcc_TokenList_t *handleMacroFunction(preprocessor_t *preprocessor, mcc_Macro_t *macro);
 static mcc_TokenList_t *handleMacroReplacement(mcc_Macro_t *macro);
-static void conditionalInnerImpl(bool_t initialConditionTrue, bool_t ignore);
-static void handleIfDefInner(bool_t ignore);
-static void handleIfNDefInner(bool_t ignore);
-static void handleIfInner(bool_t ignore);
-static bool_t handleElIfInner(bool_t ignore);
+static void conditionalInnerImpl(preprocessor_t *preprocessor, bool_t initialConditionTrue, bool_t ignore);
+static void handleIfDefInner(preprocessor_t *preprocessor, bool_t ignore);
+static void handleIfNDefInner(preprocessor_t *preprocessor, bool_t ignore);
+static void handleIfInner(preprocessor_t *preprocessor, bool_t ignore);
+static bool_t handleElIfInner(preprocessor_t *preprocessor, bool_t ignore);
 
 
 static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = {
@@ -70,11 +76,7 @@ static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] =
    &handleWarning, &handleStringify
 };
 
-static mcc_TokenListIterator_t *tokenListIter;
-static const mcc_Token_t *currentToken;
-static mcc_List_t *output;
-
-static mcc_TokenList_t *resolveMacroTokens(const char *macroText)
+static mcc_TokenList_t *resolveMacroTokens(preprocessor_t *preprocessor, const char *macroText)
 {
    mcc_Macro_t *macro = mcc_ResolveMacro(macroText);
    if (macro == NULL)
@@ -84,7 +86,7 @@ static mcc_TokenList_t *resolveMacroTokens(const char *macroText)
 
    if (macro->is_function)
    {
-      return handleMacroFunction(macro);
+      return handleMacroFunction(preprocessor, macro);
    }
    else
    {
@@ -92,14 +94,15 @@ static mcc_TokenList_t *resolveMacroTokens(const char *macroText)
    }
 }
 
-static void emitToken(void)
+static void emitToken(preprocessor_t *preprocessor)
 {
-   if (currentToken->tokenType == TOK_IDENTIFIER)
+   if (preprocessor->currentToken->tokenType == TOK_IDENTIFIER)
    {
-      mcc_TokenList_t *macroTokens = resolveMacroTokens(currentToken->text);
+      mcc_TokenList_t *macroTokens = resolveMacroTokens(
+            preprocessor, preprocessor->currentToken->text);
       if (macroTokens == NULL)
       {
-         mcc_TokenListAppend(output, mcc_CopyToken(currentToken));
+         mcc_TokenListAppend(preprocessor->output, mcc_CopyToken(preprocessor->currentToken));
       }
       else
       {
@@ -107,7 +110,7 @@ static void emitToken(void)
          mcc_Token_t *token = mcc_GetNextToken(macroTokensIter);
          while (token != NULL)
          {
-            mcc_TokenListAppend(output, mcc_CopyToken(token));
+            mcc_TokenListAppend(preprocessor->output, mcc_CopyToken(token));
             token = mcc_GetNextToken(macroTokensIter);
          }
          mcc_TokenListDeleteIterator(macroTokensIter);
@@ -116,184 +119,186 @@ static void emitToken(void)
    }
    else
    {
-      mcc_TokenListAppend(output, mcc_CopyToken(currentToken));
+      mcc_TokenListAppend(preprocessor->output, mcc_CopyToken(preprocessor->currentToken));
    }
 }
 
-static void getToken(void)
+static void getToken(preprocessor_t *preprocessor)
 {
-   currentToken = mcc_GetNextToken(tokenListIter);
+   preprocessor->currentToken = mcc_GetNextToken(preprocessor->tokenListIter);
 }
 
-static void maybeGetWhitespaceToken(void)
+static void maybeGetWhiteSpaceToken(preprocessor_t *preprocessor)
 {
-   if (currentToken->tokenType == TOK_WHITESPACE)
+   if (preprocessor->currentToken->tokenType == TOK_WHITESPACE)
    {
-      getToken();
+      getToken(preprocessor);
    }
 }
 
-static void handlePreprocessorDirective()
+static void handlePreprocessorDirective(preprocessor_t *preprocessor)
 {
-   MCC_ASSERT(currentToken->tokenType == TOK_PP_DIRECTIVE);
-   ppHandlers[currentToken->tokenIndex]();
+   MCC_ASSERT(preprocessor->currentToken->tokenType == TOK_PP_DIRECTIVE);
+   ppHandlers[preprocessor->currentToken->tokenIndex](preprocessor);
 }
 
 mcc_List_t *mcc_PreprocessTokens(mcc_TokenList_t *tokens)
 {
-   output = mcc_ListCreate();
-   tokenListIter = mcc_TokenListGetIterator(tokens);
-   getToken();
+   preprocessor_t preprocessor;
+   preprocessor.output = mcc_ListCreate();
+   preprocessor.tokenListIter = mcc_TokenListGetIterator(tokens);
+   getToken(&preprocessor);
 
-   while(currentToken != NULL)
+   while(preprocessor.currentToken != NULL)
    {
-      if (currentToken->tokenType == TOK_PP_DIRECTIVE)
+      if (preprocessor.currentToken->tokenType == TOK_PP_DIRECTIVE)
       {
-         handlePreprocessorDirective();
+         handlePreprocessorDirective(&preprocessor);
       }
       else
       {
-         emitToken();
+         emitToken(&preprocessor);
       }
-      getToken();
+      getToken(&preprocessor);
    }
-   mcc_TokenListDeleteIterator(tokenListIter);
-   return output;
+   mcc_TokenListDeleteIterator(preprocessor.tokenListIter);
+   return preprocessor.output;
 }
 
-static void handleInclude()
+static void handleInclude(preprocessor_t *preprocessor)
 {
    char *include_path;
-   getToken();
-   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
-   getToken();
+   getToken(preprocessor);
+   mcc_ExpectTokenType(preprocessor->currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
+   getToken(preprocessor);
 #if MCC_DEBUG
    printf("Including file from %s:%d: %s\n",
-      mcc_ResolveFileNameFromNumber(currentToken->fileno),
-      currentToken->lineno,
-      currentToken->text);
+      mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
+      preprocessor->currentToken->lineno,
+      preprocessor->currentToken->text);
 #endif
-   if (currentToken->tokenType == TOK_LOCAL_FILE_INC)
+   if (preprocessor->currentToken->tokenType == TOK_LOCAL_FILE_INC)
    {
-      include_path = mcc_FindLocalInclude(currentToken->text);
+      include_path = mcc_FindLocalInclude(preprocessor->currentToken->text);
    }
-   else if (currentToken->tokenType == TOK_SYS_FILE_INC)
+   else if (preprocessor->currentToken->tokenType == TOK_SYS_FILE_INC)
    {
-      include_path = mcc_FindSystemInclude(currentToken->text);
+      include_path = mcc_FindSystemInclude(preprocessor->currentToken->text);
    }
    else
    {
-      mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
-                        currentToken->lineno,
-                        currentToken->line_index,
+      mcc_PrettyError(mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
+                        preprocessor->currentToken->lineno,
+                        preprocessor->currentToken->line_index,
                         "Expected a filename to include, got '%s'\n",
-                        currentToken->text);
+                        preprocessor->currentToken->text);
    }
    if (include_path == NULL)
    {
-      mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
-                        currentToken->lineno,
-                        currentToken->line_index,
+      mcc_PrettyError(mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
+                        preprocessor->currentToken->lineno,
+                        preprocessor->currentToken->line_index,
                         "Couldn't locate file '%s' for inclusion\n",
-                        currentToken->text);
+                        preprocessor->currentToken->text);
    }
 
-   while (currentToken->tokenType != TOK_EOL)
+   while (preprocessor->currentToken->tokenType != TOK_EOL)
    {
-      getToken();
+      getToken(preprocessor);
    }
    mcc_TokenList_t *tokens = mcc_TokeniseFile(include_path);
    free(include_path);
    //I could pop the path onto a stack here, or something.
-   mcc_PreprocessTokens(tokens);
+   mcc_TokenList_t *out_tokens = mcc_PreprocessTokens(tokens);
+   mcc_TokenListConcatenate(preprocessor->output, out_tokens);
    mcc_TokenListDelete(tokens);
 }
 
-static void handleDefine()
+static void handleDefine(preprocessor_t *preprocessor)
 {
    const char *macro_identifier;
    mcc_TokenList_t *tokens = mcc_TokenListCreate();
    mcc_TokenList_t *arguments = NULL;
-   getToken();
-   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
-   getToken();
-   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
-   macro_identifier = currentToken->text;
-   getToken();
-   if (currentToken->tokenType == TOK_SYMBOL &&
-       currentToken->tokenIndex == SYM_OPEN_PAREN)
+   getToken(preprocessor);
+   mcc_ExpectTokenType(preprocessor->currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
+   getToken(preprocessor);
+   mcc_ExpectTokenType(preprocessor->currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
+   macro_identifier = preprocessor->currentToken->text;
+   getToken(preprocessor);
+   if (preprocessor->currentToken->tokenType == TOK_SYMBOL &&
+       preprocessor->currentToken->tokenIndex == SYM_OPEN_PAREN)
    {
       arguments = mcc_TokenListCreate();
-      getToken();
-      while (currentToken->tokenType != TOK_SYMBOL &&
-             currentToken->tokenIndex != SYM_CLOSE_PAREN)
+      getToken(preprocessor);
+      while (preprocessor->currentToken->tokenType != TOK_SYMBOL &&
+             preprocessor->currentToken->tokenIndex != SYM_CLOSE_PAREN)
       {
-         if (currentToken->tokenType == TOK_EOL)
+         if (preprocessor->currentToken->tokenType == TOK_EOL)
          {
             mcc_PrettyError(
-               mcc_ResolveFileNameFromNumber(currentToken->fileno),
-               currentToken->lineno,
-               currentToken->line_index,
+               mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
+               preprocessor->currentToken->lineno,
+               preprocessor->currentToken->line_index,
                "Unclosed parentheses in function macro '%s'\n",
                macro_identifier);
          }
-         if ((currentToken->tokenType == TOK_OPERATOR &&
-              currentToken->tokenIndex == OP_COMMA) ||
-             currentToken->tokenType == TOK_WHITESPACE)
+         if ((preprocessor->currentToken->tokenType == TOK_OPERATOR &&
+              preprocessor->currentToken->tokenIndex == OP_COMMA) ||
+             preprocessor->currentToken->tokenType == TOK_WHITESPACE)
          {
             // Do nothing.
             // This is fine and normal and expected, but I don't care.
             // I should attempt to deal with two commas in a row, but
             // other than that, it's fine
          }
-         if (currentToken->tokenType == TOK_IDENTIFIER)
+         if (preprocessor->currentToken->tokenType == TOK_IDENTIFIER)
          {
-            mcc_TokenListAppend(arguments, mcc_CopyToken(currentToken));
+            mcc_TokenListAppend(arguments, mcc_CopyToken(preprocessor->currentToken));
          }
-         getToken();
+         getToken(preprocessor);
       }
    }
-   if (currentToken->tokenType != TOK_EOL)
+   if (preprocessor->currentToken->tokenType != TOK_EOL)
    {
-      getToken();
-      maybeGetWhitespaceToken();
+      getToken(preprocessor);
+      maybeGetWhiteSpaceToken(preprocessor);
    }
-   while (currentToken->tokenType != TOK_EOL)
+   while (preprocessor->currentToken->tokenType != TOK_EOL)
    {
-      mcc_TokenListAppend(tokens, mcc_CopyToken(currentToken));
-      getToken();
+      mcc_TokenListAppend(tokens, mcc_CopyToken(preprocessor->currentToken));
+      getToken(preprocessor);
    }
    mcc_DefineMacro(macro_identifier, tokens, arguments);
 }
 
-static void handleUndef()
+static void handleUndef(preprocessor_t *preprocessor)
 {
-   getToken();
-   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
-   getToken();
-   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
-   mcc_UndefineMacro(currentToken->text);
-   getToken();
-   maybeGetWhitespaceToken();
-   if (currentToken->tokenType != TOK_EOL)
+   getToken(preprocessor);
+   mcc_ExpectTokenType(preprocessor->currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
+   getToken(preprocessor);
+   mcc_ExpectTokenType(preprocessor->currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
+   mcc_UndefineMacro(preprocessor->currentToken->text);
+   getToken(preprocessor);
+   maybeGetWhiteSpaceToken(preprocessor);
+   if (preprocessor->currentToken->tokenType != TOK_EOL)
    {
-      mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
-                      currentToken->lineno,
-                      currentToken->line_index,
+      mcc_PrettyError(mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
+                      preprocessor->currentToken->lineno,
+                      preprocessor->currentToken->line_index,
                       "Unexpected characters after #undef '%s'\n",
-                      currentToken->text);
+                      preprocessor->currentToken->text);
    }
 }
 
-static void handleError()
+static void handleError(preprocessor_t *preprocessor)
 {
-   const mcc_Token_t *first = currentToken;
+   const mcc_Token_t *first = preprocessor->currentToken;
    mcc_StringBuffer_t *buffer = mcc_CreateStringBuffer();
-   getToken();
-   while (currentToken->tokenType != TOK_EOL)
+   getToken(preprocessor);
+   while (preprocessor->currentToken->tokenType != TOK_EOL)
    {
-      mcc_StringBufferAppendString(buffer, currentToken->text);
-      getToken();
+      mcc_StringBufferAppendString(buffer, preprocessor->currentToken->text);
+      getToken(preprocessor);
    }
    mcc_PrettyError(mcc_ResolveFileNameFromNumber(first->fileno),
                    first->lineno,
@@ -301,38 +306,38 @@ static void handleError()
                    "Error: %s\n", mcc_StringBufferGetString(buffer));
 }
 
-static mcc_List_t *parseConditionalExpression(bool_t ignore)
+static mcc_List_t *parseConditionalExpression(preprocessor_t *preprocessor, bool_t ignore)
 {
    mcc_TokenList_t *list = mcc_TokenListCreate();
-   getToken();
-   while (currentToken->tokenType != TOK_EOL)
+   getToken(preprocessor);
+   while (preprocessor->currentToken->tokenType != TOK_EOL)
    {
       if (ignore)
       {
-         getToken();
+         getToken(preprocessor);
          continue;
       }
-      if (currentToken->tokenType == TOK_IDENTIFIER)
+      if (preprocessor->currentToken->tokenType == TOK_IDENTIFIER)
       {
-         if (strncmp(currentToken->text, "defined", strlen(currentToken->text)) == 0)
+         if (strncmp(preprocessor->currentToken->text, "defined", strlen(preprocessor->currentToken->text)) == 0)
          {
-            getToken();
-            maybeGetWhitespaceToken();
-            mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
-            bool_t defined = mcc_IsMacroDefined(currentToken->text);
+            getToken(preprocessor);
+            maybeGetWhiteSpaceToken(preprocessor);
+            mcc_ExpectTokenType(preprocessor->currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
+            bool_t defined = mcc_IsMacroDefined(preprocessor->currentToken->text);
             mcc_Number_t number;
             number.number.integer_s = (int) defined;
             number.numberType = SIGNED_INT;
             mcc_Token_t *token = mcc_CreateNumberToken(
                &number,
-               currentToken->line_index,
-               currentToken->lineno,
-               currentToken->fileno);
+               preprocessor->currentToken->line_index,
+               preprocessor->currentToken->lineno,
+               preprocessor->currentToken->fileno);
             mcc_TokenListAppend(list, token);
          }
          else
          {
-            mcc_TokenList_t *macroTokens = resolveMacroTokens(currentToken->text);
+            mcc_TokenList_t *macroTokens = resolveMacroTokens(preprocessor, preprocessor->currentToken->text);
             if (macroTokens != NULL)
             {
                mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator(macroTokens);
@@ -353,108 +358,111 @@ static mcc_List_t *parseConditionalExpression(bool_t ignore)
                number.number.integer_s = 0;
                number.numberType = SIGNED_INT;
                mcc_Token_t *undefinedMacroToken = mcc_CreateNumberToken(&number,
-                  currentToken->line_index, currentToken->lineno, currentToken->fileno);
+                  preprocessor->currentToken->line_index, preprocessor->currentToken->lineno, preprocessor->currentToken->fileno);
                mcc_TokenListAppend(list, undefinedMacroToken);
             }
          }
       }
       else
       {
-         mcc_TokenListAppend(list, mcc_CopyToken(currentToken));
+         mcc_TokenListAppend(list, mcc_CopyToken(preprocessor->currentToken));
       }
-      getToken();
+      getToken(preprocessor);
    }
    return list;
 }
 
-static void conditionalInnerImpl(bool_t initialConditionTrue, bool_t ignore)
+static void conditionalInnerImpl(
+   preprocessor_t *preprocessor,
+   bool_t initialConditionTrue,
+   bool_t ignore)
 {
    bool_t processMacro = initialConditionTrue && !ignore;
    bool_t handled = FALSE;
-   getToken();
+   getToken(preprocessor);
    while (TRUE)
    {
-      if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
-          currentToken->tokenIndex == PP_ENDIF)
+      if (preprocessor->currentToken->tokenType == TOK_PP_DIRECTIVE &&
+          preprocessor->currentToken->tokenIndex == PP_ENDIF)
       {
          break;
       }
-      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
-               currentToken->tokenIndex == PP_IFDEF)
+      else if (preprocessor->currentToken->tokenType == TOK_PP_DIRECTIVE &&
+               preprocessor->currentToken->tokenIndex == PP_IFDEF)
       {
-         handleIfDefInner(!processMacro);
+         handleIfDefInner(preprocessor, !processMacro);
       }
-      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
-               currentToken->tokenIndex == PP_IFNDEF)
+      else if (preprocessor->currentToken->tokenType == TOK_PP_DIRECTIVE &&
+               preprocessor->currentToken->tokenIndex == PP_IFNDEF)
       {
-         handleIfNDefInner(!processMacro);
+         handleIfNDefInner(preprocessor, !processMacro);
       }
-      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
-               currentToken->tokenIndex == PP_IF)
+      else if (preprocessor->currentToken->tokenType == TOK_PP_DIRECTIVE &&
+               preprocessor->currentToken->tokenIndex == PP_IF)
       {
-         handleIfInner(!processMacro);
+         handleIfInner(preprocessor, !processMacro);
       }
-      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
-               currentToken->tokenIndex == PP_ELIF)
+      else if (preprocessor->currentToken->tokenType == TOK_PP_DIRECTIVE &&
+               preprocessor->currentToken->tokenIndex == PP_ELIF)
       {
-         processMacro = handleElIfInner(!processMacro);
+         processMacro = handleElIfInner(preprocessor, !processMacro);
       }
-      else if (currentToken->tokenType == TOK_PP_DIRECTIVE &&
-               currentToken->tokenIndex == PP_ELSE)
+      else if (preprocessor->currentToken->tokenType == TOK_PP_DIRECTIVE &&
+               preprocessor->currentToken->tokenIndex == PP_ELSE)
       {
          handled = handled || processMacro;
          processMacro = !processMacro && !ignore;
       }
       else if (processMacro && !handled)
       {
-         if (currentToken->tokenType == TOK_PP_DIRECTIVE)
+         if (preprocessor->currentToken->tokenType == TOK_PP_DIRECTIVE)
          {
-            handlePreprocessorDirective(currentToken, tokenListIter);
+            handlePreprocessorDirective(preprocessor);
          }
          else
          {
             MCC_ASSERT(!ignore);
-            emitToken();
+            emitToken(preprocessor);
          }
       }
-      getToken();
+      getToken(preprocessor);
    }
-   mcc_ExpectTokenType(currentToken, TOK_PP_DIRECTIVE, PP_ENDIF);
+   mcc_ExpectTokenType(preprocessor->currentToken, TOK_PP_DIRECTIVE, PP_ENDIF);
 }
 
-static void handleIfdef()
+static void handleIfdef(preprocessor_t *preprocessor)
 {
-   handleIfDefInner(FALSE);
+   handleIfDefInner(preprocessor, FALSE);
 }
-static void handleIfDefInner(bool_t ignore)
+static void handleIfDefInner(preprocessor_t *preprocessor, bool_t ignore)
 {
-   getToken();
-   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
-   getToken();
-   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
-   conditionalInnerImpl(mcc_IsMacroDefined(currentToken->text), ignore);
-}
-
-static void handleIfndef()
-{
-   handleIfNDefInner(FALSE);
-}
-static void handleIfNDefInner(bool_t ignore)
-{
-   getToken();
-   mcc_ExpectTokenType(currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
-   getToken();
-   mcc_ExpectTokenType(currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
-   conditionalInnerImpl(!mcc_IsMacroDefined(currentToken->text), ignore);
+   getToken(preprocessor);
+   mcc_ExpectTokenType(preprocessor->currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
+   getToken(preprocessor);
+   mcc_ExpectTokenType(preprocessor->currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
+   conditionalInnerImpl(preprocessor, mcc_IsMacroDefined(preprocessor->currentToken->text), ignore);
 }
 
-static void handleIf()
+static void handleIfndef(preprocessor_t *preprocessor)
 {
-   handleIfInner(FALSE);
+   handleIfNDefInner(preprocessor, FALSE);
 }
-static void handleIfInner(bool_t ignore)
+static void handleIfNDefInner(preprocessor_t *preprocessor, bool_t ignore)
 {
-   mcc_TokenList_t *list = parseConditionalExpression(ignore);
+   getToken(preprocessor);
+   mcc_ExpectTokenType(preprocessor->currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
+   getToken(preprocessor);
+   mcc_ExpectTokenType(preprocessor->currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
+   conditionalInnerImpl(preprocessor, !mcc_IsMacroDefined(preprocessor->currentToken->text), ignore);
+}
+
+static void handleIf(preprocessor_t *preprocessor)
+{
+   handleIfInner(preprocessor, FALSE);
+}
+static void handleIfInner(preprocessor_t *preprocessor, bool_t ignore)
+{
+   mcc_TokenList_t *list = parseConditionalExpression(preprocessor, ignore);
    if (!ignore)
    {
       mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator(list);
@@ -462,20 +470,20 @@ static void handleIfInner(bool_t ignore)
          (void)mcc_GetNextToken(iter);
       mcc_AST_t *tree = mcc_ParseExpression(iter);
       mcc_Token_t *result = mcc_ICE_EvaluateAST(tree);
-      conditionalInnerImpl(result->number.number.integer_s, ignore);
+      conditionalInnerImpl(preprocessor, result->number.number.integer_s, ignore);
       mcc_DeleteToken((uintptr_t) result);
       mcc_TokenListDeleteIterator(iter);
    }
    else
    {
-      conditionalInnerImpl(FALSE, ignore);
+      conditionalInnerImpl(preprocessor, FALSE, ignore);
    }
    mcc_TokenListDelete(list);
 }
 
-static bool_t handleElIfInner(bool_t ignore)
+static bool_t handleElIfInner(preprocessor_t *preprocessor, bool_t ignore)
 {
-   mcc_TokenList_t *list = parseConditionalExpression(ignore);
+   mcc_TokenList_t *list = parseConditionalExpression(preprocessor, ignore);
    bool_t result;
    if (!ignore)
    {
@@ -492,50 +500,50 @@ static bool_t handleElIfInner(bool_t ignore)
    return result;
 }
 
-static void handleEndif()
+static void handleEndif(preprocessor_t *preprocessor)
 {
-   mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
-                     currentToken->lineno,
-                     currentToken->line_index,
+   mcc_PrettyError(mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
+                     preprocessor->currentToken->lineno,
+                     preprocessor->currentToken->line_index,
                      "endif without if\n");
 }
 
-static void handleElse()
+static void handleElse(preprocessor_t *preprocessor)
 {
-   mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
-                     currentToken->lineno,
-                     currentToken->line_index,
+   mcc_PrettyError(mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
+                     preprocessor->currentToken->lineno,
+                     preprocessor->currentToken->line_index,
                      "else without if\n");
 }
 
-static void handleElif()
+static void handleElif(preprocessor_t *preprocessor)
 {
-   mcc_PrettyError(mcc_ResolveFileNameFromNumber(currentToken->fileno),
-                     currentToken->lineno,
-                     currentToken->line_index,
+   mcc_PrettyError(mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
+                     preprocessor->currentToken->lineno,
+                     preprocessor->currentToken->line_index,
                      "elif without if\n");
 }
 
-static void handleJoin()
+static void handleJoin(preprocessor_t UNUSED(*preprocessor))
 {
    MCC_ASSERT(FALSE);
 }
 
 //What shall I do with #pragmas???
-static void handlePragma()
+static void handlePragma(preprocessor_t UNUSED(*preprocessor))
 {
    MCC_ASSERT(FALSE);
 }
 
-static void handleWarning()
+static void handleWarning(preprocessor_t *preprocessor)
 {
-   const mcc_Token_t *first = currentToken;
+   const mcc_Token_t *first = preprocessor->currentToken;
    mcc_StringBuffer_t *buffer = mcc_CreateStringBuffer();
-   getToken();
-   while (currentToken->tokenType != TOK_EOL)
+   getToken(preprocessor);
+   while (preprocessor->currentToken->tokenType != TOK_EOL)
    {
-      mcc_StringBufferAppendString(buffer, currentToken->text);
-      getToken();
+      mcc_StringBufferAppendString(buffer, preprocessor->currentToken->text);
+      getToken(preprocessor);
    }
    printf("%s:%d Warning: %s\n",
       mcc_ResolveFileNameFromNumber(first->fileno),
@@ -586,65 +594,65 @@ mcc_TokenList_t *replaceMacroTokens(mcc_Macro_t *macro, mcc_TokenList_t *paramet
    return functionTokens;
 }
 
-static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro)
+static mcc_TokenList_t *handleMacroFunction(preprocessor_t *preprocessor, mcc_Macro_t *macro)
 {
-   getToken();
-   maybeGetWhitespaceToken();
-   mcc_ExpectTokenType(currentToken, TOK_SYMBOL, SYM_OPEN_PAREN);
+   getToken(preprocessor);
+   maybeGetWhiteSpaceToken(preprocessor);
+   mcc_ExpectTokenType(preprocessor->currentToken, TOK_SYMBOL, SYM_OPEN_PAREN);
    mcc_List_t *parameters = mcc_ListCreate();
-   getToken();
-   maybeGetWhitespaceToken();
-   if (currentToken &&
-      (currentToken->tokenType != TOK_SYMBOL ||
-       currentToken->tokenIndex != SYM_CLOSE_PAREN))
+   getToken(preprocessor);
+   maybeGetWhiteSpaceToken(preprocessor);
+   if (preprocessor->currentToken &&
+      (preprocessor->currentToken->tokenType != TOK_SYMBOL ||
+       preprocessor->currentToken->tokenIndex != SYM_CLOSE_PAREN))
    {
       mcc_TokenListIterator_t *argumentsIter = mcc_TokenListGetIterator(macro->arguments);
-      while (!(currentToken->tokenType == TOK_SYMBOL &&
-               currentToken->tokenIndex == SYM_CLOSE_PAREN))
+      while (!(preprocessor->currentToken->tokenType == TOK_SYMBOL &&
+               preprocessor->currentToken->tokenIndex == SYM_CLOSE_PAREN))
       {
          mcc_MacroParameter_t *param = mcc_MacroParameterCreate();
          param->argument = mcc_GetNextToken(argumentsIter);
-         maybeGetWhitespaceToken();
-         if (currentToken->tokenType == TOK_SYMBOL &&
-             currentToken->tokenIndex == SYM_OPEN_PAREN)
+         maybeGetWhiteSpaceToken(preprocessor);
+         if (preprocessor->currentToken->tokenType == TOK_SYMBOL &&
+             preprocessor->currentToken->tokenIndex == SYM_OPEN_PAREN)
          {
-            getToken();
-            while (!(currentToken->tokenType == TOK_SYMBOL &&
-                     currentToken->tokenIndex == SYM_CLOSE_PAREN))
+            getToken(preprocessor);
+            while (!(preprocessor->currentToken->tokenType == TOK_SYMBOL &&
+                     preprocessor->currentToken->tokenIndex == SYM_CLOSE_PAREN))
             {
-               mcc_TokenListAppend(param->parameterTokens, mcc_CopyToken(currentToken));
-               getToken();
-               MCC_ASSERT(currentToken != NULL);
+               mcc_TokenListAppend(param->parameterTokens, mcc_CopyToken(preprocessor->currentToken));
+               getToken(preprocessor);
+               MCC_ASSERT(preprocessor->currentToken != NULL);
             }
          }
          else
          {
-            while (!(currentToken->tokenType == TOK_OPERATOR &&
-                     currentToken->tokenIndex == OP_COMMA) &&
-                   !(currentToken->tokenType == TOK_SYMBOL &&
-                     currentToken->tokenIndex == SYM_CLOSE_PAREN))
+            while (!(preprocessor->currentToken->tokenType == TOK_OPERATOR &&
+                     preprocessor->currentToken->tokenIndex == OP_COMMA) &&
+                   !(preprocessor->currentToken->tokenType == TOK_SYMBOL &&
+                     preprocessor->currentToken->tokenIndex == SYM_CLOSE_PAREN))
             {
-               mcc_TokenListAppend(param->parameterTokens, mcc_CopyToken(currentToken));
-               getToken();
-               MCC_ASSERT(currentToken != NULL);
+               mcc_TokenListAppend(param->parameterTokens, mcc_CopyToken(preprocessor->currentToken));
+               getToken(preprocessor);
+               MCC_ASSERT(preprocessor->currentToken != NULL);
             }
          }
-         if (currentToken->tokenType == TOK_OPERATOR &&
-             currentToken->tokenIndex == OP_COMMA)
+         if (preprocessor->currentToken->tokenType == TOK_OPERATOR &&
+             preprocessor->currentToken->tokenIndex == OP_COMMA)
          {
-            getToken();
+            getToken(preprocessor);
          }
          mcc_ListAppendData(parameters, (uintptr_t)param);
-         maybeGetWhitespaceToken();
+         maybeGetWhiteSpaceToken(preprocessor);
       }
       mcc_TokenListDeleteIterator(argumentsIter);
    }
    if (mcc_ListGetLength(parameters) != mcc_ListGetLength(macro->arguments))
    {
       mcc_PrettyError(
-         mcc_ResolveFileNameFromNumber(currentToken->fileno),
-         currentToken->lineno,
-         currentToken->line_index,
+         mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
+         preprocessor->currentToken->lineno,
+         preprocessor->currentToken->line_index,
          "macro function %s expects %d argument(s), but %d were provided\n",
          macro->text,
          mcc_ListGetLength(macro->arguments),
@@ -655,7 +663,7 @@ static mcc_TokenList_t *handleMacroFunction(mcc_Macro_t *macro)
    return result;
 }
 
-static void handleStringify(void)
+static void handleStringify(preprocessor_t UNUSED(*preprocessor))
 {
    MCC_ASSERT(FALSE);
 }
