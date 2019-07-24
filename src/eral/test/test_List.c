@@ -263,7 +263,7 @@ void test_RemoveThenAdd(void)
    mcc_List_t *list = mcc_ListCreate();
    int result;
 
-   printf("*** Starting remove then add test ***\n");
+   printf("Testing remove then add...");
    for (i = 0; i < NUM_BASIC_TEST_ITEMS; i++)
    {
       mcc_ListAppendData(list, basic_test_data[i]);
@@ -302,7 +302,34 @@ void test_RemoveThenAdd(void)
    mcc_ListDeleteIterator(iter);
    mcc_ListDelete(list, NULL);
 
-   printf("*** Finished remove then add test ***\n");
+   printf("ok\n");
+}
+
+static void test_Concatenate(void)
+{
+   printf("Testing concatenate...");
+   mcc_List_t *dst = mcc_ListCreate();
+   mcc_List_t *src = mcc_ListCreate();
+   int i;
+   for (i = 1; i <= 5; i++)
+      mcc_ListAppendData(dst, (uintptr_t) i);
+
+   for (i = 6; i <= 10; i++)
+      mcc_ListAppendData(src, (uintptr_t) i);
+
+   mcc_ListConcatenate(dst, src);
+
+   mcc_ListIterator_t *iter = mcc_ListGetIterator(dst);
+
+   for (i = 1; i <= 10; i++)
+   {
+      int expected = (int) mcc_ListGetNextData(iter);
+      MCC_ASSERT(expected == i);
+   }
+
+   mcc_ListDeleteIterator(iter);
+   mcc_ListDelete(dst, NULL);
+   printf("ok\n");
 }
 
 int main(void)
@@ -315,6 +342,7 @@ int main(void)
    test_CopyingIterator();
    test_InsertionIteratingBackwards();
    test_RemoveThenAdd();
+   test_Concatenate();
 
    printf("Finished %s\n", __FILE__);
    return 0;

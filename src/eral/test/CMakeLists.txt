@@ -6,6 +6,10 @@ include(CTest)
 include_directories("${PROJECT_SOURCE_DIR}/..")
 include_directories("${PROJECT_SOURCE_DIR}/../..")
 
+add_custom_target(test_eral_valgrind
+    COMMAND ${CMAKE_CTEST_COMMAND} 
+        --force-new-ctest-process --test-action memcheck)
+
 add_executable(test_FileBuffer test_FileBuffer.c)
 target_link_libraries(test_FileBuffer mccstatic eral)
 add_test(test_FileBuffer test_FileBuffer)

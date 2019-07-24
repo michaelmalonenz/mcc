@@ -192,6 +192,11 @@ void mcc_TokenListDelete(mcc_TokenList_t *list)
    mcc_ListDelete(list, &mcc_DeleteToken);
 }
 
+void mcc_TokenListConcatenate(mcc_TokenList_t *dst, mcc_TokenList_t *src)
+{
+   mcc_ListConcatenate((mcc_List_t *)dst, (mcc_List_t *)src);
+}
+
 void mcc_WriteTokensToOutputFile(mcc_TokenList_t *tokens)
 {
    FILE *outf = fopen(mcc_global_options.outputFilename, "w+");

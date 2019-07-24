@@ -35,4 +35,6 @@ add_executable(test_Tokeniser test_Tokeniser.c)
 target_link_libraries(test_Tokeniser mccstatic testutils eral)
 add_test(test_Tokeniser test_Tokeniser)
 
-
+add_executable(test_TokenList test_TokenList.c)
+target_link_libraries(test_TokenList mccstatic testutils eral)
+add_test(test_TokenList test_TokenList)

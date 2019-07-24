@@ -299,3 +299,24 @@ uintptr_t mcc_ListGetPrevData(mcc_ListIterator_t *iter)
    return iter->current->data;
 }
 
+void mcc_ListConcatenate(mcc_List_t *dst, mcc_List_t *src)
+{
+   if (dst->tail == NULL)
+   {
+      *dst = *src;
+   }
+   else
+   {
+      dst->tail->next = src->head;
+      if (src->head != NULL)
+      {
+         src->head->prev = dst->tail;
+      }
+      dst->tail = src->tail;
+      dst->nItems += src->nItems;
+      src->nItems = 0;
+      src->head = NULL;
+      src->tail = NULL;
+   }
+   mcc_ListDelete(src, NULL);
+}

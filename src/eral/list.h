@@ -38,7 +38,7 @@ typedef struct iterator mcc_ListIterator_t;
 
 typedef void (*mcc_NodeDestructor_fn)(uintptr_t);
 
-#define NULL_DATA 0
+#define NULL_DATA ((uintptr_t) 0)
 
 /**
  * Initialises an empty unordered, doubly-linked list.
@@ -150,5 +150,11 @@ uintptr_t mcc_ListGetNextData(mcc_ListIterator_t *iter);
  * Returns the previous item in the list or NULL if we are at the start of the list
  */
 uintptr_t mcc_ListGetPrevData(mcc_ListIterator_t *iter);
+
+/**
+ * Concatenates the src list onto the dst list, freeing the memory
+ * associated with the src list.
+ */
+void mcc_ListConcatenate(mcc_List_t *dst, mcc_List_t *src);
 
 #endif /* _MCC_LIST_H_ */

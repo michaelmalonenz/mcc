@@ -157,5 +157,6 @@ mcc_Token_t *mcc_GetNextToken(mcc_TokenListIterator_t *iter);
 
 void mcc_WriteTokensToOutputFile(mcc_TokenList_t *tokens);
 
+void mcc_TokenListConcatenate(mcc_TokenList_t *dst, mcc_TokenList_t *src);
 #endif /* _MCC_TOKEN_LIST_H_ */
 
