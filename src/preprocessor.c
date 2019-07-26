@@ -322,8 +322,16 @@ static mcc_List_t *parseConditionalExpression(preprocessor_t *preprocessor, bool
          if (strncmp(preprocessor->currentToken->text,
              "defined", strlen(preprocessor->currentToken->text)) == 0)
          {
+            bool_t expectClosingParen = FALSE;
             getToken(preprocessor);
             maybeGetWhiteSpaceToken(preprocessor);
+            if (preprocessor->currentToken->tokenType == TOK_SYMBOL &&
+                preprocessor->currentToken->tokenIndex == SYM_OPEN_PAREN)
+            {
+               expectClosingParen = TRUE;
+               getToken(preprocessor);
+               maybeGetWhiteSpaceToken(preprocessor);
+            }
             mcc_ExpectTokenType(preprocessor->currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
             bool_t defined = mcc_IsMacroDefined(preprocessor->currentToken->text);
             mcc_Number_t number;
@@ -335,6 +343,11 @@ static mcc_List_t *parseConditionalExpression(preprocessor_t *preprocessor, bool
                preprocessor->currentToken->lineno,
                preprocessor->currentToken->fileno);
             mcc_TokenListAppend(list, token);
+            if (expectClosingParen) {
+               getToken(preprocessor);
+               maybeGetWhiteSpaceToken(preprocessor);
+               mcc_ExpectTokenType(preprocessor->currentToken, TOK_SYMBOL, SYM_CLOSE_PAREN);
+            }
          }
          else
          {
