@@ -147,12 +147,12 @@ const mcc_Token_t *mcc_TokenListPeekNextToken(mcc_TokenListIterator_t *iter)
 
 void mcc_TokenListDeleteIterator(mcc_TokenListIterator_t *iter)
 {
-   mcc_ListDeleteIterator((mcc_TokenListIterator_t *) iter);
+   mcc_ListDeleteIterator((mcc_ListIterator_t *) iter);
 }
 
 mcc_TokenListIterator_t *mcc_TokenListGetIterator(mcc_TokenList_t *list)
 {
-   return (mcc_TokenListIterator_t *) mcc_ListGetIterator(list);
+   return (mcc_TokenListIterator_t *) mcc_ListGetIterator((mcc_List_t *)list);
 }
 
 void mcc_TokenListAppend(mcc_TokenList_t *list, mcc_Token_t *token)
@@ -168,6 +168,11 @@ mcc_TokenListIterator_t *mcc_TokenListCopyIterator(mcc_TokenListIterator_t *iter
 mcc_Token_t *mcc_GetNextToken(mcc_TokenListIterator_t *iter)
 {
    return (mcc_Token_t *) mcc_ListGetNextData((mcc_ListIterator_t *) iter);
+}
+
+mcc_Token_t *mcc_GetPreviousToken(mcc_TokenListIterator_t *iter)
+{
+   return (mcc_Token_t *) mcc_ListGetPrevData((mcc_ListIterator_t *) iter);
 }
 
 const mcc_Token_t *mcc_PeekPreviousNonWhitespaceToken(mcc_TokenListIterator_t *iter)
@@ -195,6 +200,11 @@ void mcc_TokenListDelete(mcc_TokenList_t *list)
 void mcc_TokenListConcatenate(mcc_TokenList_t *dst, mcc_TokenList_t *src)
 {
    mcc_ListConcatenate((mcc_List_t *)dst, (mcc_List_t *)src);
+}
+
+mcc_Token_t *mcc_TokenListRemoveCurrent(mcc_TokenListIterator_t *iter)
+{
+   return (mcc_Token_t *) mcc_ListRemoveCurrentData((mcc_ListIterator_t *)iter);
 }
 
 void mcc_WriteTokensToOutputFile(mcc_TokenList_t *tokens)

@@ -81,8 +81,11 @@ static void test_Implementation(void)
         for (j = 0; j < expected_num_tokens[i]; j++)
         {
             token = mcc_GetNextToken(outputIter);
-            printf("Expected token type: %s\n", token_types[expected_token_types[i][j]]);
-            mcc_DebugPrintToken(token);
+            if (token->tokenType != expected_token_types[i][j])
+            {
+                printf("Expected token type: %s\n", token_types[expected_token_types[i][j]]);
+                mcc_DebugPrintToken(token);
+            }
             MCC_ASSERT(token->tokenType == expected_token_types[i][j]);
         }
         mcc_TokenListDeleteIterator(outputIter);
@@ -99,8 +102,8 @@ static void test_Implementation(void)
 static void test_SemiRecursiveMacroFunction(void)
 {
     const char *token_string = "\
-#define __FEAT_USE(F) __FEAT_USE_ ## F\n\
-__FEAT_USE(SEMI_MACRO)";
+#define __FEAT_USE(F) __FEAT_USE ## F\n\
+__FEAT_USE(_SEMI_MACRO)";
     const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
                                                           strlen(token_string));
     mcc_InitialiseMacros();

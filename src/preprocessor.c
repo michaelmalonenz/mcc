@@ -319,7 +319,8 @@ static mcc_List_t *parseConditionalExpression(preprocessor_t *preprocessor, bool
       }
       if (preprocessor->currentToken->tokenType == TOK_IDENTIFIER)
       {
-         if (strncmp(preprocessor->currentToken->text, "defined", strlen(preprocessor->currentToken->text)) == 0)
+         if (strncmp(preprocessor->currentToken->text,
+             "defined", strlen(preprocessor->currentToken->text)) == 0)
          {
             getToken(preprocessor);
             maybeGetWhiteSpaceToken(preprocessor);
@@ -578,7 +579,8 @@ mcc_TokenList_t *replaceMacroTokens(mcc_Macro_t *macro, mcc_TokenList_t *paramet
       while (functionToken != NULL)
       {
          if (functionToken->tokenType == TOK_IDENTIFIER &&
-             strncmp(functionToken->text, param->argument->text, strlen(functionToken->text)))
+             strcmp(functionToken->text,
+                    param->argument->text) == 0)
          {
             mcc_TokenList_t *paramTokens = mcc_TokenListDeepCopy(param->parameterTokens);
             mcc_Token_t *result = mcc_TokenListReplaceCurrent(tokensIter, paramTokens);
@@ -592,6 +594,45 @@ mcc_TokenList_t *replaceMacroTokens(mcc_Macro_t *macro, mcc_TokenList_t *paramet
    }
    mcc_TokenListDeleteIterator(parametersIter);
    return functionTokens;
+}
+
+void rescanMacroFunctionForActions(mcc_TokenList_t *tokens)
+{
+   mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator(tokens);
+   mcc_Token_t *token = mcc_GetNextToken(iter);
+   while (token != NULL)
+   {
+      if (token->tokenType == TOK_PP_DIRECTIVE &&
+          token->tokenIndex == PP_JOIN)
+      {
+         mcc_DeleteToken((uintptr_t)mcc_TokenListRemoveCurrent(iter));
+         mcc_Token_t *lhs = mcc_TokenListRemoveCurrent(iter);
+         if (lhs->tokenType == TOK_WHITESPACE)
+         {
+            mcc_DeleteToken((uintptr_t)lhs);
+            lhs = mcc_TokenListRemoveCurrent(iter);
+         }
+
+         (void)mcc_GetNextToken(iter);
+         mcc_Token_t *rhs = mcc_TokenListRemoveCurrent(iter);
+         if (rhs->tokenType == TOK_WHITESPACE)
+         {
+            mcc_DeleteToken((uintptr_t)rhs);
+            (void)mcc_GetNextToken(iter);
+            rhs = mcc_TokenListRemoveCurrent(iter);
+         }
+         mcc_StringBuffer_t *sbuffer = mcc_CreateStringBuffer();
+         mcc_StringBufferAppendString(sbuffer, lhs->text);
+         mcc_StringBufferAppendString(sbuffer, rhs->text);
+         mcc_Token_t *tok = mcc_CreateToken(mcc_StringBufferGetString(sbuffer),
+            mcc_GetStringBufferLength(sbuffer), TOK_IDENTIFIER,
+            TOK_UNSET_INDEX, lhs->line_index + 1,
+            lhs->lineno, lhs->fileno);
+         mcc_InsertToken(tok, iter);
+         mcc_DeleteStringBuffer(sbuffer);
+      }
+      token = mcc_GetNextToken(iter);
+   }
 }
 
 static mcc_TokenList_t *handleMacroFunction(preprocessor_t *preprocessor, mcc_Macro_t *macro)
@@ -660,6 +701,7 @@ static mcc_TokenList_t *handleMacroFunction(preprocessor_t *preprocessor, mcc_Ma
    }
    mcc_TokenList_t *result = replaceMacroTokens(macro, parameters);
    mcc_ListDelete(parameters, mcc_MacroParameterDelete);
+   rescanMacroFunctionForActions(result);
    return result;
 }
 

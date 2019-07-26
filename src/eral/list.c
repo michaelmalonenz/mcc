@@ -320,3 +320,33 @@ void mcc_ListConcatenate(mcc_List_t *dst, mcc_List_t *src)
    }
    mcc_ListDelete(src, NULL);
 }
+
+uintptr_t mcc_ListRemoveCurrentData(mcc_ListIterator_t *iter)
+{
+   mcc_ListNode_t *current = iter->current;
+   if (current == NULL)
+      return NULL_DATA;
+
+   if (current->prev != NULL)
+   {
+      current->prev->next = current->next;
+   }
+   else
+   {
+      iter->list->head = current->next;
+   }
+
+   if (current->next != NULL)
+   {
+      current->next->prev = current->prev;
+   }
+   else
+   {
+      iter->list->tail = current->prev;
+   }
+   iter->current = iter->current->prev;
+   iter->list->nItems--;
+   uintptr_t result = (uintptr_t) current->data;
+   free(current);
+   return (uintptr_t)result;
+}

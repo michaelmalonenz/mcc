@@ -154,9 +154,12 @@ mcc_Token_t *mcc_TokenListReplaceCurrent(mcc_TokenListIterator_t *iter,
 mcc_TokenListIterator_t *mcc_TokenListCopyIterator(mcc_TokenListIterator_t *iter);
 void mcc_TokenListDeleteIterator(mcc_TokenListIterator_t *iter);
 mcc_Token_t *mcc_GetNextToken(mcc_TokenListIterator_t *iter);
+mcc_Token_t *mcc_GetPreviousToken(mcc_TokenListIterator_t *iter);
 
 void mcc_WriteTokensToOutputFile(mcc_TokenList_t *tokens);
 
 void mcc_TokenListConcatenate(mcc_TokenList_t *dst, mcc_TokenList_t *src);
+
+mcc_Token_t *mcc_TokenListRemoveCurrent(mcc_TokenListIterator_t *iter);
 #endif /* _MCC_TOKEN_LIST_H_ */
 

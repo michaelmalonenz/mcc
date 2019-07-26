@@ -157,4 +157,12 @@ uintptr_t mcc_ListGetPrevData(mcc_ListIterator_t *iter);
  */
 void mcc_ListConcatenate(mcc_List_t *dst, mcc_List_t *src);
 
+/**
+ * Removes the data at the current position and returns it to the caller.
+ * If we don't have any data in the list, or the iterator has no current
+ * data, it returns NULL.
+ * This is a destructive operation.
+ */
+uintptr_t mcc_ListRemoveCurrentData(mcc_ListIterator_t *iter);
+
 #endif /* _MCC_LIST_H_ */
