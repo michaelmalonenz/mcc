@@ -57,6 +57,8 @@ void mcc_FileOpenerInitialise(void)
    mcc_ListAppendData(systemIncludeDirList, (uintptr_t) "/usr/include/i386-linux-gnu");
 # elif  defined(__x86_64__)
    mcc_ListAppendData(systemIncludeDirList, (uintptr_t) "/usr/include/x86_64-linux-gnu");
+   // How do I deal with the GCC version?
+   mcc_ListAppendData(systemIncludeDirList, (uintptr_t) "/usr/lib/gcc/x86_64-linux-gnu/8/include");
 # endif
 #endif
 
