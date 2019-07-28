@@ -110,7 +110,8 @@ static inline void init_tokens(void)
 }
 
 static int get_token_impl(mcc_LogicalLine_t *line, int num_tokens,
-                          const char **token_list, size_t *strlens_list)
+                          const char **token_list, size_t *strlens_list,
+                          bool_t requires_non_word_after)
 {
    int i;
    if (!initialised)
@@ -122,7 +123,15 @@ static int get_token_impl(mcc_LogicalLine_t *line, int num_tokens,
    {
       if (strncmp(&line->string[line->index], token_list[i], strlens_list[i]) == 0)
       {
-         return i;
+         if (requires_non_word_after) {
+            if (strlens_list[i] + line->index < line->length &&
+                !isWordChar(line->string[strlens_list[i] + line->index]))
+            {
+               return i;
+            }
+         } else {
+            return i;
+         }
       }
    }
    
@@ -134,7 +143,7 @@ PREPROC_DIRECTIVE mcc_GetPreprocessorDirective(mcc_LogicalLine_t *line)
    int pp_dir;
 
    pp_dir = get_token_impl(line, NUM_PREPROCESSOR_DIRECTIVES, 
-                           preprocessor_directives, pp_strlens);
+                           preprocessor_directives, pp_strlens, FALSE);
 
    if (pp_dir != -1)
    {
@@ -150,7 +159,7 @@ MCC_SYMBOL mcc_GetSymbol(mcc_LogicalLine_t *line)
 {
    int sym;
 
-   sym = get_token_impl(line, NUM_SYMBOLS, symbols, symbol_strlens);
+   sym = get_token_impl(line, NUM_SYMBOLS, symbols, symbol_strlens, FALSE);
 
    if (sym != -1)
    {
@@ -167,7 +176,7 @@ MCC_OPERATOR mcc_GetOperator(mcc_LogicalLine_t *line)
 {
    int op;
 
-   op = get_token_impl(line, NUM_OPERATORS, operators, operator_strlens);
+   op = get_token_impl(line, NUM_OPERATORS, operators, operator_strlens, FALSE);
 
    if (op != -1)
    {
@@ -183,7 +192,7 @@ MCC_KEYWORD mcc_GetKeyword(mcc_LogicalLine_t *line)
 {
    int key;
 
-   key = get_token_impl(line, NUM_KEYWORDS, keywords, keyword_strlens);
+   key = get_token_impl(line, NUM_KEYWORDS, keywords, keyword_strlens, TRUE);
 
    if (key != -1)
    {

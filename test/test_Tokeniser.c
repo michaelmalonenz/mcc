@@ -29,7 +29,7 @@
 #include "toolChainCommands.h"
 #include "TestUtils.h"
 
-#define NUM_TEST_CASES 9
+#define NUM_TEST_CASES 10
 const char *strings_to_tokenise[NUM_TEST_CASES] = { 
    "#include \"12/some_header.h\"\n",
    "char /*embedded comment*/ a = /*second embedded comment*/'\\0377';\n",
@@ -40,10 +40,11 @@ const char *strings_to_tokenise[NUM_TEST_CASES] = {
    "#define string(x) #x",
    "# define MACRO",
    "#  define MACRO",
+   "int static_macro"
 };
 
 const int32_t expected_num_tokens[NUM_TEST_CASES] = {
-   5, 10, 10, 9, 19, 2, 10, 4, 4
+   5, 10, 10, 9, 19, 2, 10, 4, 4, 4
 };
 #define LARGEST_NUM_TOKENS 19
 
@@ -56,7 +57,8 @@ const uint32_t expected_token_types[NUM_TEST_CASES][LARGEST_NUM_TOKENS] = {
    { TOK_NUMBER, TOK_EOL },
    { TOK_PP_DIRECTIVE, TOK_WHITESPACE, TOK_IDENTIFIER, TOK_SYMBOL, TOK_IDENTIFIER, TOK_SYMBOL, TOK_WHITESPACE, TOK_PP_DIRECTIVE, TOK_IDENTIFIER, TOK_EOL},
    { TOK_PP_DIRECTIVE, TOK_WHITESPACE, TOK_IDENTIFIER, TOK_EOL },
-   { TOK_PP_DIRECTIVE, TOK_WHITESPACE, TOK_IDENTIFIER, TOK_EOL }
+   { TOK_PP_DIRECTIVE, TOK_WHITESPACE, TOK_IDENTIFIER, TOK_EOL },
+   { TOK_KEYWORD, TOK_WHITESPACE, TOK_IDENTIFIER, TOK_EOL }
 };
 
 const int expected_token_indices[NUM_TEST_CASES][LARGEST_NUM_TOKENS] = {
@@ -68,7 +70,8 @@ const int expected_token_indices[NUM_TEST_CASES][LARGEST_NUM_TOKENS] = {
    { TOK_UNSET_INDEX, TOK_UNSET_INDEX },
    { PP_DEFINE, TOK_UNSET_INDEX, TOK_UNSET_INDEX, SYM_OPEN_PAREN, TOK_UNSET_INDEX, SYM_CLOSE_PAREN, TOK_UNSET_INDEX, PP_STRINGIFY, TOK_UNSET_INDEX, TOK_UNSET_INDEX},
    { PP_DEFINE, TOK_UNSET_INDEX, TOK_UNSET_INDEX, TOK_UNSET_INDEX},
-   { PP_DEFINE, TOK_UNSET_INDEX, TOK_UNSET_INDEX, TOK_UNSET_INDEX}
+   { PP_DEFINE, TOK_UNSET_INDEX, TOK_UNSET_INDEX, TOK_UNSET_INDEX},
+   { KEY_INT, TOK_UNSET_INDEX, TOK_UNSET_INDEX, TOK_UNSET_INDEX},
 };
 
 int main(void)
@@ -81,7 +84,7 @@ int main(void)
       const char *tmp_filename = mcc_TestUtils_DumpStringToTempFile(
          strings_to_tokenise[i], tok_str_len);
 
-      printf("***** Beginning Tokeniser test %d ******\n", i+1);
+      printf("Tokeniser test %d...", i+1);
       mcc_FileOpenerInitialise();
 
       mcc_TokenList_t *tokens = mcc_TokeniseFile(tmp_filename);
@@ -91,11 +94,11 @@ int main(void)
       {
          mcc_Token_t *token = mcc_GetNextToken(tokenListIter);
          MCC_ASSERT(token != NULL);
-         printf("Expected token type: %s, Actual token type: %s\n",
-                token_types[expected_token_types[i][j]],
-                token_types[token->tokenType]);
          if (token->tokenType != expected_token_types[i][j])
          {
+            printf("Expected token type: %s, Actual token type: %s\n",
+                  token_types[expected_token_types[i][j]],
+                  token_types[token->tokenType]);
             mcc_DebugPrintToken(token);
          }
          if (token->tokenIndex != expected_token_indices[i][j])
@@ -118,7 +121,7 @@ int main(void)
       mcc_FileOpenerDelete();
 
       unlink(tmp_filename);
-      printf("***** Finished Tokeniser test %d ******\n", i+1);
+      printf("ok\n");
    }
    return 0;
 }
