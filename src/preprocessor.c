@@ -419,7 +419,7 @@ static void conditionalInnerImpl(
       else if (preprocessor->currentToken->tokenType == TOK_PP_DIRECTIVE &&
                preprocessor->currentToken->tokenIndex == PP_ELIF)
       {
-         processMacro = handleElIfInner(preprocessor, !processMacro);
+         processMacro = handleElIfInner(preprocessor, ignore || handled);
       }
       else if (preprocessor->currentToken->tokenType == TOK_PP_DIRECTIVE &&
                preprocessor->currentToken->tokenIndex == PP_ELSE)

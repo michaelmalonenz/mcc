@@ -79,6 +79,7 @@ void mcc_InitialiseMacros(void)
    mcc_DefineMacro("__STDC__", NULL, NULL);
    mcc_DefineMacroAsNumber("__x86_64__", 1);
    mcc_DefineMacroAsNumber("__LP64__", 1);
+   mcc_DefineMacroAsNumber("__WORDSIZE", 64);
 #if MCC_C99_COMPATIBLE
    mcc_DefineMacroAsNumber("__STDC_VERSION__", 199901L);
 #endif
