@@ -117,8 +117,9 @@ extern size_t symbol_strlens[NUM_SYMBOLS];
 
 /* The order here, is my guess at the relative frequency of each directive's
    use - so we can match earlier in the list, and hopefully speed up the
-   pre-processing portion a little bit */
-typedef enum pp_directives { PP_INCLUDE, PP_DEFINE, PP_IFDEF, PP_IFNDEF,
+   pre-processing portion a little bit (you know, minus the include_next which
+   needs to come before include) */
+typedef enum pp_directives { PP_INCLUDE_NEXT, PP_INCLUDE, PP_DEFINE, PP_IFDEF, PP_IFNDEF,
                              PP_IF, PP_ENDIF, PP_ELSE, PP_ELIF, PP_UNDEF,
                              PP_ERROR, PP_PRAGMA, PP_JOIN, PP_WARNING, PP_STRINGIFY,
                              NUM_PREPROCESSOR_DIRECTIVES, PP_NONE }

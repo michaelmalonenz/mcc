@@ -40,9 +40,9 @@ const char *token_types[NUM_TOK_TYPES] = { "Preprocessor directive", "Identifier
                                            "System File Include", "Local File Include", "Whitespace",
                                            "End Of Line"};
 
-const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES] = { "include", "define", "ifdef", "ifndef", "if",
-                                                                     "endif", "else", "elif", "undef", "error", "pragma",
-                                                                     "#", "warning", ""};
+const char *preprocessor_directives[NUM_PREPROCESSOR_DIRECTIVES] = { 
+   "include_next", "include", "define", "ifdef", "ifndef", "if",
+   "endif", "else", "elif", "undef", "error", "pragma", "#", "warning", ""};
 
 size_t pp_strlens[NUM_PREPROCESSOR_DIRECTIVES];
 
@@ -230,7 +230,7 @@ void mcc_ExpectTokenType(const mcc_Token_t *token, TOKEN_TYPE tokenType, int ind
       mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
                       token->lineno,
                       token->line_index,
-                      "Preprocessor expected %s, but got %s (%s)\n",
+                      "Expected %s, but got %s (%s)\n",
                       expected,
                       token_types[token->tokenType],
                       token->text);

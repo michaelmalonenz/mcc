@@ -69,7 +69,7 @@ static bool_t handleElIfInner(preprocessor_t *preprocessor, bool_t ignore);
 
 
 static preprocessorDirectiveHandler_t *ppHandlers[NUM_PREPROCESSOR_DIRECTIVES] = {
-   &handleInclude, &handleDefine, &handleIfdef,
+   &handleInclude, &handleInclude, &handleDefine, &handleIfdef,
    &handleIfndef, &handleIf, &handleEndif,
    &handleElse, &handleElif, &handleUndef,
    &handleError, &handlePragma, &handleJoin,
