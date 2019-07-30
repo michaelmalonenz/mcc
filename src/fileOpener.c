@@ -133,6 +133,36 @@ const char *mcc_ResolveFileNameFromNumber(const unsigned short fileno)
 
 char *mcc_FindLocalInclude(const char *filename)
 {
+   mcc_ListIterator_t *iter = mcc_ListGetIterator(localIncludeDirList);
+   char *currentDir = (char *) mcc_ListGetNextData(iter);
+   while (currentDir != NULL)
+   {
+      size_t dirLen = strlen(currentDir);
+      size_t filenameLen = strlen(filename);
+      bool_t needsTrailingSlash = currentDir[dirLen-1] != '/';
+      size_t total = dirLen + filenameLen + 1;
+      int fd;
+      if (needsTrailingSlash)
+         total++;
+      char *temp = (char *) malloc(total);
+      int i = 0;
+      strncpy(temp, currentDir, dirLen);
+      i += dirLen;
+      if (needsTrailingSlash)
+      {
+         temp[i++] = '/';
+      }
+      strncpy(&temp[i], filename, filenameLen + 1);
+      fd = open(temp, O_RDONLY);
+      if (fd != -1)
+      {
+         close(fd);
+         return temp;
+      }
+      free(temp);
+      currentDir = (char *) mcc_ListGetNextData(iter);
+   }
+
    char *result = (char *) malloc(strlen(filename) + 1);
    strncpy(result, filename, strlen(filename) + 1);
    return result;
@@ -158,6 +188,7 @@ char *mcc_FindSystemInclude(const char *filename)
          close(fd);
          return temp;
       }
+      free(temp);
       currentDir = (char *) mcc_ListGetNextData(iter);
    }
    return NULL;

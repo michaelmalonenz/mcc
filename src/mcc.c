@@ -43,9 +43,10 @@ int main(int argc, char **argv)
       mcc_Error("No input files\n");
    }
 
+   mcc_FileOpenerInitialise();
+
    mcc_ParseOptions(argc, argv);
 
-   mcc_FileOpenerInitialise();
    mcc_InitialiseMacros();
 
    fileIter = mcc_OptionsFileListGetIterator();
@@ -58,6 +59,8 @@ int main(int argc, char **argv)
       mcc_List_t *output = mcc_PreprocessTokens(tokens);
       if (mcc_global_options.stages == PREPROCESS)
       {
+         fprintf(stderr, "Writing tokens to file %s...\n",
+            mcc_global_options.outputFilename);
          mcc_WriteTokensToOutputFile(output);
       }
       mcc_TokenListDelete(output);

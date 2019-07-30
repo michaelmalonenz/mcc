@@ -89,8 +89,8 @@ typedef struct mcc_Number
 #define min(a, b) ( ((a) < (b)) ? (a) : (b) )
 
 
-#define isWhiteSpace(c) ((c) == '\t' || (c) == '\v' ||	\
-                         (c) == '\r' || (c) == '\n' ||  \
+#define isWhiteSpace(c) ((c) == '\t' || (c) == '\v' || \
+                         (c) == '\r' || (c) == '\n' || \
                          (c) == '\v' || (c) == ' ')
 
 #define isNonBreakingWhiteSpace(c) ((c) == ' ' || (c) == '\t' || (c) == '\v')
@@ -119,5 +119,6 @@ const char *mcc_ResolveFileNameFromNumber(const unsigned short fileno);
  */
 char *mcc_FindLocalInclude(const char *filename);
 char *mcc_FindSystemInclude(const char *filename);
+void mcc_FileOpenerLocalIncAppendDir(const char *dir);
 
 #endif /* MCC_H */

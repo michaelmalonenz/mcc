@@ -53,6 +53,10 @@ void mcc_ParseOptions(int argc, char **argv)
       {
          mcc_global_options.stages = PREPROCESS;
       }
+      else if (strncmp(argv[i], "-I", 2) == 0)
+      {
+         mcc_FileOpenerLocalIncAppendDir(&argv[i][2]);
+      }
       else if (argv[i][0] == '-')
       {
          //do nothing;  Silently drop all unused arguments
