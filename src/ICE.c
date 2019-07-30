@@ -160,7 +160,8 @@ static  mcc_Token_t *evaluate_operands(
 const mcc_Token_t *evaluatePostOrder(mcc_AST_t *tree, mcc_ASTNode_t *node)
 {
     if (node->data->tokenType == TOK_NUMBER ||
-        node->data->tokenType == TOK_IDENTIFIER)
+        node->data->tokenType == TOK_IDENTIFIER ||
+        node->data->tokenType == TOK_CHAR_CONST)
     {
         return node->data;
     }
@@ -169,6 +170,10 @@ const mcc_Token_t *evaluatePostOrder(mcc_AST_t *tree, mcc_ASTNode_t *node)
         const mcc_Token_t *result = NULL;
         const mcc_Token_t *lhs = NULL;
         const mcc_Token_t *rhs = NULL;
+        if (node->data->tokenType != TOK_OPERATOR)
+        {
+            mcc_DebugPrintToken(node->data);
+        }
         MCC_ASSERT(node->data->tokenType == TOK_OPERATOR);
         switch(node->data->tokenIndex)
         {
@@ -295,7 +300,8 @@ static mcc_ASTNode_t *parseFactor(mcc_AST_t *tree)
         return result;
     }
     else if (tree->currentToken->tokenType == TOK_NUMBER ||
-             tree->currentToken->tokenType == TOK_IDENTIFIER)
+             tree->currentToken->tokenType == TOK_IDENTIFIER ||
+             tree->currentToken->tokenType == TOK_CHAR_CONST)
     {
         result = ast_node_create(tree->currentToken);
         GetNonWhitespaceToken(tree);
@@ -316,6 +322,7 @@ static mcc_ASTNode_t *parseFactor(mcc_AST_t *tree)
         GetNonWhitespaceToken(tree);
         return result;
     }
+    mcc_DebugPrintToken(tree->currentToken);
     ICE_Error(tree,
         "Unknown token in arithmetic expression '%s'\n",
         tree->currentToken->text);

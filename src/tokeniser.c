@@ -245,6 +245,12 @@ static void handle_string_char_const(mcc_LogicalLine_t *line,
                            line->index+1,
                            mcc_GetFileBufferCurrentLineNo(fileBuffer),
                            mcc_GetFileBufferFileNumber(fileBuffer));
+   // Turns out, chars are interchangeable with numbers
+   if (type == TOK_CHAR_CONST)
+   {
+      token->number.number.integer_s = line->string[line->index];
+      token->number.numberType = SIGNED_INT;
+   }
    line->index += strLen + 1;
    mcc_InsertToken(token, iter);
 }
@@ -438,6 +444,7 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
          if (toupper(line->string[line->index]) == 'L')
          {
             line->index++;
+            current_symbol = mcc_GetSymbol(line);
          }
          if (current_symbol == SYM_DOUBLE_QUOTE)
          {
