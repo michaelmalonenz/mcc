@@ -643,9 +643,12 @@ void rescanMacroFunctionForActions(mcc_TokenList_t *tokens)
             lhs->lineno, lhs->fileno);
          mcc_InsertToken(tok, iter);
          mcc_DeleteStringBuffer(sbuffer);
+         mcc_DeleteToken((uintptr_t)lhs);
+         mcc_DeleteToken((uintptr_t)rhs);
       }
       token = mcc_GetNextToken(iter);
    }
+   mcc_TokenListDeleteIterator(iter);
 }
 
 static mcc_TokenList_t *handleMacroFunction(preprocessor_t *preprocessor, mcc_Macro_t *macro)
