@@ -538,9 +538,12 @@ static void handleElif(preprocessor_t *preprocessor)
                      "elif without if\n");
 }
 
-static void handleJoin(preprocessor_t UNUSED(*preprocessor))
+static void handleJoin(preprocessor_t *preprocessor)
 {
-   MCC_ASSERT(FALSE);
+   mcc_PrettyError(mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
+                     preprocessor->currentToken->lineno,
+                     preprocessor->currentToken->line_index,
+                     "## found outside a macro function\n");
 }
 
 //What shall I do with #pragmas???
@@ -721,7 +724,10 @@ static mcc_TokenList_t *handleMacroFunction(preprocessor_t *preprocessor, mcc_Ma
    return result;
 }
 
-static void handleStringify(preprocessor_t UNUSED(*preprocessor))
+static void handleStringify(preprocessor_t *preprocessor)
 {
-   MCC_ASSERT(FALSE);
+   mcc_PrettyError(mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
+                     preprocessor->currentToken->lineno,
+                     preprocessor->currentToken->line_index,
+                     "# found outside a macro function\n");
 }
