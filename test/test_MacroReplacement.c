@@ -127,9 +127,32 @@ __FEAT_USE(_SEMI_MACRO)";
     printf("ok\n");
 }
 
+static void test_MultipleLongListReplacement(void)
+{
+    const char *token_string = "\
+#define isWordChar(c) (c) = 'A'\n\
+isWordChar(strlens_list[i]);\n";
+    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
+                                                          strlen(token_string));
+    mcc_InitialiseMacros();
+    mcc_FileOpenerInitialise();
+    mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
+    printf("Test Multiple Long List Replacement...");
+
+    mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
+    // Getting here means the replacement didn't crap out
+    mcc_TokenListDelete(output);
+    mcc_TokenListDelete(tokens);
+    mcc_FileOpenerDelete();
+    unlink(file);
+    mcc_DeleteAllMacros();
+    printf("ok\n");
+}
+
 int main(int UNUSED(argc), char UNUSED(**argv))
 {
     test_Implementation();
     test_SemiRecursiveMacroFunction();
+    test_MultipleLongListReplacement();
     return 0;
 }

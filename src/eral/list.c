@@ -109,7 +109,7 @@ void mcc_ListAppendData(mcc_List_t *list, uintptr_t data)
       node->prev = list->tail;
       list->tail = node;
    }
-   list->nItems ++;
+   list->nItems++;
 }
 
 uintptr_t mcc_ListRemoveTailData(mcc_List_t *list)
@@ -227,11 +227,12 @@ uintptr_t mcc_ListReplaceCurrentData(mcc_ListIterator_t *iter, mcc_List_t *data)
    if (iter->current == iter->list->tail)
       iter->list->tail = data->tail;
 
+   iter->list->nItems += data->nItems - 1;
+
    data->head = NULL;
    data->tail = NULL;
    data->nItems = 0;
 
-   iter->list->nItems += data->nItems;
    free(iter->current);
    iter->current = data->tail;
    return previous;
