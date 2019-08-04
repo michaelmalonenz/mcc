@@ -24,27 +24,31 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
+#ifndef _ERAL_STACK_H_
+#define _ERAL_STACK_H_
 #include "list.h"
 
-typedef struct stack mcc_Stack_t;
+typedef struct stack eral_Stack_t;
 
-mcc_Stack_t *mcc_StackCreate(void);
+eral_Stack_t *eral_StackCreate(void);
 
-void mcc_StackDelete(mcc_Stack_t *stack, mcc_NodeDestructor_fn destructorFn);
+void eral_StackDelete(eral_Stack_t *stack, eral_NodeDestructor_fn destructorFn);
 
-void mcc_StackPush(mcc_Stack_t *stack, uintptr_t data);
+void eral_StackPush(eral_Stack_t *stack, uintptr_t data);
 
-uintptr_t mcc_StackPop(const mcc_Stack_t *stack);
+uintptr_t eral_StackPop(const eral_Stack_t *stack);
 
-uintptr_t mcc_StackPeek(const mcc_Stack_t *stack);
+uintptr_t eral_StackPeek(const eral_Stack_t *stack);
 
-bool_t mcc_StackEmpty(const mcc_Stack_t *stack);
+bool_t eral_StackEmpty(const eral_Stack_t *stack);
 
-uint32_t mcc_StackNumItems(const mcc_Stack_t *stack);
+uint32_t eral_StackNumItems(const eral_Stack_t *stack);
 
-mcc_Stack_t *mcc_StackReverse(mcc_Stack_t *stack);
+eral_Stack_t *eral_StackReverse(eral_Stack_t *stack);
 
 #if MCC_DEBUG
 typedef void (*stackItemPrinter_t)(uintptr_t item);
-void mcc_DebugPrintStack(const mcc_Stack_t *stack, stackItemPrinter_t);
+void eral_DebugPrintStack(const eral_Stack_t *stack, stackItemPrinter_t);
 #endif
+
+#endif /* _ERAL_STACK_H_ */

@@ -37,41 +37,41 @@
 #include "tokenList.h"
 
 
-static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
-                             mcc_FileBuffer_t *fileBuffer,
+static void eral_TokeniseLine(eral_LogicalLine_t *line,
+                             eral_FileBuffer_t *fileBuffer,
                              mcc_TokenListIterator_t *iter);
 
-static void handle_string_char_const(mcc_LogicalLine_t *line,
-                                     mcc_FileBuffer_t *fileBuffer,
+static void handle_string_char_const(eral_LogicalLine_t *line,
+                                     eral_FileBuffer_t *fileBuffer,
                                      const char delimiter,
                                      TOKEN_TYPE type,
                                      mcc_TokenListIterator_t *iter);
-static void handle_pp_include_filename(mcc_LogicalLine_t *line,
-                                       mcc_FileBuffer_t *fileBuffer,
+static void handle_pp_include_filename(eral_LogicalLine_t *line,
+                                       eral_FileBuffer_t *fileBuffer,
                                        mcc_TokenListIterator_t *iter);
-static char handle_octal_integer_const(mcc_LogicalLine_t *line,
-                                       mcc_FileBuffer_t *fileBuffer);
-static char handle_hex_integer_const(mcc_LogicalLine_t *line,
-                                     mcc_FileBuffer_t *fileBuffer);
-static void handle_whitespace(mcc_LogicalLine_t *line,
-                              mcc_FileBuffer_t *fileBuffer,
+static char handle_octal_integer_const(eral_LogicalLine_t *line,
+                                       eral_FileBuffer_t *fileBuffer);
+static char handle_hex_integer_const(eral_LogicalLine_t *line,
+                                     eral_FileBuffer_t *fileBuffer);
+static void handle_whitespace(eral_LogicalLine_t *line,
+                              eral_FileBuffer_t *fileBuffer,
                               mcc_TokenListIterator_t *iter);
 
-static void handle_whitespace(mcc_LogicalLine_t *line,
-                              mcc_FileBuffer_t *fileBuffer,
+static void handle_whitespace(eral_LogicalLine_t *line,
+                              eral_FileBuffer_t *fileBuffer,
                               mcc_TokenListIterator_t *iter)
 {
    if (SkipWhiteSpace(line) > 0)
    {
       mcc_CreateAndAddWhitespaceToken(line->index+1,
-                                      mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                                      mcc_GetFileBufferFileNumber(fileBuffer),
+                                      eral_GetFileBufferCurrentLineNo(fileBuffer),
+                                      eral_GetFileBufferFileNumber(fileBuffer),
                                       iter);
    }
 }
 
-static void handle_pp_include_filename(mcc_LogicalLine_t *line,
-                                       mcc_FileBuffer_t *fileBuffer,
+static void handle_pp_include_filename(eral_LogicalLine_t *line,
+                                       eral_FileBuffer_t *fileBuffer,
                                        mcc_TokenListIterator_t *iter)
 {
    char delimiter;
@@ -93,8 +93,8 @@ static void handle_pp_include_filename(mcc_LogicalLine_t *line,
    }
    else
    {
-      mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
-                      mcc_GetFileBufferCurrentLineNo(fileBuffer),
+      mcc_PrettyError(eral_GetFileBufferFilename(fileBuffer),
+                      eral_GetFileBufferCurrentLineNo(fileBuffer),
                       line->index,
                       "Not a recognised character %c for file include\n",
                       delimiter);
@@ -105,8 +105,8 @@ static void handle_pp_include_filename(mcc_LogicalLine_t *line,
    {
       if (line->index + filenameLen == line->length)
       {
-         mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
-                         mcc_GetFileBufferCurrentLineNo(fileBuffer),
+         mcc_PrettyError(eral_GetFileBufferFilename(fileBuffer),
+                         eral_GetFileBufferCurrentLineNo(fileBuffer),
                          line->index,
                          "Reached the end of the line while looking for the include file delimiter '%c'\n",
                          delimiter);
@@ -117,8 +117,8 @@ static void handle_pp_include_filename(mcc_LogicalLine_t *line,
              line->string[line->index + filenameLen] == '\'' ||
              line->string[line->index + filenameLen] == '"')
          {
-            mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
-                            mcc_GetFileBufferCurrentLineNo(fileBuffer),
+            mcc_PrettyError(eral_GetFileBufferFilename(fileBuffer),
+                            eral_GetFileBufferCurrentLineNo(fileBuffer),
                             line->index,
                             "Invalid character '%c' found in the included file name\n",
                             line->string[line->index + filenameLen]);
@@ -128,8 +128,8 @@ static void handle_pp_include_filename(mcc_LogicalLine_t *line,
             if (line->string[line->index + filenameLen + 1] == '/' ||
                 line->string[line->index + filenameLen + 1] == '*')
             {
-               mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
-                               mcc_GetFileBufferCurrentLineNo(fileBuffer),
+               mcc_PrettyError(eral_GetFileBufferFilename(fileBuffer),
+                               eral_GetFileBufferCurrentLineNo(fileBuffer),
                                line->index,
                                "Comments are not allowed inside an include filename\n");
             }
@@ -142,15 +142,15 @@ static void handle_pp_include_filename(mcc_LogicalLine_t *line,
                             filenameLen, type,
                             TOK_UNSET_INDEX,
                             line->index+1,
-                            mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                            mcc_GetFileBufferFileNumber(fileBuffer));
+                            eral_GetFileBufferCurrentLineNo(fileBuffer),
+                            eral_GetFileBufferFileNumber(fileBuffer));
    mcc_InsertToken(token, iter);
    line->index += filenameLen + 1; //+1 for the delimiter
    handle_whitespace(line, fileBuffer, iter);
 }
 
-static void handle_string_char_const(mcc_LogicalLine_t *line,
-                                     mcc_FileBuffer_t *fileBuffer,
+static void handle_string_char_const(eral_LogicalLine_t *line,
+                                     eral_FileBuffer_t *fileBuffer,
                                      const char delimiter,
                                      TOKEN_TYPE type,
                                      mcc_TokenListIterator_t *iter)
@@ -181,15 +181,15 @@ static void handle_string_char_const(mcc_LogicalLine_t *line,
       {
          //The fileBuffer should have already found all the line continuations
          //and we should be able to handle all string constants as a single logical line.
-         mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
-                         mcc_GetFileBufferCurrentLineNo(fileBuffer),
+         mcc_PrettyError(eral_GetFileBufferFilename(fileBuffer),
+                         eral_GetFileBufferCurrentLineNo(fileBuffer),
                          line->index,
                          "Reached end of line when parsing %s constant and there's no continuation character\n",
                          type_name);
       }
       else if (line->string[line->index + strLen] == '\\')
       {
-         mcc_ShiftLineLeftAndShrink(line, line->index + strLen, 1);
+         eral_ShiftLineLeftAndShrink(line, line->index + strLen, 1);
          switch (line->string[line->index + strLen])
          {
             case 'a':
@@ -229,8 +229,8 @@ static void handle_string_char_const(mcc_LogicalLine_t *line,
                line->string[line->index + strLen] = handle_hex_integer_const(line, fileBuffer);
                break;
             default:
-               mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
-                               mcc_GetFileBufferCurrentLineNo(fileBuffer),
+               mcc_PrettyError(eral_GetFileBufferFilename(fileBuffer),
+                               eral_GetFileBufferCurrentLineNo(fileBuffer),
                                line->index,
                                "Unrecognised escape sequence \\%c when parsing %s constant\n",
                                line->string[line->index + strLen], type_name);
@@ -243,8 +243,8 @@ static void handle_string_char_const(mcc_LogicalLine_t *line,
                            strLen, type,
                            TOK_UNSET_INDEX,
                            line->index+1,
-                           mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                           mcc_GetFileBufferFileNumber(fileBuffer));
+                           eral_GetFileBufferCurrentLineNo(fileBuffer),
+                           eral_GetFileBufferFileNumber(fileBuffer));
    // Turns out, chars are interchangeable with numbers
    if (type == TOK_CHAR_CONST)
    {
@@ -255,8 +255,8 @@ static void handle_string_char_const(mcc_LogicalLine_t *line,
    mcc_InsertToken(token, iter);
 }
 
-static char handle_octal_integer_const(mcc_LogicalLine_t *line,
-                                       mcc_FileBuffer_t *fileBuffer)
+static char handle_octal_integer_const(eral_LogicalLine_t *line,
+                                       eral_FileBuffer_t *fileBuffer)
 {
    int intLen = 0, j;
    long long number = 0;
@@ -272,13 +272,13 @@ static char handle_octal_integer_const(mcc_LogicalLine_t *line,
    }
    if (number != (long long)(number & mask))
    {
-      mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
-                      mcc_GetFileBufferCurrentLineNo(fileBuffer),
+      mcc_PrettyError(eral_GetFileBufferFilename(fileBuffer),
+                      eral_GetFileBufferCurrentLineNo(fileBuffer),
                       line->index,
                       "Octal integer constant '%lld' exceeds allowed precision\n",
                       number);
    }
-   mcc_ShiftLineLeftAndShrink(line, line->index, intLen-1);
+   eral_ShiftLineLeftAndShrink(line, line->index, intLen-1);
    return (char) number;
 }
 
@@ -296,8 +296,8 @@ static char convertHexCharToNum(char character)
    return 0;
 }
 
-static char handle_hex_integer_const(mcc_LogicalLine_t *line,
-                                     mcc_FileBuffer_t *fileBuffer)
+static char handle_hex_integer_const(eral_LogicalLine_t *line,
+                                     eral_FileBuffer_t *fileBuffer)
 {
    int intLen = 1, j;
    long long number = 0;
@@ -317,45 +317,45 @@ static char handle_hex_integer_const(mcc_LogicalLine_t *line,
       char *tempStr = (char *) malloc((intLen + 1) * sizeof(char));
       memcpy(tempStr, &line->string[line->index + 1], intLen-1);
       tempStr[intLen-1] = 0;
-      mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
-                      mcc_GetFileBufferCurrentLineNo(fileBuffer),
+      mcc_PrettyError(eral_GetFileBufferFilename(fileBuffer),
+                      eral_GetFileBufferCurrentLineNo(fileBuffer),
                       line->index,
                       "hexadecimal integer constant \\x%s exceeds allowed precision\n",
                       tempStr);
    }
 
-   mcc_ShiftLineLeftAndShrink(line, line->index, intLen-2);
+   eral_ShiftLineLeftAndShrink(line, line->index, intLen-2);
    return (char) number;
 }
                                        
 mcc_TokenList_t *mcc_TokeniseFile(const char *inFilename)
 {
-   mcc_FileBuffer_t *fileBuffer = mcc_CreateFileBuffer(inFilename);
+   eral_FileBuffer_t *fileBuffer = eral_CreateFileBuffer(inFilename);
    mcc_TokenList_t *tokens = mcc_TokenListCreate();
    mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator(tokens);
-   mcc_LogicalLine_t *logicalLine = NULL;
+   eral_LogicalLine_t *logicalLine = NULL;
 
-   while(!mcc_FileBufferEOFReached(fileBuffer))
+   while(!eral_FileBufferEOFReached(fileBuffer))
    {
-      logicalLine = mcc_FileBufferGetNextLogicalLine(fileBuffer);
+      logicalLine = eral_FileBufferGetNextLogicalLine(fileBuffer);
       if ((logicalLine->length > 0) && (logicalLine->index < logicalLine->length))
       {
-         mcc_TokeniseLine(logicalLine, fileBuffer, iter);
+         eral_TokeniseLine(logicalLine, fileBuffer, iter);
       }
       mcc_AddEndOfLineToken(
          logicalLine->index+1,
-         mcc_GetFileBufferCurrentLineNo(fileBuffer),
-         mcc_GetFileBufferFileNumber(fileBuffer),
+         eral_GetFileBufferCurrentLineNo(fileBuffer),
+         eral_GetFileBufferFileNumber(fileBuffer),
          iter);
    }
-   mcc_DeleteFileBuffer(fileBuffer);
+   eral_DeleteFileBuffer(fileBuffer);
    mcc_TokenListDeleteIterator(iter);
    return tokens;
 }
 
 //by providing a logical line, we are guaranteed to only have whole tokens.
-static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
-                             mcc_FileBuffer_t *fileBuffer,
+static void eral_TokeniseLine(eral_LogicalLine_t *line,
+                             eral_FileBuffer_t *fileBuffer,
                              mcc_TokenListIterator_t *iter)
 {
    MCC_OPERATOR current_operator = OP_NONE;
@@ -409,8 +409,8 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
             token = mcc_CreateToken("#", 1, TOK_PP_DIRECTIVE,
                                     PP_JOIN,
                                     line->index+1,
-                                    mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                                    mcc_GetFileBufferFileNumber(fileBuffer));
+                                    eral_GetFileBufferCurrentLineNo(fileBuffer),
+                                    eral_GetFileBufferFileNumber(fileBuffer));
             mcc_InsertToken(token, iter);
             line->index++;
             token = NULL;
@@ -425,8 +425,8 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
                                     pp_strlens[pp_dir], TOK_PP_DIRECTIVE,
                                     pp_dir,
                                     line->index+1,
-                                    mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                                    mcc_GetFileBufferFileNumber(fileBuffer));
+                                    eral_GetFileBufferCurrentLineNo(fileBuffer),
+                                    eral_GetFileBufferFileNumber(fileBuffer));
             line->index += pp_strlens[pp_dir];
             if (pp_dir == PP_INCLUDE)
             {
@@ -463,8 +463,8 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
                                     TOK_SYMBOL,
                                     current_symbol,
                                     line->index+1,
-                                    mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                                    mcc_GetFileBufferFileNumber(fileBuffer));
+                                    eral_GetFileBufferCurrentLineNo(fileBuffer),
+                                    eral_GetFileBufferFileNumber(fileBuffer));
             line->index += symbol_strlens[current_symbol];
          }
       }
@@ -488,8 +488,8 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
                                  TOK_OPERATOR,
                                  current_operator,
                                  line->index+1,
-                                 mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                                 mcc_GetFileBufferFileNumber(fileBuffer));
+                                 eral_GetFileBufferCurrentLineNo(fileBuffer),
+                                 eral_GetFileBufferFileNumber(fileBuffer));
          line->index += operator_strlens[current_operator];
       }
       else if (isNumber(line->string[line->index]))
@@ -541,8 +541,8 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
                                  TOK_NUMBER,
                                  TOK_UNSET_INDEX,
                                  line->index+1,
-                                 mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                                 mcc_GetFileBufferFileNumber(fileBuffer));
+                                 eral_GetFileBufferCurrentLineNo(fileBuffer),
+                                 eral_GetFileBufferFileNumber(fileBuffer));
          if (isDouble)
          {
             token->number.number.float_d = strtod(token->text, NULL);
@@ -579,8 +579,8 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
                                     TOK_KEYWORD,
                                     keyword,
                                     line->index+1,
-                                    mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                                    mcc_GetFileBufferFileNumber(fileBuffer));
+                                    eral_GetFileBufferCurrentLineNo(fileBuffer),
+                                    eral_GetFileBufferFileNumber(fileBuffer));
             line->index += keyword_strlens[keyword];
          }
          else //it's an identifier
@@ -596,15 +596,15 @@ static void mcc_TokeniseLine(mcc_LogicalLine_t *line,
                                     TOK_IDENTIFIER,
                                     TOK_UNSET_INDEX,
                                     line->index+1,
-                                    mcc_GetFileBufferCurrentLineNo(fileBuffer),
-                                    mcc_GetFileBufferFileNumber(fileBuffer));
+                                    eral_GetFileBufferCurrentLineNo(fileBuffer),
+                                    eral_GetFileBufferFileNumber(fileBuffer));
             line->index += identLen;
          }
       }
       else
       {
-         mcc_PrettyError(mcc_GetFileBufferFilename(fileBuffer),
-                         mcc_GetFileBufferCurrentLineNo(fileBuffer),
+         mcc_PrettyError(eral_GetFileBufferFilename(fileBuffer),
+                         eral_GetFileBufferCurrentLineNo(fileBuffer),
                          line->index,
                          "Not a recognised character: '%c'.  This is probably a bug in the tokeniser.\n",
                          line->string[line->index]);

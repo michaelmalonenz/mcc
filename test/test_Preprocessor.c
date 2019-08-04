@@ -277,7 +277,7 @@ static void test_DefineFunctionMacro(void)
    MCC_ASSERT(strncmp(current->text, "b", strlen(current->text)) == 0);
    current = mcc_GetNextToken(argIter);
    MCC_ASSERT(current == NULL);
-   mcc_ListDeleteIterator(argIter);
+   eral_ListDeleteIterator(argIter);
    printf("ok\n");
 
    mcc_TokenListDelete(output);

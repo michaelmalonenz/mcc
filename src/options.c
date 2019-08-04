@@ -33,7 +33,7 @@ mcc_Options_t mcc_global_options;
 void mcc_ParseOptions(int argc, char **argv)
 {
    int i;
-   mcc_global_options.filenames = mcc_ListCreate();
+   mcc_global_options.filenames = eral_ListCreate();
    mcc_global_options.stages = (PREPROCESS &
                                 COMPILE &
                                 LINK);
@@ -63,17 +63,17 @@ void mcc_ParseOptions(int argc, char **argv)
       }
       else
       {
-         mcc_ListAppendData(mcc_global_options.filenames, (uintptr_t) argv[i]);
+         eral_ListAppendData(mcc_global_options.filenames, (uintptr_t) argv[i]);
       }
    }
 }
 
-mcc_ListIterator_t *mcc_OptionsFileListGetIterator(void)
+eral_ListIterator_t *mcc_OptionsFileListGetIterator(void)
 {
-   return mcc_ListGetIterator(mcc_global_options.filenames);
+   return eral_ListGetIterator(mcc_global_options.filenames);
 }
 
 void mcc_TearDownOptions(void)
 {
-   mcc_ListDelete(mcc_global_options.filenames, NULL);
+   eral_ListDelete(mcc_global_options.filenames, NULL);
 }

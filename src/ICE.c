@@ -15,7 +15,7 @@ struct syntax_tree {
     mcc_ASTNode_t *root;
     mcc_TokenListIterator_t *iterator;
     const mcc_Token_t *currentToken;
-    mcc_List_t *numbers_to_delete;
+    eral_List_t *numbers_to_delete;
 };
 
 static mcc_ASTNode_t *parseCommaExpression(mcc_AST_t *tree);
@@ -46,7 +46,7 @@ static mcc_Token_t *create_number_token(mcc_AST_t *tree, int number)
         .numberType = SIGNED_INT
     };
     mcc_Token_t *result = mcc_CreateNumberToken(&num, 0, 0, 0);
-    mcc_ListAppendData(tree->numbers_to_delete, (uintptr_t) result);
+    eral_ListAppendData(tree->numbers_to_delete, (uintptr_t) result);
     return result;
 }
 
@@ -511,7 +511,7 @@ static mcc_ASTNode_t *parseCommaExpression(mcc_AST_t *tree)
 static mcc_AST_t *create_syntax_tree(mcc_TokenListIterator_t *iter)
 {
     mcc_AST_t *result = (mcc_AST_t *) malloc(sizeof(mcc_AST_t));
-    result->numbers_to_delete = mcc_ListCreate();
+    result->numbers_to_delete = eral_ListCreate();
     result->root = NULL;
     result->currentToken = NULL;
     result->iterator = iter;
@@ -520,15 +520,15 @@ static mcc_AST_t *create_syntax_tree(mcc_TokenListIterator_t *iter)
 
 void mcc_DeleteAST(mcc_AST_t *tree)
 {
-    mcc_ListIterator_t *number_iter = mcc_ListGetIterator(tree->numbers_to_delete);
-    uintptr_t death_row = mcc_ListGetNextData(number_iter);
+    eral_ListIterator_t *number_iter = eral_ListGetIterator(tree->numbers_to_delete);
+    uintptr_t death_row = eral_ListGetNextData(number_iter);
     while(death_row != NULL_DATA)
     {
         mcc_DeleteToken(death_row);
-        death_row = mcc_ListGetNextData(number_iter);
+        death_row = eral_ListGetNextData(number_iter);
     }
-    mcc_ListDeleteIterator(number_iter);
-    mcc_ListDelete(tree->numbers_to_delete, NULL);
+    eral_ListDeleteIterator(number_iter);
+    eral_ListDelete(tree->numbers_to_delete, NULL);
     delete_ast_node_tree(tree->root);
     free(tree);
 }

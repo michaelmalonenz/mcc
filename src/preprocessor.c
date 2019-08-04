@@ -40,7 +40,7 @@
 typedef struct preprocessor {
    mcc_TokenListIterator_t *tokenListIter;
    const mcc_Token_t *currentToken;
-   mcc_List_t *output;
+   eral_List_t *output;
 } preprocessor_t;
 
 typedef void (preprocessorDirectiveHandler_t)(preprocessor_t *preprocessor);
@@ -142,10 +142,10 @@ static void handlePreprocessorDirective(preprocessor_t *preprocessor)
    ppHandlers[preprocessor->currentToken->tokenIndex](preprocessor);
 }
 
-mcc_List_t *mcc_PreprocessTokens(mcc_TokenList_t *tokens)
+eral_List_t *mcc_PreprocessTokens(mcc_TokenList_t *tokens)
 {
    preprocessor_t preprocessor;
-   preprocessor.output = mcc_ListCreate();
+   preprocessor.output = eral_ListCreate();
    preprocessor.tokenListIter = mcc_TokenListGetIterator(tokens);
    getToken(&preprocessor);
 
@@ -293,20 +293,20 @@ static void handleUndef(preprocessor_t *preprocessor)
 static void handleError(preprocessor_t *preprocessor)
 {
    const mcc_Token_t *first = preprocessor->currentToken;
-   mcc_StringBuffer_t *buffer = mcc_CreateStringBuffer();
+   eral_StringBuffer_t *buffer = eral_CreateStringBuffer();
    getToken(preprocessor);
    while (preprocessor->currentToken->tokenType != TOK_EOL)
    {
-      mcc_StringBufferAppendString(buffer, preprocessor->currentToken->text);
+      eral_StringBufferAppendString(buffer, preprocessor->currentToken->text);
       getToken(preprocessor);
    }
    mcc_PrettyError(mcc_ResolveFileNameFromNumber(first->fileno),
                    first->lineno,
                    first->line_index,
-                   "Error: %s\n", mcc_StringBufferGetString(buffer));
+                   "Error: %s\n", eral_StringBufferGetString(buffer));
 }
 
-static mcc_List_t *parseConditionalExpression(preprocessor_t *preprocessor, bool_t ignore)
+static eral_List_t *parseConditionalExpression(preprocessor_t *preprocessor, bool_t ignore)
 {
    mcc_TokenList_t *list = mcc_TokenListCreate();
    getToken(preprocessor);
@@ -563,18 +563,18 @@ static void handlePragma(preprocessor_t UNUSED(*preprocessor))
 static void handleWarning(preprocessor_t *preprocessor)
 {
    const mcc_Token_t *first = preprocessor->currentToken;
-   mcc_StringBuffer_t *buffer = mcc_CreateStringBuffer();
+   eral_StringBuffer_t *buffer = eral_CreateStringBuffer();
    getToken(preprocessor);
    while (preprocessor->currentToken->tokenType != TOK_EOL)
    {
-      mcc_StringBufferAppendString(buffer, preprocessor->currentToken->text);
+      eral_StringBufferAppendString(buffer, preprocessor->currentToken->text);
       getToken(preprocessor);
    }
    printf("%s:%d Warning: %s\n",
       mcc_ResolveFileNameFromNumber(first->fileno),
       first->lineno,
-      mcc_StringBufferGetString(buffer));
-   mcc_DeleteStringBuffer(buffer);
+      eral_StringBufferGetString(buffer));
+   eral_DeleteStringBuffer(buffer);
 }
 
 static mcc_TokenList_t *handleMacroReplacement(mcc_Macro_t *macro)
@@ -595,7 +595,7 @@ mcc_TokenList_t *replaceMacroTokens(mcc_Macro_t *macro, mcc_TokenList_t *paramet
 {
    mcc_TokenList_t *functionTokens = mcc_TokenListDeepCopy(macro->tokens);
    mcc_TokenListIterator_t *parametersIter = mcc_TokenListGetIterator(parameters);
-   mcc_MacroParameter_t *param = (mcc_MacroParameter_t *) mcc_ListGetNextData(parametersIter);
+   mcc_MacroParameter_t *param = (mcc_MacroParameter_t *) eral_ListGetNextData(parametersIter);
    while (param != NULL)
    {
       mcc_TokenListIterator_t *tokensIter = mcc_TokenListGetIterator(functionTokens);
@@ -609,12 +609,12 @@ mcc_TokenList_t *replaceMacroTokens(mcc_Macro_t *macro, mcc_TokenList_t *paramet
             mcc_TokenList_t *paramTokens = mcc_TokenListDeepCopy(param->parameterTokens);
             mcc_Token_t *result = mcc_TokenListReplaceCurrent(tokensIter, paramTokens);
             mcc_DeleteToken((uintptr_t) result);
-            mcc_ListDelete(paramTokens, NULL);
+            eral_ListDelete(paramTokens, NULL);
          }
          functionToken = mcc_GetNextToken(tokensIter);
       }
       mcc_TokenListDeleteIterator(tokensIter);
-      param = (mcc_MacroParameter_t *) mcc_ListGetNextData(parametersIter);
+      param = (mcc_MacroParameter_t *) eral_ListGetNextData(parametersIter);
    }
    mcc_TokenListDeleteIterator(parametersIter);
    return functionTokens;
@@ -645,15 +645,15 @@ void rescanMacroFunctionForActions(mcc_TokenList_t *tokens)
             (void)mcc_GetNextToken(iter);
             rhs = mcc_TokenListRemoveCurrent(iter);
          }
-         mcc_StringBuffer_t *sbuffer = mcc_CreateStringBuffer();
-         mcc_StringBufferAppendString(sbuffer, lhs->text);
-         mcc_StringBufferAppendString(sbuffer, rhs->text);
-         mcc_Token_t *tok = mcc_CreateToken(mcc_StringBufferGetString(sbuffer),
-            mcc_GetStringBufferLength(sbuffer), TOK_IDENTIFIER,
+         eral_StringBuffer_t *sbuffer = eral_CreateStringBuffer();
+         eral_StringBufferAppendString(sbuffer, lhs->text);
+         eral_StringBufferAppendString(sbuffer, rhs->text);
+         mcc_Token_t *tok = mcc_CreateToken(eral_StringBufferGetString(sbuffer),
+            eral_GetStringBufferLength(sbuffer), TOK_IDENTIFIER,
             TOK_UNSET_INDEX, lhs->line_index + 1,
             lhs->lineno, lhs->fileno);
          mcc_InsertToken(tok, iter);
-         mcc_DeleteStringBuffer(sbuffer);
+         eral_DeleteStringBuffer(sbuffer);
          mcc_DeleteToken((uintptr_t)lhs);
          mcc_DeleteToken((uintptr_t)rhs);
       }
@@ -667,7 +667,7 @@ static mcc_TokenList_t *handleMacroFunction(preprocessor_t *preprocessor, mcc_Ma
    getToken(preprocessor);
    maybeGetWhiteSpaceToken(preprocessor);
    mcc_ExpectTokenType(preprocessor->currentToken, TOK_SYMBOL, SYM_OPEN_PAREN);
-   mcc_List_t *parameters = mcc_ListCreate();
+   eral_List_t *parameters = eral_ListCreate();
    getToken(preprocessor);
    maybeGetWhiteSpaceToken(preprocessor);
    if (preprocessor->currentToken &&
@@ -710,12 +710,12 @@ static mcc_TokenList_t *handleMacroFunction(preprocessor_t *preprocessor, mcc_Ma
          {
             getToken(preprocessor);
          }
-         mcc_ListAppendData(parameters, (uintptr_t)param);
+         eral_ListAppendData(parameters, (uintptr_t)param);
          maybeGetWhiteSpaceToken(preprocessor);
       }
       mcc_TokenListDeleteIterator(argumentsIter);
    }
-   if (mcc_ListGetLength(parameters) != mcc_ListGetLength(macro->arguments))
+   if (eral_ListGetLength(parameters) != eral_ListGetLength(macro->arguments))
    {
       mcc_PrettyError(
          mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
@@ -723,11 +723,11 @@ static mcc_TokenList_t *handleMacroFunction(preprocessor_t *preprocessor, mcc_Ma
          preprocessor->currentToken->line_index,
          "macro function '%s' expects %d argument(s), but %d were provided\n",
          macro->text,
-         mcc_ListGetLength(macro->arguments),
-         mcc_ListGetLength(parameters));
+         eral_ListGetLength(macro->arguments),
+         eral_ListGetLength(parameters));
    }
    mcc_TokenList_t *result = replaceMacroTokens(macro, parameters);
-   mcc_ListDelete(parameters, mcc_MacroParameterDelete);
+   eral_ListDelete(parameters, mcc_MacroParameterDelete);
    rescanMacroFunctionForActions(result);
    return result;
 }

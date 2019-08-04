@@ -37,19 +37,19 @@ struct list_node {
 };
 
 struct list {
-   mcc_ListNode_t *head;
-   mcc_ListNode_t *tail;
+   eral_ListNode_t *head;
+   eral_ListNode_t *tail;
    uint32_t nItems;
 };
 
 struct iterator {
-   mcc_ListNode_t *current;
-   mcc_List_t *list;
+   eral_ListNode_t *current;
+   eral_List_t *list;
 };
 
-static mcc_ListNode_t *CreateListNode(uintptr_t data)
+static eral_ListNode_t *CreateListNode(uintptr_t data)
 {
-   mcc_ListNode_t *node = (mcc_ListNode_t *) malloc(sizeof(mcc_ListNode_t));
+   eral_ListNode_t *node = (eral_ListNode_t *) malloc(sizeof(eral_ListNode_t));
    MCC_ASSERT(node != NULL);
    node->next = NULL;
    node->prev = NULL;
@@ -57,9 +57,9 @@ static mcc_ListNode_t *CreateListNode(uintptr_t data)
    return node;
 }
 
-mcc_List_t *mcc_ListCreate(void)
+eral_List_t *eral_ListCreate(void)
 {
-   mcc_List_t *result = (mcc_List_t *) malloc(sizeof(mcc_List_t));
+   eral_List_t *result = (eral_List_t *) malloc(sizeof(eral_List_t));
    MCC_ASSERT(result != NULL);
    result->head = NULL;
    result->tail = NULL;
@@ -67,10 +67,10 @@ mcc_List_t *mcc_ListCreate(void)
    return result;
 }
 
-void mcc_ListDelete(mcc_List_t *list, mcc_NodeDestructor_fn destructorFn)
+void eral_ListDelete(eral_List_t *list, eral_NodeDestructor_fn destructorFn)
 {
-   mcc_ListNode_t *current = NULL;
-   mcc_ListNode_t *next = NULL;
+   eral_ListNode_t *current = NULL;
+   eral_ListNode_t *next = NULL;
 
    current = list->head;
 
@@ -94,9 +94,9 @@ void mcc_ListDelete(mcc_List_t *list, mcc_NodeDestructor_fn destructorFn)
    free(list);
 }
 
-void mcc_ListAppendData(mcc_List_t *list, uintptr_t data)
+void eral_ListAppendData(eral_List_t *list, uintptr_t data)
 {
-   mcc_ListNode_t *node = CreateListNode(data);
+   eral_ListNode_t *node = CreateListNode(data);
 
    if (list->head == NULL)
    {
@@ -112,11 +112,11 @@ void mcc_ListAppendData(mcc_List_t *list, uintptr_t data)
    list->nItems++;
 }
 
-uintptr_t mcc_ListRemoveTailData(mcc_List_t *list)
+uintptr_t eral_ListRemoveTailData(eral_List_t *list)
 {
    if (list->tail != NULL)
    {
-      mcc_ListNode_t *result_node = list->tail;
+      eral_ListNode_t *result_node = list->tail;
       uintptr_t result = list->tail->data;
       if (list->head == list->tail)
       {
@@ -134,7 +134,7 @@ uintptr_t mcc_ListRemoveTailData(mcc_List_t *list)
    return NULL_DATA;
 }
 
-uintptr_t mcc_ListPeekTailData(mcc_List_t *list)
+uintptr_t eral_ListPeekTailData(eral_List_t *list)
 {
    if (list->tail != NULL)
    {
@@ -143,9 +143,9 @@ uintptr_t mcc_ListPeekTailData(mcc_List_t *list)
    return NULL_DATA;
 }
 
-mcc_ListIterator_t *mcc_ListGetIterator(mcc_List_t *list)
+eral_ListIterator_t *eral_ListGetIterator(eral_List_t *list)
 {
-   mcc_ListIterator_t *iter = (mcc_ListIterator_t *) malloc(sizeof(mcc_ListIterator_t));
+   eral_ListIterator_t *iter = (eral_ListIterator_t *) malloc(sizeof(eral_ListIterator_t));
    MCC_ASSERT(iter != NULL);
    MCC_ASSERT(list != NULL);
    iter->list = list;
@@ -153,9 +153,9 @@ mcc_ListIterator_t *mcc_ListGetIterator(mcc_List_t *list)
    return iter;
 }
 
-mcc_ListIterator_t *mcc_ListCopyIterator(mcc_ListIterator_t *iter)
+eral_ListIterator_t *eral_ListCopyIterator(eral_ListIterator_t *iter)
 {
-   mcc_ListIterator_t *result = (mcc_ListIterator_t *) malloc(sizeof(mcc_ListIterator_t));
+   eral_ListIterator_t *result = (eral_ListIterator_t *) malloc(sizeof(eral_ListIterator_t));
    MCC_ASSERT(iter != NULL);
    MCC_ASSERT(result != NULL);
    result->list = iter->list;
@@ -163,7 +163,7 @@ mcc_ListIterator_t *mcc_ListCopyIterator(mcc_ListIterator_t *iter)
    return result;
 }
 
-void mcc_ListDeleteIterator(mcc_ListIterator_t *iter)
+void eral_ListDeleteIterator(eral_ListIterator_t *iter)
 {
    MCC_ASSERT(iter != NULL);
    /* These two aren't strictly necessary, but if anyone tries to use
@@ -174,9 +174,9 @@ void mcc_ListDeleteIterator(mcc_ListIterator_t *iter)
    free(iter);
 }
 
-void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, uintptr_t data)
+void eral_ListInsertDataAtCurrentPosition(eral_ListIterator_t *iter, uintptr_t data)
 {
-   mcc_ListNode_t *node = CreateListNode(data);
+   eral_ListNode_t *node = CreateListNode(data);
    if (iter->current == NULL)
    {
       if (iter->list->head == NULL)
@@ -209,7 +209,7 @@ void mcc_ListInsertDataAtCurrentPosition(mcc_ListIterator_t *iter, uintptr_t dat
    iter->list->nItems++;
 }
 
-uintptr_t mcc_ListReplaceCurrentData(mcc_ListIterator_t *iter, mcc_List_t *data)
+uintptr_t eral_ListReplaceCurrentData(eral_ListIterator_t *iter, eral_List_t *data)
 {
    MCC_ASSERT(iter->current != NULL);
    uintptr_t previous = iter->current->data;
@@ -238,31 +238,31 @@ uintptr_t mcc_ListReplaceCurrentData(mcc_ListIterator_t *iter, mcc_List_t *data)
    return previous;
 }
 
-bool_t mcc_ListEmpty(mcc_List_t *list)
+bool_t eral_ListEmpty(eral_List_t *list)
 {
    return list->nItems == 0;
 }
 
-uint32_t mcc_ListGetLength(mcc_List_t *list)
+uint32_t eral_ListGetLength(eral_List_t *list)
 {
    return list->nItems;
 }
 
-uintptr_t mcc_ListPeekCurrentData(mcc_ListIterator_t *iter)
+uintptr_t eral_ListPeekCurrentData(eral_ListIterator_t *iter)
 {
    if (iter->current == NULL)
       return NULL_DATA;
    return iter->current->data;
 }
 
-uintptr_t mcc_ListPeekNextData(mcc_ListIterator_t *iter)
+uintptr_t eral_ListPeekNextData(eral_ListIterator_t *iter)
 {
    if (iter->current == NULL || iter->current->next == NULL)
       return NULL_DATA;
    return iter->current->next->data;
 }
 
-uintptr_t mcc_ListGetNextData(mcc_ListIterator_t *iter)
+uintptr_t eral_ListGetNextData(eral_ListIterator_t *iter)
 {
    if (iter->current == iter->list->tail)
    {
@@ -281,7 +281,7 @@ uintptr_t mcc_ListGetNextData(mcc_ListIterator_t *iter)
    return iter->current->data;
 }
 
-uintptr_t mcc_ListGetPrevData(mcc_ListIterator_t *iter)
+uintptr_t eral_ListGetPrevData(eral_ListIterator_t *iter)
 {
    if (iter->current == iter->list->head)
    {
@@ -300,7 +300,7 @@ uintptr_t mcc_ListGetPrevData(mcc_ListIterator_t *iter)
    return iter->current->data;
 }
 
-void mcc_ListConcatenate(mcc_List_t *dst, mcc_List_t *src)
+void eral_ListConcatenate(eral_List_t *dst, eral_List_t *src)
 {
    if (dst->tail == NULL)
    {
@@ -319,12 +319,12 @@ void mcc_ListConcatenate(mcc_List_t *dst, mcc_List_t *src)
       src->head = NULL;
       src->tail = NULL;
    }
-   mcc_ListDelete(src, NULL);
+   eral_ListDelete(src, NULL);
 }
 
-uintptr_t mcc_ListRemoveCurrentData(mcc_ListIterator_t *iter)
+uintptr_t eral_ListRemoveCurrentData(eral_ListIterator_t *iter)
 {
-   mcc_ListNode_t *current = iter->current;
+   eral_ListNode_t *current = iter->current;
    if (current == NULL)
       return NULL_DATA;
 

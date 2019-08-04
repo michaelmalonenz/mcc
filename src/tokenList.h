@@ -36,8 +36,8 @@
  * It hurts to have to expose this typedef in the header file
  * so please don't abuse it by calling the mcc_List* functions directly!
  */
-typedef mcc_ListIterator_t mcc_TokenListIterator_t;
-typedef mcc_List_t mcc_TokenList_t;
+typedef eral_ListIterator_t mcc_TokenListIterator_t;
+typedef eral_List_t mcc_TokenList_t;
 
 #if MCC_DEBUG
 void mcc_DebugPrintToken(const mcc_Token_t *token);
@@ -142,7 +142,7 @@ void mcc_TokenListAppend(mcc_TokenList_t *list, mcc_Token_t *token);
  *
  * @param list - The list to copy
  */
-mcc_List_t *mcc_TokenListDeepCopy(mcc_TokenList_t *list);
+eral_List_t *mcc_TokenListDeepCopy(mcc_TokenList_t *list);
 
 /**
  * Replace the current token as defined by the iterator with the given

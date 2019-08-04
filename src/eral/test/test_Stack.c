@@ -43,24 +43,24 @@ static void stackItemPrinter(uintptr_t item)
 int main(void)
 {
    int i;
-   mcc_Stack_t *stack = mcc_StackCreate();
+   eral_Stack_t *stack = eral_StackCreate();
 
    for (i = 0; i < NUM_TEST_DATA; i++)
    {
       printf("Pushing %d\n", basicTestData[i]);
-      mcc_StackPush(stack, basicTestData[i]);
+      eral_StackPush(stack, basicTestData[i]);
    }
    
-   mcc_DebugPrintStack(stack, stackItemPrinter);
+   eral_DebugPrintStack(stack, stackItemPrinter);
 
    for (i = NUM_TEST_DATA-1; i >= 0; i--)
    {
-      int result = mcc_StackPop(stack);
+      int result = eral_StackPop(stack);
       printf("Popped %d\n", result);
       MCC_ASSERT(result == basicTestData[i]);
    }
 
-   mcc_StackDelete(stack, NULL);
+   eral_StackDelete(stack, NULL);
 
    return EXIT_SUCCESS;
 }

@@ -31,6 +31,6 @@
 #include "tokenList.h"
 
 mcc_TokenList_t *mcc_TokeniseFile(const char *inFilename);
-mcc_List_t *mcc_PreprocessTokens(mcc_TokenList_t *tokens);
+eral_List_t *mcc_PreprocessTokens(mcc_TokenList_t *tokens);
 
 #endif /* _MCC_TOOL_CHAIN_COMMANDS_H_ */

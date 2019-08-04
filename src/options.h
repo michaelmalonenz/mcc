@@ -38,7 +38,7 @@ enum { PREPROCESS = 1,
 
 typedef struct {
    uint32_t stages;
-   mcc_List_t *filenames;
+   eral_List_t *filenames;
    const char *outputFilename;
 }mcc_Options_t;
 
@@ -46,7 +46,7 @@ extern mcc_Options_t mcc_global_options;
 
 void mcc_ParseOptions(int argc, char **argv);
 
-mcc_ListIterator_t *mcc_OptionsFileListGetIterator(void);
+eral_ListIterator_t *mcc_OptionsFileListGetIterator(void);
 
 /**
  * A method mainly for unit testing.  It destroys the dynamic memory associated

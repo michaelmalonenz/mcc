@@ -59,19 +59,19 @@ static void TearDownFileBufferTest(void)
 
 static void test_fileBuffer(void)
 {
-   mcc_FileBuffer_t *testBuffer = mcc_CreateFileBuffer(FILENAME);
-   mcc_LogicalLine_t *line = NULL;
+   eral_FileBuffer_t *testBuffer = eral_CreateFileBuffer(FILENAME);
+   eral_LogicalLine_t *line = NULL;
    int i = 0;
-   while(!mcc_FileBufferEOFReached(testBuffer))
+   while(!eral_FileBufferEOFReached(testBuffer))
    {
-      line = mcc_FileBufferGetNextLogicalLine(testBuffer);
+      line = eral_FileBufferGetNextLogicalLine(testBuffer);
       printf("Test Line  : '%s'\n", lines[i]);
       printf("Value line : '%s'\n", line->string);
       MCC_ASSERT(strncmp(lines[i], line->string, line->length) == 0);
       i++;
    }
    MCC_ASSERT(i == NUM_LINES);
-   mcc_DeleteFileBuffer(testBuffer);
+   eral_DeleteFileBuffer(testBuffer);
 }
 
 int main(int UNUSED(argc), char UNUSED(**argv))

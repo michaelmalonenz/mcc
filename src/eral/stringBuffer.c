@@ -39,9 +39,9 @@ struct StringBuffer {
 };
 
 
-mcc_StringBuffer_t *mcc_CreateStringBuffer()
+eral_StringBuffer_t *eral_CreateStringBuffer()
 {
-   mcc_StringBuffer_t *result = (mcc_StringBuffer_t *) malloc(sizeof(mcc_StringBuffer_t));
+   eral_StringBuffer_t *result = (eral_StringBuffer_t *) malloc(sizeof(eral_StringBuffer_t));
    MCC_ASSERT(result != NULL);
    result->string = (char *) calloc(sizeof(char), MCC_INITIAL_STRING_BUFFER_LENGTH);
    MCC_ASSERT(result->string != NULL);
@@ -50,14 +50,14 @@ mcc_StringBuffer_t *mcc_CreateStringBuffer()
    return result;
 }
 
-void mcc_DeleteStringBuffer(mcc_StringBuffer_t *buffer)
+void eral_DeleteStringBuffer(eral_StringBuffer_t *buffer)
 {
    MCC_ASSERT(buffer != NULL);
    free(buffer->string);
    free(buffer);
 }
 
-char *mcc_DestroyBufferNotString(mcc_StringBuffer_t *buffer)
+char *eral_DestroyBufferNotString(eral_StringBuffer_t *buffer)
 {
    //+1 leaves space for the NUL
    char *string = (char *) realloc(buffer->string,
@@ -72,12 +72,12 @@ char *mcc_DestroyBufferNotString(mcc_StringBuffer_t *buffer)
    return string;
 }
 
-const char *mcc_StringBufferGetString(mcc_StringBuffer_t *buffer)
+const char *eral_StringBufferGetString(eral_StringBuffer_t *buffer)
 {
    return (const char *) buffer->string;
 }
 
-void mcc_StringBufferAppendChar(mcc_StringBuffer_t *buffer, const char c)
+void eral_StringBufferAppendChar(eral_StringBuffer_t *buffer, const char c)
 {
    if (buffer->stringLength == buffer->bufferSize)
    {
@@ -92,38 +92,38 @@ void mcc_StringBufferAppendChar(mcc_StringBuffer_t *buffer, const char c)
       buffer->stringLength++;
 }
 
-void mcc_StringBufferAppendString(mcc_StringBuffer_t *buffer, const char *string)
+void eral_StringBufferAppendString(eral_StringBuffer_t *buffer, const char *string)
 {
    int len = strlen(string);
    int i;
    for (i = 0; i < len; i++)
    {
-      mcc_StringBufferAppendChar(buffer, string[i]);
+      eral_StringBufferAppendChar(buffer, string[i]);
    }
 }
 
-void mcc_StringBufferUnappendChar(mcc_StringBuffer_t *buffer)
+void eral_StringBufferUnappendChar(eral_StringBuffer_t *buffer)
 {
    buffer->stringLength--;
 }
 
-unsigned long mcc_GetStringBufferLength(mcc_StringBuffer_t *buffer)
+unsigned long eral_GetStringBufferLength(eral_StringBuffer_t *buffer)
 {
    return buffer->stringLength;
 }
 
-int mcc_StringBufferStrncmp(mcc_StringBuffer_t *buffer, const char *string, size_t length)
+int eral_StringBufferStrncmp(eral_StringBuffer_t *buffer, const char *string, size_t length)
 {
    return strncmp((const char *)buffer->string, string, length);
 }
 
 #if MCC_DEBUG
-unsigned long mcc_StringBufferGetBufferSize(mcc_StringBuffer_t *buffer)
+unsigned long eral_StringBufferGetBufferSize(eral_StringBuffer_t *buffer)
 {
    return buffer->bufferSize;
 }
 
-void mcc_PrintStringBuffer(mcc_StringBuffer_t *buffer)
+void eral_PrintStringBuffer(eral_StringBuffer_t *buffer)
 {
    printf("BufferSize:\t%ld\nString Length:\t%ld\nString:\t'%s'\n",
           buffer->bufferSize, buffer->stringLength, buffer->string);

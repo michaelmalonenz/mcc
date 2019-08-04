@@ -24,35 +24,35 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
-#ifndef MCC_STRING_BUFFER_H
-#define MCC_STRING_BUFFER_H
+#ifndef ERAL_STRING_BUFFER_H
+#define ERAL_STRING_BUFFER_H
 
 #include <stdlib.h>
 #include "config.h"
 
-typedef struct StringBuffer mcc_StringBuffer_t;
+typedef struct StringBuffer eral_StringBuffer_t;
 
-mcc_StringBuffer_t *mcc_CreateStringBuffer(void);
+eral_StringBuffer_t *eral_CreateStringBuffer(void);
 
-void mcc_DeleteStringBuffer(mcc_StringBuffer_t *buffer);
+void eral_DeleteStringBuffer(eral_StringBuffer_t *buffer);
 
-char *mcc_DestroyBufferNotString(mcc_StringBuffer_t *buffer);
+char *eral_DestroyBufferNotString(eral_StringBuffer_t *buffer);
 
-void mcc_StringBufferAppendChar(mcc_StringBuffer_t *buffer, const char c);
+void eral_StringBufferAppendChar(eral_StringBuffer_t *buffer, const char c);
 
-void mcc_StringBufferAppendString(mcc_StringBuffer_t *buffer, const char *string);
+void eral_StringBufferAppendString(eral_StringBuffer_t *buffer, const char *string);
 
-void mcc_StringBufferUnappendChar(mcc_StringBuffer_t *buffer);
+void eral_StringBufferUnappendChar(eral_StringBuffer_t *buffer);
 
-unsigned long mcc_GetStringBufferLength(mcc_StringBuffer_t *buffer);
+unsigned long eral_GetStringBufferLength(eral_StringBuffer_t *buffer);
 
-const char *mcc_StringBufferGetString(mcc_StringBuffer_t *buffer);
+const char *eral_StringBufferGetString(eral_StringBuffer_t *buffer);
 
-int mcc_StringBufferStrncmp(mcc_StringBuffer_t *buffer, const char *string, size_t length);
+int eral_StringBufferStrncmp(eral_StringBuffer_t *buffer, const char *string, size_t length);
 
 #if MCC_DEBUG
-void mcc_PrintStringBuffer(mcc_StringBuffer_t *buffer);
-unsigned long mcc_StringBufferGetBufferSize(mcc_StringBuffer_t *buffer);
+void eral_PrintStringBuffer(eral_StringBuffer_t *buffer);
+unsigned long eral_StringBufferGetBufferSize(eral_StringBuffer_t *buffer);
 #endif /* MCC_DEBUG */
 
-#endif /* MCC_STRING_BUFFER_H */
+#endif /* ERAL_STRING_BUFFER_H */

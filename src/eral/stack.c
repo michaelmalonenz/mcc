@@ -31,70 +31,70 @@
 #include "list.h"
 
 struct stack {
-   mcc_List_t *list;
+   eral_List_t *list;
 };
 
-mcc_Stack_t *mcc_StackCreate(void)
+eral_Stack_t *eral_StackCreate(void)
 {
-   mcc_Stack_t *result = (mcc_Stack_t *) malloc(sizeof(mcc_Stack_t));
-   result->list = mcc_ListCreate();
+   eral_Stack_t *result = (eral_Stack_t *) malloc(sizeof(eral_Stack_t));
+   result->list = eral_ListCreate();
    return result;
 }
 
-void mcc_StackDelete(mcc_Stack_t *stack, mcc_NodeDestructor_fn destructorFn)
+void eral_StackDelete(eral_Stack_t *stack, eral_NodeDestructor_fn destructorFn)
 {
-   mcc_ListDelete(stack->list, destructorFn);
+   eral_ListDelete(stack->list, destructorFn);
    free(stack);
 }
 
-void mcc_StackPush(mcc_Stack_t *stack, uintptr_t data)
+void eral_StackPush(eral_Stack_t *stack, uintptr_t data)
 {
    MCC_ASSERT(data != NULL_DATA);
-   mcc_ListAppendData(stack->list, data);
+   eral_ListAppendData(stack->list, data);
 }
 
-uintptr_t mcc_StackPop(const mcc_Stack_t *stack)
+uintptr_t eral_StackPop(const eral_Stack_t *stack)
 {
-   return mcc_ListRemoveTailData(stack->list);
+   return eral_ListRemoveTailData(stack->list);
 }
 
-uintptr_t mcc_StackPeek(const mcc_Stack_t *stack)
+uintptr_t eral_StackPeek(const eral_Stack_t *stack)
 {
-   return mcc_ListPeekTailData(stack->list);
+   return eral_ListPeekTailData(stack->list);
 }
 
-bool_t mcc_StackEmpty(const mcc_Stack_t *stack)
+bool_t eral_StackEmpty(const eral_Stack_t *stack)
 {
-   return mcc_ListEmpty(stack->list);
+   return eral_ListEmpty(stack->list);
 }
 
-uint32_t mcc_StackNumItems(const mcc_Stack_t *stack)
+uint32_t eral_StackNumItems(const eral_Stack_t *stack)
 {
-   return mcc_ListGetLength(stack->list);
+   return eral_ListGetLength(stack->list);
 }
 
-mcc_Stack_t *mcc_StackReverse(mcc_Stack_t *stack)
+eral_Stack_t *eral_StackReverse(eral_Stack_t *stack)
 {
-   mcc_Stack_t *result = mcc_StackCreate();
-   while(!mcc_StackEmpty(stack))
+   eral_Stack_t *result = eral_StackCreate();
+   while(!eral_StackEmpty(stack))
    {
-      mcc_StackPush(result, mcc_StackPop(stack));
+      eral_StackPush(result, eral_StackPop(stack));
    }
-   mcc_StackDelete(stack, NULL);
+   eral_StackDelete(stack, NULL);
    return result;
 }
 
 #if MCC_DEBUG
-void mcc_DebugPrintStack(const mcc_Stack_t *stack, stackItemPrinter_t itemPrinterFn)
+void eral_DebugPrintStack(const eral_Stack_t *stack, stackItemPrinter_t itemPrinterFn)
 {
-   mcc_ListIterator_t *iter = mcc_ListGetIterator(stack->list);
-   uintptr_t item = mcc_ListGetPrevData(iter);
-   printf("Number of Stack Items: %d\n", mcc_ListGetLength(stack->list));
+   eral_ListIterator_t *iter = eral_ListGetIterator(stack->list);
+   uintptr_t item = eral_ListGetPrevData(iter);
+   printf("Number of Stack Items: %d\n", eral_ListGetLength(stack->list));
    while(item != NULL_DATA)
    {
       itemPrinterFn(item);
-      item = mcc_ListGetPrevData(iter);
+      item = eral_ListGetPrevData(iter);
    }
-   mcc_ListDeleteIterator(iter);
+   eral_ListDeleteIterator(iter);
 }
 #endif

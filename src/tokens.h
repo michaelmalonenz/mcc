@@ -130,10 +130,10 @@ extern size_t pp_strlens[NUM_PREPROCESSOR_DIRECTIVES];
 
 extern const char *number_types[NUMBER_OF_NUMBER_TYPES];
 
-MCC_SYMBOL mcc_GetSymbol(mcc_LogicalLine_t *line);
-MCC_OPERATOR mcc_GetOperator(mcc_LogicalLine_t *line);
-PREPROC_DIRECTIVE mcc_GetPreprocessorDirective(mcc_LogicalLine_t *line);
-MCC_KEYWORD mcc_GetKeyword(mcc_LogicalLine_t * line);
+MCC_SYMBOL mcc_GetSymbol(eral_LogicalLine_t *line);
+MCC_OPERATOR mcc_GetOperator(eral_LogicalLine_t *line);
+PREPROC_DIRECTIVE mcc_GetPreprocessorDirective(eral_LogicalLine_t *line);
+MCC_KEYWORD mcc_GetKeyword(eral_LogicalLine_t * line);
 
 void mcc_ExpectTokenType(const mcc_Token_t *token, TOKEN_TYPE tokenType, int index);
 

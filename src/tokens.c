@@ -109,7 +109,7 @@ static inline void init_tokens(void)
    initialised = TRUE;
 }
 
-static int get_token_impl(mcc_LogicalLine_t *line, int num_tokens,
+static int get_token_impl(eral_LogicalLine_t *line, int num_tokens,
                           const char **token_list, size_t *strlens_list,
                           bool_t requires_non_word_after)
 {
@@ -138,7 +138,7 @@ static int get_token_impl(mcc_LogicalLine_t *line, int num_tokens,
    return -1;
 }
 
-PREPROC_DIRECTIVE mcc_GetPreprocessorDirective(mcc_LogicalLine_t *line)
+PREPROC_DIRECTIVE mcc_GetPreprocessorDirective(eral_LogicalLine_t *line)
 {
    int pp_dir;
 
@@ -155,7 +155,7 @@ PREPROC_DIRECTIVE mcc_GetPreprocessorDirective(mcc_LogicalLine_t *line)
    }
 }
 
-MCC_SYMBOL mcc_GetSymbol(mcc_LogicalLine_t *line)
+MCC_SYMBOL mcc_GetSymbol(eral_LogicalLine_t *line)
 {
    int sym;
 
@@ -172,7 +172,7 @@ MCC_SYMBOL mcc_GetSymbol(mcc_LogicalLine_t *line)
 }
 
 
-MCC_OPERATOR mcc_GetOperator(mcc_LogicalLine_t *line)
+MCC_OPERATOR mcc_GetOperator(eral_LogicalLine_t *line)
 {
    int op;
 
@@ -188,7 +188,7 @@ MCC_OPERATOR mcc_GetOperator(mcc_LogicalLine_t *line)
    }
 }
 
-MCC_KEYWORD mcc_GetKeyword(mcc_LogicalLine_t *line)
+MCC_KEYWORD mcc_GetKeyword(eral_LogicalLine_t *line)
 {
    int key;
 

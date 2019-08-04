@@ -24,38 +24,38 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
-#ifndef MCC_FILE_BUFFER_H
-#define MCC_FILE_BUFFER_H
+#ifndef ERAL_FILE_BUFFER_H
+#define ERAL_FILE_BUFFER_H
 
 #include <stdio.h>
 #include <stdint.h>
 #include "mcc.h"
 
-typedef struct FileBuffer mcc_FileBuffer_t;
+typedef struct FileBuffer eral_FileBuffer_t;
 
 typedef struct LogicalLine {
    char *string;
    unsigned int index;
    unsigned int length;
-} mcc_LogicalLine_t;
+} eral_LogicalLine_t;
 
-mcc_FileBuffer_t *mcc_CreateFileBuffer(const char *file);
+eral_FileBuffer_t *eral_CreateFileBuffer(const char *file);
 
-void mcc_DeleteFileBuffer(mcc_FileBuffer_t* buffer);
+void eral_DeleteFileBuffer(eral_FileBuffer_t* buffer);
 
-bool_t mcc_FileBufferEOFReached(mcc_FileBuffer_t *buffer);
+bool_t eral_FileBufferEOFReached(eral_FileBuffer_t *buffer);
 
-mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer);
+eral_LogicalLine_t *eral_FileBufferGetNextLogicalLine(eral_FileBuffer_t *fileBuffer);
 
-int SkipWhiteSpace(mcc_LogicalLine_t *line);
-void mcc_ShiftLineLeftAndShrink(mcc_LogicalLine_t *line, uint32_t shiftOffset, int amountToShift);
+int SkipWhiteSpace(eral_LogicalLine_t *line);
+void eral_ShiftLineLeftAndShrink(eral_LogicalLine_t *line, uint32_t shiftOffset, int amountToShift);
 
-const char *mcc_GetFileBufferFilename(mcc_FileBuffer_t *fileBuffer);
-unsigned short mcc_GetFileBufferFileNumber(mcc_FileBuffer_t *fileBuffer);
-unsigned int mcc_GetFileBufferCurrentLineNo(mcc_FileBuffer_t *fileBuffer);
+const char *eral_GetFileBufferFilename(eral_FileBuffer_t *fileBuffer);
+unsigned short eral_GetFileBufferFileNumber(eral_FileBuffer_t *fileBuffer);
+unsigned int eral_GetFileBufferCurrentLineNo(eral_FileBuffer_t *fileBuffer);
 
-#if MCC_DEBUG
-void mcc_DebugPrintFileBuffer(mcc_FileBuffer_t *buffer);
+#if ERAL_DEBUG
+void eral_DebugPrintFileBuffer(eral_FileBuffer_t *buffer);
 #endif
 
-#endif /* MCC_FILE_BUFFER_H */
+#endif /* ERAL_FILE_BUFFER_H */

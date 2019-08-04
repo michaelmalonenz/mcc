@@ -50,32 +50,32 @@ struct FileBuffer {
    unsigned int bufferIndex;
    char buffer[FILE_BUFFER_SIZE + 1];
    size_t charsRead;
-   mcc_LogicalLine_t currentLine;
+   eral_LogicalLine_t currentLine;
 };
 
 
 #if MCC_DEBUG
-void mcc_DebugPrintFileBuffer(mcc_FileBuffer_t *buffer);
+void eral_DebugPrintFileBuffer(eral_FileBuffer_t *buffer);
 #endif
 
-const char *mcc_GetFileBufferFilename(mcc_FileBuffer_t *fileBuffer)
+const char *eral_GetFileBufferFilename(eral_FileBuffer_t *fileBuffer)
 {
    return fileBuffer->filename;
 }
 
-unsigned int mcc_GetFileBufferCurrentLineNo(mcc_FileBuffer_t *fileBuffer)
+unsigned int eral_GetFileBufferCurrentLineNo(eral_FileBuffer_t *fileBuffer)
 {
    return fileBuffer->lineNum;
 }
 
-unsigned short mcc_GetFileBufferFileNumber(mcc_FileBuffer_t *fileBuffer)
+unsigned short eral_GetFileBufferFileNumber(eral_FileBuffer_t *fileBuffer)
 {
    return fileBuffer->fileNumber;
 }
 
-mcc_FileBuffer_t *mcc_CreateFileBuffer(const char *file)
+eral_FileBuffer_t *eral_CreateFileBuffer(const char *file)
 {
-   mcc_FileBuffer_t *fileBuffer = (mcc_FileBuffer_t *) malloc(sizeof(mcc_FileBuffer_t));
+   eral_FileBuffer_t *fileBuffer = (eral_FileBuffer_t *) malloc(sizeof(eral_FileBuffer_t));
    fileBuffer->filename = file;
    fileBuffer->file = mcc_OpenFile(file, "r", &fileBuffer->fileNumber);
    fileBuffer->lineNum = 0;
@@ -87,7 +87,7 @@ mcc_FileBuffer_t *mcc_CreateFileBuffer(const char *file)
    return fileBuffer;
 }
 
-void mcc_DeleteFileBuffer(mcc_FileBuffer_t* buffer)
+void eral_DeleteFileBuffer(eral_FileBuffer_t* buffer)
 {
    MCC_ASSERT(buffer->file != NULL);
    fclose(buffer->file);
@@ -99,7 +99,7 @@ void mcc_DeleteFileBuffer(mcc_FileBuffer_t* buffer)
    free(buffer);
 }
 
-static void readFileChunk(mcc_FileBuffer_t *fileBuffer)
+static void readFileChunk(eral_FileBuffer_t *fileBuffer)
 {
    fileBuffer->charsRead = fread(fileBuffer->buffer,
                                   sizeof(*(fileBuffer->buffer)),
@@ -114,14 +114,14 @@ static void readFileChunk(mcc_FileBuffer_t *fileBuffer)
    fileBuffer->bufferIndex = 0;
 }
 
-bool_t mcc_FileBufferEOFReached(mcc_FileBuffer_t *buffer)
+bool_t eral_FileBufferEOFReached(eral_FileBuffer_t *buffer)
 {
    return (bool_t) (feof(buffer->file) && buffer->charsRead == 0);
 }
 
-mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer)
+eral_LogicalLine_t *eral_FileBufferGetNextLogicalLine(eral_FileBuffer_t *fileBuffer)
 {
-   mcc_StringBuffer_t *lineBuffer = mcc_CreateStringBuffer();
+   eral_StringBuffer_t *lineBuffer = eral_CreateStringBuffer();
    bool_t lineIsRead = FALSE;
    if (fileBuffer->currentLine.string != NULL)
    {
@@ -132,17 +132,17 @@ mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer
       if (fileBuffer->bufferIndex == fileBuffer->charsRead)
       {
          readFileChunk(fileBuffer);
-         if (mcc_FileBufferEOFReached(fileBuffer))
+         if (eral_FileBufferEOFReached(fileBuffer))
          {
-            long lineLength = mcc_GetStringBufferLength(lineBuffer);
+            long lineLength = eral_GetStringBufferLength(lineBuffer);
             if (lineLength > 0)
             {
                fileBuffer->currentLine.length = lineLength;
-               fileBuffer->currentLine.string = mcc_DestroyBufferNotString(lineBuffer);
+               fileBuffer->currentLine.string = eral_DestroyBufferNotString(lineBuffer);
                fileBuffer->currentLine.index = 0;
                return &fileBuffer->currentLine;
             }
-            mcc_DeleteStringBuffer(lineBuffer);
+            eral_DeleteStringBuffer(lineBuffer);
             fileBuffer->currentLine.string = NULL;
             fileBuffer->currentLine.index = 0;
             fileBuffer->currentLine.length = 0;
@@ -153,18 +153,18 @@ mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer
       {
          if (!isBreakingWhiteSpace(fileBuffer->buffer[fileBuffer->bufferIndex]))
          {
-            mcc_StringBufferAppendChar(lineBuffer,
+            eral_StringBufferAppendChar(lineBuffer,
                                        fileBuffer->buffer[fileBuffer->bufferIndex++]);
          }
          else
          {
             if (fileBuffer->buffer[(fileBuffer->bufferIndex - 1)] == '\\')
             {
-               mcc_StringBufferUnappendChar(lineBuffer);
+               eral_StringBufferUnappendChar(lineBuffer);
             }
             else
             {
-               mcc_StringBufferAppendChar(lineBuffer, '\0');
+               eral_StringBufferAppendChar(lineBuffer, '\0');
                lineIsRead = TRUE;
             }
             //This might seem weird, but the construction here will allow us to handle any
@@ -184,13 +184,13 @@ mcc_LogicalLine_t *mcc_FileBufferGetNextLogicalLine(mcc_FileBuffer_t *fileBuffer
          }
       }
    }
-   fileBuffer->currentLine.length = mcc_GetStringBufferLength(lineBuffer);
-   fileBuffer->currentLine.string = mcc_DestroyBufferNotString(lineBuffer);
+   fileBuffer->currentLine.length = eral_GetStringBufferLength(lineBuffer);
+   fileBuffer->currentLine.string = eral_DestroyBufferNotString(lineBuffer);
    fileBuffer->currentLine.index = 0;
    return &fileBuffer->currentLine;
 }
 
-int SkipWhiteSpace(mcc_LogicalLine_t *line)
+int SkipWhiteSpace(eral_LogicalLine_t *line)
 {
    int numChars = 0;
    while( (line->index + numChars < line->length) && 
@@ -207,7 +207,7 @@ int SkipWhiteSpace(mcc_LogicalLine_t *line)
  * We don't realloc here, because it's a side effect which would break client
  * referential integrity.
  */
-void mcc_ShiftLineLeftAndShrink(mcc_LogicalLine_t *line,
+void eral_ShiftLineLeftAndShrink(eral_LogicalLine_t *line,
                                 uint32_t shiftOffset,
                                 int amountToShift)
 {
@@ -221,7 +221,7 @@ void mcc_ShiftLineLeftAndShrink(mcc_LogicalLine_t *line,
 }
 
 #if MCC_DEBUG
-void mcc_DebugPrintFileBuffer(mcc_FileBuffer_t *buffer)
+void eral_DebugPrintFileBuffer(eral_FileBuffer_t *buffer)
 {
    printf("----- FileBuffer ----- \nfilename:\t%s\nlineNum:\t%u\nbufferIndex:\t%u\ncharsRead:\t%" PRIuPTR "\n",
           buffer->filename, buffer->lineNum, buffer->bufferIndex, (uintptr_t)buffer->charsRead);

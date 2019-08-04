@@ -125,86 +125,86 @@ void mcc_DeleteToken(uintptr_t token)
 
 void mcc_InsertToken(mcc_Token_t *token, mcc_TokenListIterator_t *iter)
 {
-   mcc_ListInsertDataAtCurrentPosition((mcc_ListIterator_t *) iter, (uintptr_t) token);
+   eral_ListInsertDataAtCurrentPosition((eral_ListIterator_t *) iter, (uintptr_t) token);
 }
 
 mcc_Token_t *mcc_TokenListReplaceCurrent(
    mcc_TokenListIterator_t *iter, mcc_TokenList_t *list)
 {
-   return (mcc_Token_t *)mcc_ListReplaceCurrentData(
-      (mcc_ListIterator_t *)iter, (mcc_List_t *)list);
+   return (mcc_Token_t *)eral_ListReplaceCurrentData(
+      (eral_ListIterator_t *)iter, (eral_List_t *)list);
 }
 
 const mcc_Token_t *mcc_TokenListPeekCurrentToken(mcc_TokenListIterator_t *iter)
 {
-   return (const mcc_Token_t *) mcc_ListPeekCurrentData((mcc_ListIterator_t *) iter);
+   return (const mcc_Token_t *) eral_ListPeekCurrentData((eral_ListIterator_t *) iter);
 }
 
 const mcc_Token_t *mcc_TokenListPeekNextToken(mcc_TokenListIterator_t *iter)
 {
-   return (const mcc_Token_t *) mcc_ListPeekNextData((mcc_ListIterator_t *)iter);
+   return (const mcc_Token_t *) eral_ListPeekNextData((eral_ListIterator_t *)iter);
 }
 
 void mcc_TokenListDeleteIterator(mcc_TokenListIterator_t *iter)
 {
-   mcc_ListDeleteIterator((mcc_ListIterator_t *) iter);
+   eral_ListDeleteIterator((eral_ListIterator_t *) iter);
 }
 
 mcc_TokenListIterator_t *mcc_TokenListGetIterator(mcc_TokenList_t *list)
 {
-   return (mcc_TokenListIterator_t *) mcc_ListGetIterator((mcc_List_t *)list);
+   return (mcc_TokenListIterator_t *) eral_ListGetIterator((eral_List_t *)list);
 }
 
 void mcc_TokenListAppend(mcc_TokenList_t *list, mcc_Token_t *token)
 {
-   mcc_ListAppendData((mcc_List_t *)list, (uintptr_t)token);
+   eral_ListAppendData((eral_List_t *)list, (uintptr_t)token);
 }
 
 mcc_TokenListIterator_t *mcc_TokenListCopyIterator(mcc_TokenListIterator_t *iter)
 {
-   return (mcc_TokenListIterator_t *) mcc_ListCopyIterator((mcc_ListIterator_t *) iter);
+   return (mcc_TokenListIterator_t *) eral_ListCopyIterator((eral_ListIterator_t *) iter);
 }
 
 mcc_Token_t *mcc_GetNextToken(mcc_TokenListIterator_t *iter)
 {
-   return (mcc_Token_t *) mcc_ListGetNextData((mcc_ListIterator_t *) iter);
+   return (mcc_Token_t *) eral_ListGetNextData((eral_ListIterator_t *) iter);
 }
 
 mcc_Token_t *mcc_GetPreviousToken(mcc_TokenListIterator_t *iter)
 {
-   return (mcc_Token_t *) mcc_ListGetPrevData((mcc_ListIterator_t *) iter);
+   return (mcc_Token_t *) eral_ListGetPrevData((eral_ListIterator_t *) iter);
 }
 
 const mcc_Token_t *mcc_PeekPreviousNonWhitespaceToken(mcc_TokenListIterator_t *iter)
 {
-   const mcc_Token_t *tok = (mcc_Token_t *) mcc_ListPeekCurrentData(iter);
+   const mcc_Token_t *tok = (mcc_Token_t *) eral_ListPeekCurrentData(iter);
    if (tok && tok->tokenType != TOK_WHITESPACE)
       return tok;
-   mcc_TokenListIterator_t *temp = mcc_ListCopyIterator(iter);
+   mcc_TokenListIterator_t *temp = eral_ListCopyIterator(iter);
    while (tok && tok->tokenType == TOK_WHITESPACE)
-      tok = (mcc_Token_t *) mcc_ListGetPrevData(temp);
-   mcc_ListDeleteIterator(temp);
+      tok = (mcc_Token_t *) eral_ListGetPrevData(temp);
+   eral_ListDeleteIterator(temp);
    return tok;
 }
 
 mcc_TokenList_t *mcc_TokenListCreate(void)
 {
-   return (mcc_TokenList_t*) mcc_ListCreate();
+   return (mcc_TokenList_t*) eral_ListCreate();
 }
 
 void mcc_TokenListDelete(mcc_TokenList_t *list)
 {
-   mcc_ListDelete(list, &mcc_DeleteToken);
+   eral_ListDelete(list, &mcc_DeleteToken);
 }
 
 void mcc_TokenListConcatenate(mcc_TokenList_t *dst, mcc_TokenList_t *src)
 {
-   mcc_ListConcatenate((mcc_List_t *)dst, (mcc_List_t *)src);
+   eral_ListConcatenate((eral_List_t *)dst, (eral_List_t *)src);
 }
 
 mcc_Token_t *mcc_TokenListRemoveCurrent(mcc_TokenListIterator_t *iter)
 {
-   return (mcc_Token_t *) mcc_ListRemoveCurrentData((mcc_ListIterator_t *)iter);
+   return (mcc_Token_t *) eral_ListRemoveCurrentData((eral_ListIterator_t *)iter);
 }
 
 void mcc_WriteTokensToOutputFile(mcc_TokenList_t *tokens)

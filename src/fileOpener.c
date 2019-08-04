@@ -39,30 +39,30 @@ typedef struct file_info {
 } file_info_t;
 
 static unsigned short current_file_number = 0;
-static mcc_List_t *fileList = NULL;
+static eral_List_t *fileList = NULL;
 
-static mcc_List_t *localIncludeDirList = NULL;
-static mcc_List_t *systemIncludeDirList = NULL;
+static eral_List_t *localIncludeDirList = NULL;
+static eral_List_t *systemIncludeDirList = NULL;
 
 void mcc_FileOpenerInitialise(void)
 {
-   localIncludeDirList = mcc_ListCreate();
-   systemIncludeDirList = mcc_ListCreate();
+   localIncludeDirList = eral_ListCreate();
+   systemIncludeDirList = eral_ListCreate();
 
 // @todo also append all dirs in the env var C_INCLUDE_PATH
 #if defined(__linux)
-   mcc_ListAppendData(systemIncludeDirList, (uintptr_t) "/usr/include");
-   mcc_ListAppendData(systemIncludeDirList, (uintptr_t) "/usr/include/linux");
+   eral_ListAppendData(systemIncludeDirList, (uintptr_t) "/usr/include");
+   eral_ListAppendData(systemIncludeDirList, (uintptr_t) "/usr/include/linux");
 # if defined(__i386__)
-   mcc_ListAppendData(systemIncludeDirList, (uintptr_t) "/usr/include/i386-linux-gnu");
+   eral_ListAppendData(systemIncludeDirList, (uintptr_t) "/usr/include/i386-linux-gnu");
 # elif  defined(__x86_64__)
-   mcc_ListAppendData(systemIncludeDirList, (uintptr_t) "/usr/include/x86_64-linux-gnu");
+   eral_ListAppendData(systemIncludeDirList, (uintptr_t) "/usr/include/x86_64-linux-gnu");
    // How do I deal with the GCC version?
-   mcc_ListAppendData(systemIncludeDirList, (uintptr_t) "/usr/lib/gcc/x86_64-linux-gnu/8/include");
+   eral_ListAppendData(systemIncludeDirList, (uintptr_t) "/usr/lib/gcc/x86_64-linux-gnu/8/include");
 # endif
 #endif
 
-   fileList = mcc_ListCreate();
+   fileList = eral_ListCreate();
 }
 
 static void DeleteFileInfo(uintptr_t deathRow)
@@ -75,14 +75,14 @@ static void DeleteFileInfo(uintptr_t deathRow)
 
 void mcc_FileOpenerDelete(void)
 {
-   mcc_ListDelete(fileList, &DeleteFileInfo);
-   mcc_ListDelete(localIncludeDirList, NULL);
-   mcc_ListDelete(systemIncludeDirList, NULL);
+   eral_ListDelete(fileList, &DeleteFileInfo);
+   eral_ListDelete(localIncludeDirList, NULL);
+   eral_ListDelete(systemIncludeDirList, NULL);
 }
 
 void mcc_FileOpenerLocalIncAppendDir(const char *dir)
 {
-   mcc_ListAppendData(localIncludeDirList, (uintptr_t) dir);
+   eral_ListAppendData(localIncludeDirList, (uintptr_t) dir);
 }
 
 FILE *mcc_OpenFile(const char *filename, const char *flags,
@@ -101,40 +101,40 @@ FILE *mcc_OpenFile(const char *filename, const char *flags,
    newFile->filename = (char *) malloc((filename_len + 1) * sizeof(char));
    strncpy(newFile->filename, filename, filename_len + 1);
 
-   mcc_ListAppendData(fileList, (uintptr_t) newFile);
+   eral_ListAppendData(fileList, (uintptr_t) newFile);
    
    return file;
 }
 
 const char *mcc_ResolveFileNameFromNumber(const unsigned short fileno)
 {
-   mcc_ListIterator_t *iter = NULL;
+   eral_ListIterator_t *iter = NULL;
    file_info_t *temp = NULL;
 
    if (fileList == NULL)
       return NULL;
 
-   iter = mcc_ListGetIterator(fileList);
-   temp = (file_info_t *) mcc_ListGetNextData(iter);
+   iter = eral_ListGetIterator(fileList);
+   temp = (file_info_t *) eral_ListGetNextData(iter);
    while (temp != NULL)
    {
       if (temp->fileno == fileno)
       {
-         mcc_ListDeleteIterator(iter);
+         eral_ListDeleteIterator(iter);
          return temp->filename;
       }
-      temp = (file_info_t *) mcc_ListGetNextData(iter);
+      temp = (file_info_t *) eral_ListGetNextData(iter);
    }
 
    /* We couldn't find it, so free the iterator and return NULL */
-   mcc_ListDeleteIterator(iter);
+   eral_ListDeleteIterator(iter);
    return NULL;
 }
 
 char *mcc_FindLocalInclude(const char *filename)
 {
-   mcc_ListIterator_t *iter = mcc_ListGetIterator(localIncludeDirList);
-   char *currentDir = (char *) mcc_ListGetNextData(iter);
+   eral_ListIterator_t *iter = eral_ListGetIterator(localIncludeDirList);
+   char *currentDir = (char *) eral_ListGetNextData(iter);
    while (currentDir != NULL)
    {
       size_t dirLen = strlen(currentDir);
@@ -157,12 +157,13 @@ char *mcc_FindLocalInclude(const char *filename)
       if (fd != -1)
       {
          close(fd);
+         eral_ListDeleteIterator(iter);
          return temp;
       }
       free(temp);
-      currentDir = (char *) mcc_ListGetNextData(iter);
+      currentDir = (char *) eral_ListGetNextData(iter);
    }
-
+   eral_ListDeleteIterator(iter);
    char *result = (char *) malloc(strlen(filename) + 1);
    strncpy(result, filename, strlen(filename) + 1);
    return result;
@@ -170,8 +171,8 @@ char *mcc_FindLocalInclude(const char *filename)
 
 char *mcc_FindSystemInclude(const char *filename)
 {
-   mcc_ListIterator_t *iter = mcc_ListGetIterator(systemIncludeDirList);
-   char *currentDir = (char *) mcc_ListGetNextData(iter);
+   eral_ListIterator_t *iter = eral_ListGetIterator(systemIncludeDirList);
+   char *currentDir = (char *) eral_ListGetNextData(iter);
    while (currentDir != NULL)
    {
       size_t dirLen = strlen(currentDir);
@@ -186,10 +187,12 @@ char *mcc_FindSystemInclude(const char *filename)
       if (fd != -1)
       {
          close(fd);
+         eral_ListDeleteIterator(iter);
          return temp;
       }
       free(temp);
-      currentDir = (char *) mcc_ListGetNextData(iter);
+      currentDir = (char *) eral_ListGetNextData(iter);
    }
+   eral_ListDeleteIterator(iter);
    return NULL;
 }
