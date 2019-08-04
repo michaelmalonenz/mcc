@@ -100,10 +100,10 @@ typedef enum operator_index {OP_DECREMENT_POST, OP_INCREMENT_POST, OP_TIMES_EQUA
                              OP_LOGICAL_INCL_OR, OP_NOT, OP_BITWISE_AND,
                              OP_BITWISE_INCL_OR, OP_BITWISE_EXCL_OR,
                              OP_NEGATE, OP_SIZEOF, OP_ADDRESS_OF, OP_DEREFERENCE,
-                             OP_TERNARY_IF, OP_TERNARY_ELSE, OP_MEMBER_OF,
-                             OP_DEREF_MEMBER_OF, OP_EQUALS_ASSIGN, OP_COMMA,
-                             OP_ADD, OP_MINUS, OP_DIVIDE, OP_MULTIPLY, OP_MODULO,
-                             OP_DECREMENT_PRE, OP_INCREMENT_PRE,
+                             OP_TERNARY_IF, OP_TERNARY_ELSE, OP_VARIADIC_ARGS,
+                             OP_MEMBER_OF, OP_DEREF_MEMBER_OF, OP_EQUALS_ASSIGN,
+                             OP_COMMA, OP_ADD, OP_MINUS, OP_DIVIDE, OP_MULTIPLY,
+                             OP_MODULO, OP_DECREMENT_PRE, OP_INCREMENT_PRE,
                              NUM_OPERATORS, OP_NONE} MCC_OPERATOR;
 extern const char *operators[NUM_OPERATORS];
 extern size_t operator_strlens[NUM_OPERATORS];

@@ -29,7 +29,7 @@
 #include "toolChainCommands.h"
 #include "TestUtils.h"
 
-#define NUM_TEST_CASES 11
+#define NUM_TEST_CASES 12
 const char *strings_to_tokenise[NUM_TEST_CASES] = { 
    "#include \"12/some_header.h\"\n",
    "char /*embedded comment*/ a = /*second embedded comment*/'\\0377';\n",
@@ -41,11 +41,12 @@ const char *strings_to_tokenise[NUM_TEST_CASES] = {
    "# define MACRO",
    "#  define MACRO",
    "int static_macro",
-   "L'\\0'"
+   "L'\\0'",
+   "...",
 };
 
 const int32_t expected_num_tokens[NUM_TEST_CASES] = {
-   5, 10, 10, 9, 19, 2, 10, 4, 4, 4, 2
+   5, 10, 10, 9, 19, 2, 10, 4, 4, 4, 2, 2
 };
 #define LARGEST_NUM_TOKENS 19
 
@@ -61,6 +62,7 @@ const uint32_t expected_token_types[NUM_TEST_CASES][LARGEST_NUM_TOKENS] = {
    { TOK_PP_DIRECTIVE, TOK_WHITESPACE, TOK_IDENTIFIER, TOK_EOL },
    { TOK_KEYWORD, TOK_WHITESPACE, TOK_IDENTIFIER, TOK_EOL },
    { TOK_CHAR_CONST, TOK_EOL },
+   { TOK_OPERATOR, TOK_EOL },
 };
 
 const int expected_token_indices[NUM_TEST_CASES][LARGEST_NUM_TOKENS] = {
@@ -75,6 +77,7 @@ const int expected_token_indices[NUM_TEST_CASES][LARGEST_NUM_TOKENS] = {
    { PP_DEFINE, TOK_UNSET_INDEX, TOK_UNSET_INDEX, TOK_UNSET_INDEX},
    { KEY_INT, TOK_UNSET_INDEX, TOK_UNSET_INDEX, TOK_UNSET_INDEX},
    { TOK_UNSET_INDEX, TOK_UNSET_INDEX},
+   { OP_VARIADIC_ARGS, TOK_UNSET_INDEX},
 };
 
 int main(void)
