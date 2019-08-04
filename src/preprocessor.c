@@ -546,6 +546,14 @@ static void handleJoin(preprocessor_t *preprocessor)
                      "## found outside a macro function\n");
 }
 
+static void handleStringify(preprocessor_t *preprocessor)
+{
+   mcc_PrettyError(mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
+                     preprocessor->currentToken->lineno,
+                     preprocessor->currentToken->line_index,
+                     "# found outside a macro function\n");
+}
+
 //What shall I do with #pragmas???
 static void handlePragma(preprocessor_t UNUSED(*preprocessor))
 {
@@ -713,7 +721,7 @@ static mcc_TokenList_t *handleMacroFunction(preprocessor_t *preprocessor, mcc_Ma
          mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
          preprocessor->currentToken->lineno,
          preprocessor->currentToken->line_index,
-         "macro function %s expects %d argument(s), but %d were provided\n",
+         "macro function '%s' expects %d argument(s), but %d were provided\n",
          macro->text,
          mcc_ListGetLength(macro->arguments),
          mcc_ListGetLength(parameters));
@@ -722,12 +730,4 @@ static mcc_TokenList_t *handleMacroFunction(preprocessor_t *preprocessor, mcc_Ma
    mcc_ListDelete(parameters, mcc_MacroParameterDelete);
    rescanMacroFunctionForActions(result);
    return result;
-}
-
-static void handleStringify(preprocessor_t *preprocessor)
-{
-   mcc_PrettyError(mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
-                     preprocessor->currentToken->lineno,
-                     preprocessor->currentToken->line_index,
-                     "# found outside a macro function\n");
 }
