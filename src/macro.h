@@ -37,6 +37,7 @@ typedef struct macro {
    mcc_TokenList_t *tokens;
    mcc_TokenList_t *arguments;
    bool_t is_function;
+   bool_t is_variadic;
    struct macro *next;
 }mcc_Macro_t;
 
@@ -49,7 +50,7 @@ void mcc_InitialiseMacros(void);
 
 void mcc_DeleteAllMacros(void);
 
-void mcc_DefineMacro(const char *text, mcc_TokenList_t *tokens, mcc_TokenList_t *arguments);
+void mcc_DefineMacro(const char *text, mcc_TokenList_t *tokens, mcc_TokenList_t *arguments, bool_t variadic);
 
 void mcc_UndefineMacro(const char *text);
 

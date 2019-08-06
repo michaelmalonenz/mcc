@@ -46,7 +46,7 @@ static void test_Define(void)
    mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, TOK_UNSET_INDEX, 1, 1, 1);
    printf("Testing Define...");
    mcc_TokenListAppend(tokens, tok);
-   mcc_DefineMacro(MACRO_NAME, tokens, NULL);
+   mcc_DefineMacro(MACRO_NAME, tokens, NULL, FALSE);
    mcc_DeleteAllMacros();
    printf("ok\n");
 }
@@ -57,7 +57,7 @@ static void test_Find(void)
    mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, TOK_UNSET_INDEX, 1, 1, 1);
    printf("Testing Find...");
    mcc_TokenListAppend(tokens, tok);
-   mcc_DefineMacro(MACRO_NAME, tokens, NULL);
+   mcc_DefineMacro(MACRO_NAME, tokens, NULL, FALSE);
    mcc_Macro_t *result = mcc_ResolveMacro(MACRO_NAME);
    MCC_ASSERT(result != NULL);
    bool_t defined = mcc_IsMacroDefined(MACRO_NAME);
@@ -72,7 +72,7 @@ static void test_Undefine(void)
    mcc_TokenList_t *tokens = eral_ListCreate();
    mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, TOK_UNSET_INDEX, 1, 1, 1);
    mcc_TokenListAppend(tokens, tok);
-   mcc_DefineMacro(MACRO_NAME, tokens, NULL);
+   mcc_DefineMacro(MACRO_NAME, tokens, NULL, FALSE);
    mcc_UndefineMacro(MACRO_NAME);
    bool_t defined = mcc_IsMacroDefined(MACRO_NAME);
    MCC_ASSERT(!defined);
@@ -102,7 +102,7 @@ static void test_BulkMacros(void)
 
       tokenList = mcc_TokeniseFile(tempFilename);
 
-      mcc_DefineMacro(test_Macros[i], mcc_TokenListDeepCopy(tokenList), NULL);
+      mcc_DefineMacro(test_Macros[i], mcc_TokenListDeepCopy(tokenList), NULL, FALSE);
 
       unlink(tempFilename);
       mcc_TokenListDelete(tokenList);
@@ -131,6 +131,27 @@ void test_BuiltinDefine(void)
    printf("ok!\n");
 }
 
+static void test_VariadicMacroFunctionDefinition(void)
+{
+    const char *token_string = "#define mcc_Error(...) __VA_ARGS__\n";
+    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
+                                                          strlen(token_string));
+    mcc_InitialiseMacros();
+    mcc_FileOpenerInitialise();
+    mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
+    printf("Test Variadic Macro function definition...");
+
+    mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
+    mcc_Macro_t *macro = mcc_ResolveMacro("mcc_Error");
+    MCC_ASSERT(macro->is_variadic);
+    mcc_TokenListDelete(output);
+    mcc_TokenListDelete(tokens);
+    mcc_FileOpenerDelete();
+    unlink(file);
+    mcc_DeleteAllMacros();
+    printf("ok\n");
+}
+
 int main(void)
 {
    test_Define();
@@ -139,5 +160,6 @@ int main(void)
    test_Undefined();
    test_BulkMacros();
    test_BuiltinDefine();
+   test_VariadicMacroFunctionDefinition();
    return 0;
 }
