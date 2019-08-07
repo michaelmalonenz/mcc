@@ -464,6 +464,27 @@ static void test_BuiltinMacroIfElif(void)
    mcc_DeleteAllMacros();
 }
 
+static void test_VariadicMacroFunctionDefinition(void)
+{
+    const char *token_string = "#define mcc_Error(...) __VA_ARGS__\n";
+    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
+                                                          strlen(token_string));
+    mcc_InitialiseMacros();
+    mcc_FileOpenerInitialise();
+    mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
+    printf("Test Variadic Macro function definition...");
+
+    mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
+    mcc_Macro_t *macro = mcc_ResolveMacro("mcc_Error");
+    MCC_ASSERT(macro->is_variadic);
+    mcc_TokenListDelete(output);
+    mcc_TokenListDelete(tokens);
+    mcc_FileOpenerDelete();
+    unlink(file);
+    mcc_DeleteAllMacros();
+    printf("ok\n");
+}
+
 int main(int UNUSED(argc), char UNUSED(**argv))
 {
    test_Define();
@@ -481,5 +502,6 @@ int main(int UNUSED(argc), char UNUSED(**argv))
    test_If_BuiltinDefines();
    test_NoWhitespaceFunctionCall();
    test_BuiltinMacroIfElif();
+   test_VariadicMacroFunctionDefinition();
    return 0;
 }

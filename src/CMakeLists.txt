@@ -4,22 +4,16 @@ enable_language(C)
 enable_testing()
 
 add_subdirectory(eral)
-include_directories("eral" ${PROJECT_SOURCE_DIR})
+add_subdirectory(preprocessor)
+include_directories(eral ${PROJECT_SOURCE_DIR} preprocessor)
 
 set(SOURCE_FILES 
   config.h
   fileOpener.c
-  ICE.c
-  ICE.h
-  macro_hash.c
-  macro_private.h
-  macro.c
-  macro.h
   mcc.c
   mcc.h
   options.c
   options.h
-  preprocessor.c
   tokeniser.c
   tokenList.c
   tokenList.h
@@ -28,7 +22,7 @@ set(SOURCE_FILES
   toolChainCommands.h
 )
 add_executable(mcc ${SOURCE_FILES})
-target_link_libraries(mcc m eral)
+target_link_libraries(mcc m eral preproc)
 
 add_library(mccstatic STATIC ${SOURCE_FILES})
 target_link_libraries(mccstatic m)
