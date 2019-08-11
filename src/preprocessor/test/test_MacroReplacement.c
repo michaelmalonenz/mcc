@@ -34,6 +34,7 @@
 #include "TestUtils.h"
 #include "tokenList.h"
 #include "toolChainCommands.h"
+#include "preprocessor.h"
 #include "macro.h"
 
 #define NUM_TEST_CASES 4

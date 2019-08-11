@@ -40,7 +40,7 @@
 typedef struct preprocessor {
    mcc_TokenListIterator_t *tokenListIter;
    const mcc_Token_t *currentToken;
-   eral_List_t *output;
+   mcc_TokenList_t *output;
 } preprocessor_t;
 
 typedef void (preprocessorDirectiveHandler_t)(preprocessor_t *preprocessor);
@@ -145,7 +145,7 @@ static void handlePreprocessorDirective(preprocessor_t *preprocessor)
 eral_List_t *mcc_PreprocessTokens(mcc_TokenList_t *tokens)
 {
    preprocessor_t preprocessor;
-   preprocessor.output = eral_ListCreate();
+   preprocessor.output = mcc_TokenListCreate();
    preprocessor.tokenListIter = mcc_TokenListGetIterator(tokens);
    getToken(&preprocessor);
 

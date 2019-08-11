@@ -27,10 +27,8 @@
 #ifndef _MCC_TOOL_CHAIN_COMMANDS_H_
 #define _MCC_TOOL_CHAIN_COMMANDS_H_
 
-#include "mcc.h"
 #include "tokenList.h"
 
 mcc_TokenList_t *mcc_TokeniseFile(const char *inFilename);
-eral_List_t *mcc_PreprocessTokens(mcc_TokenList_t *tokens);
 
 #endif /* _MCC_TOOL_CHAIN_COMMANDS_H_ */

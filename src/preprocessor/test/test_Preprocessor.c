@@ -34,6 +34,7 @@
 #include "TestUtils.h"
 #include "tokenList.h"
 #include "toolChainCommands.h"
+#include "preprocessor.h"
 #include "macro.h"
 
 static void test_Define(void)
