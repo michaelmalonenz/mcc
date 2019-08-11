@@ -46,6 +46,7 @@ static void test_Define(void)
    mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, TOK_UNSET_INDEX, 1, 1, 1);
    printf("Testing Define...");
    mcc_TokenListAppend(tokens, tok);
+   mcc_InitialiseMacros();
    mcc_DefineMacro(MACRO_NAME, tokens, NULL, FALSE);
    mcc_DeleteAllMacros();
    printf("ok\n");
@@ -57,6 +58,7 @@ static void test_Find(void)
    mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, TOK_UNSET_INDEX, 1, 1, 1);
    printf("Testing Find...");
    mcc_TokenListAppend(tokens, tok);
+   mcc_InitialiseMacros();
    mcc_DefineMacro(MACRO_NAME, tokens, NULL, FALSE);
    mcc_Macro_t *result = mcc_ResolveMacro(MACRO_NAME);
    MCC_ASSERT(result != NULL);
@@ -72,6 +74,7 @@ static void test_Undefine(void)
    mcc_TokenList_t *tokens = eral_ListCreate();
    mcc_Token_t *tok = mcc_CreateToken("1", 1, TOK_NUMBER, TOK_UNSET_INDEX, 1, 1, 1);
    mcc_TokenListAppend(tokens, tok);
+   mcc_InitialiseMacros();
    mcc_DefineMacro(MACRO_NAME, tokens, NULL, FALSE);
    mcc_UndefineMacro(MACRO_NAME);
    bool_t defined = mcc_IsMacroDefined(MACRO_NAME);
@@ -83,8 +86,10 @@ static void test_Undefine(void)
 static void test_Undefined(void)
 {
    printf("Testing undefined...");
+   mcc_InitialiseMacros();
    bool_t defined = mcc_IsMacroDefined("SOME_OTHER_MACRO");
    MCC_ASSERT(!defined);
+   mcc_DeleteAllMacros();
    printf("ok\n");
 }
 
@@ -93,6 +98,7 @@ static void test_BulkMacros(void)
    int i;
    printf("Testing Bulk Macro Definitions...");
    mcc_FileOpenerInitialise();
+   mcc_InitialiseMacros();
    for(i = 0; i < NUM_BULK_MACROS; i++)
    {
       mcc_TokenList_t *tokenList;

@@ -14,4 +14,5 @@ set(SOURCE
 )
 
 add_library(preproc STATIC ${SOURCE})
+target_link_libraries(preproc eral)
 add_subdirectory(test)
