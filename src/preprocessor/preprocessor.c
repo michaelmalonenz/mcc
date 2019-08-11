@@ -232,7 +232,6 @@ void handleDefine(preprocessor_t *preprocessor)
          else if (preprocessor->currentToken->tokenType == TOK_OPERATOR &&
                   preprocessor->currentToken->tokenIndex == OP_VARIADIC_ARGS)
          {
-            mcc_TokenListAppend(arguments, mcc_CopyToken(preprocessor->currentToken));
             variadic = TRUE;
             maybeGetWhiteSpaceToken(preprocessor);
          }
@@ -358,36 +357,45 @@ static mcc_TokenList_t *handleMacroReplacement(mcc_Macro_t *macro)
    return result;
 }
 
-mcc_TokenList_t *replaceMacroTokens(mcc_Macro_t *macro, mcc_TokenList_t *parameters)
+mcc_TokenList_t *replaceMacroTokens(mcc_Macro_t *macro, eral_List_t *parameters)
 {
    mcc_TokenList_t *functionTokens = mcc_TokenListDeepCopy(macro->tokens);
-   mcc_TokenListIterator_t *parametersIter = mcc_TokenListGetIterator(parameters);
+   eral_ListIterator_t *parametersIter = eral_ListGetIterator(parameters);
    mcc_MacroParameter_t *param = (mcc_MacroParameter_t *) eral_ListGetNextData(parametersIter);
    while (param != NULL)
    {
-      if (macro->is_variadic)
+      mcc_TokenListIterator_t *tokensIter = mcc_TokenListGetIterator(functionTokens);
+      mcc_Token_t *functionToken = mcc_GetNextToken(tokensIter);
+      while (functionToken != NULL)
       {
-         MCC_ASSERT(FALSE);
-      }
-      else
-      {
-         mcc_TokenListIterator_t *tokensIter = mcc_TokenListGetIterator(functionTokens);
-         mcc_Token_t *functionToken = mcc_GetNextToken(tokensIter);
-         while (functionToken != NULL)
+         if (param->argument == NULL &&
+             strncmp(functionToken->text, "__VA_ARGS__", strlen("__VA_ARGS__")) == 0)
          {
-            if (functionToken->tokenType == TOK_IDENTIFIER &&
-               strcmp(functionToken->text,
-                     param->argument->text) == 0)
+            eral_ListIterator_t *iter_copy = eral_ListCopyIterator(parametersIter);
+            mcc_MacroParameter_t *currentParam = (mcc_MacroParameter_t *)eral_ListPeekCurrentData(iter_copy);
+            mcc_TokenList_t *paramTokens = mcc_TokenListCreate();
+            while(currentParam != NULL)
             {
-               mcc_TokenList_t *paramTokens = mcc_TokenListDeepCopy(param->parameterTokens);
-               mcc_Token_t *result = mcc_TokenListReplaceCurrent(tokensIter, paramTokens);
-               mcc_DeleteToken((uintptr_t) result);
-               eral_ListDelete(paramTokens, NULL);
+               mcc_TokenListConcatenate(paramTokens, mcc_TokenListDeepCopy(currentParam->parameterTokens));
+               currentParam = (mcc_MacroParameter_t *) eral_ListGetNextData(iter_copy);
             }
-            functionToken = mcc_GetNextToken(tokensIter);
+            mcc_Token_t *result = mcc_TokenListReplaceCurrent(tokensIter, paramTokens);
+            mcc_DeleteToken((uintptr_t) result);
+            eral_ListDelete(paramTokens, NULL);
+            eral_ListDeleteIterator(iter_copy);
          }
-         mcc_TokenListDeleteIterator(tokensIter);
+         else if (functionToken->tokenType == TOK_IDENTIFIER &&
+            strcmp(functionToken->text,
+                  param->argument->text) == 0)
+         {
+            mcc_TokenList_t *paramTokens = mcc_TokenListDeepCopy(param->parameterTokens);
+            mcc_Token_t *result = mcc_TokenListReplaceCurrent(tokensIter, paramTokens);
+            mcc_DeleteToken((uintptr_t) result);
+            eral_ListDelete(paramTokens, NULL);
+         }
+         functionToken = mcc_GetNextToken(tokensIter);
       }
+      mcc_TokenListDeleteIterator(tokensIter);
       param = (mcc_MacroParameter_t *) eral_ListGetNextData(parametersIter);
    }
    mcc_TokenListDeleteIterator(parametersIter);
@@ -444,6 +452,7 @@ static mcc_TokenList_t *handleMacroFunction(preprocessor_t *preprocessor, mcc_Ma
    eral_List_t *parameters = eral_ListCreate();
    getToken(preprocessor);
    maybeGetWhiteSpaceToken(preprocessor);
+   bool_t argumentsComplete = FALSE;
    if (preprocessor->currentToken &&
       !(preprocessor->currentToken->tokenType == TOK_SYMBOL &&
         preprocessor->currentToken->tokenIndex == SYM_CLOSE_PAREN))
@@ -453,7 +462,13 @@ static mcc_TokenList_t *handleMacroFunction(preprocessor_t *preprocessor, mcc_Ma
                preprocessor->currentToken->tokenIndex == SYM_CLOSE_PAREN))
       {
          mcc_MacroParameter_t *param = mcc_MacroParameterCreate();
-         param->argument = mcc_GetNextToken(argumentsIter);
+         if (argumentsComplete)
+            param->argument = NULL;
+         else
+         {
+            param->argument = mcc_GetNextToken(argumentsIter);
+            argumentsComplete = param->argument == NULL;
+         }
          maybeGetWhiteSpaceToken(preprocessor);
          if (preprocessor->currentToken->tokenType == TOK_SYMBOL &&
              preprocessor->currentToken->tokenIndex == SYM_OPEN_PAREN)

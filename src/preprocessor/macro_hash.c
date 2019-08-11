@@ -77,7 +77,10 @@ void mcc_DefineMacro(const char *text, mcc_TokenList_t *value, mcc_TokenList_t *
 void mcc_UndefineMacro(const char *text)
 {
     mcc_Macro_t *temp = (mcc_Macro_t *) eral_HashTableRemove(macro_table, text, strlen(text));
-    delete_macro(temp);
+    if (temp)
+    {
+        delete_macro(temp);
+    }
 }
 
 mcc_Macro_t *mcc_ResolveMacro(const char *text)

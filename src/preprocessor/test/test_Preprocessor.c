@@ -169,6 +169,35 @@ static void test_VariadicMacroFunctionDefinition(void)
    printf("ok\n");
 }
 
+static void test_VariadicMacroFunctionUse(void)
+{
+   const char *token_string = "\
+#define mcc_Error(...) __VA_ARGS__\n\
+mcc_Error(\"Hello\");";
+   const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
+                                                         strlen(token_string));
+   mcc_InitialiseMacros();
+   mcc_FileOpenerInitialise();
+   mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
+   printf("Test Variadic Macro function use...");
+
+   mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
+   MCC_ASSERT(eral_ListGetLength(output) == 2);
+   mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator(output);
+   mcc_Token_t *tok = mcc_GetNextToken(iter);
+   MCC_ASSERT(tok->tokenType == TOK_STR_CONST);
+   tok = mcc_GetNextToken(iter);
+   MCC_ASSERT(tok->tokenType == TOK_WHITESPACE);
+
+   mcc_TokenListDeleteIterator(iter);
+   mcc_TokenListDelete(output);
+   mcc_TokenListDelete(tokens);
+   mcc_FileOpenerDelete();
+   unlink(file);
+   mcc_DeleteAllMacros();
+   printf("ok\n");
+}
+
 int main(int UNUSED(argc), char UNUSED(**argv))
 {
    test_Define();
@@ -176,5 +205,6 @@ int main(int UNUSED(argc), char UNUSED(**argv))
    test_DefineFunctionMacro();
    test_NoWhitespaceFunctionCall();
    test_VariadicMacroFunctionDefinition();
+   test_VariadicMacroFunctionUse();
    return 0;
 }
