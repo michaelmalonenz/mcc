@@ -6,6 +6,8 @@ include_directories("${PROJECT_SOURCE_DIR}/..")
 set(SOURCE 
   fileBuffer.c
   fileBuffer.h
+  hash_table.c
+  hash_table.h
   list.c
   list.h
   stack.c

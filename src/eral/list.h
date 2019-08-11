@@ -38,8 +38,6 @@ typedef struct iterator eral_ListIterator_t;
 
 typedef void (*eral_NodeDestructor_fn)(uintptr_t);
 
-#define NULL_DATA ((uintptr_t) 0)
-
 /**
  * Initialises an empty unordered, doubly-linked list.
  * Any call to this must be matched with a call to eral_ListDelete()

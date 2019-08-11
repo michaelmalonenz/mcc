@@ -20,6 +20,7 @@
 #define MCC_DEBUG 1
 #include "config.h"
 #include "mcc.h"
+#include "liberal.h"
 #include "list.h"
 
 #define NUM_BASIC_TEST_ITEMS 10

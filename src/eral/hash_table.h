@@ -1,5 +1,5 @@
 /**
- Copyright (c) 2013, Michael Malone
+ Copyright (c) 2019, Michael Malone
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -16,7 +16,7 @@
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL Michael Malone BE LIABLE FOR ANY
+ DISCLAIMED. IN NO EVENT SHALL MICHAEL MALONE BE LIABLE FOR ANY
  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,44 +24,24 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
-#include <stdio.h>
-#include <stdlib.h>
+#ifndef _HASH_TABLE_H_
+#define _HASH_TABLE_H_
 
-#define MCC_DEBUG 1
-#include "config.h"
-#include "mcc.h"
-#include "liberal.h"
-#include "stack.h"
+typedef struct eral_hash_table eral_HashTable_t;
 
-#define NUM_TEST_DATA 10
-static int basicTestData[NUM_TEST_DATA] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+typedef void (*eral_HashNodeDestructor_fn)(uintptr_t);
 
-static void stackItemPrinter(uintptr_t item)
-{
-   printf("Stack Item: %lu\n", item);
-}
+eral_HashTable_t *eral_HashTableCreate(void);
 
-int main(void)
-{
-   int i;
-   eral_Stack_t *stack = eral_StackCreate();
+eral_HashTable_t *eral_HashTableCreateSize(uint32_t size);
 
-   for (i = 0; i < NUM_TEST_DATA; i++)
-   {
-      printf("Pushing %d\n", basicTestData[i]);
-      eral_StackPush(stack, basicTestData[i]);
-   }
-   
-   eral_DebugPrintStack(stack, stackItemPrinter);
+void eral_HashTableDelete(eral_HashTable_t *table, eral_HashNodeDestructor_fn destructor);
 
-   for (i = NUM_TEST_DATA-1; i >= 0; i--)
-   {
-      int result = eral_StackPop(stack);
-      printf("Popped %d\n", result);
-      MCC_ASSERT(result == basicTestData[i]);
-   }
+void eral_HashTableInsert(eral_HashTable_t *table, const void *key,
+                          uint16_t key_len, uintptr_t data);
 
-   eral_StackDelete(stack, NULL);
+uintptr_t eral_HashTableFind(eral_HashTable_t *table, const void *key, uint16_t key_len);
 
-   return EXIT_SUCCESS;
-}
+uintptr_t eral_HashTableRemove(eral_HashTable_t *table, const void *key, uint16_t key_len);
+
+#endif /* _HASH_TABLE_H_ */

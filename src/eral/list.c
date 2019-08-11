@@ -28,6 +28,7 @@
 #include <stdint.h>
 
 #include "mcc.h"
+#include "liberal.h"
 #include "list.h"
 
 struct list_node {
