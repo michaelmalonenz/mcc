@@ -28,17 +28,18 @@
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdint.h>
 
 #include "mcc.h"
 #include "liberal.h"
 
 //A list is probably fine here.  If we need to resolve the filename, it's probably an error condition
 typedef struct file_info {
-   unsigned short fileno;
+   uint16_t fileno;
    char *filename;
 } file_info_t;
 
-static unsigned short current_file_number = 0;
+static uint16_t current_file_number = 0;
 static eral_List_t *fileList = NULL;
 
 static eral_List_t *localIncludeDirList = NULL;
@@ -106,7 +107,7 @@ FILE *mcc_OpenFile(const char *filename, const char *flags,
    return file;
 }
 
-const char *mcc_ResolveFileNameFromNumber(const unsigned short fileno)
+const char *mcc_ResolveFileNameFromNumber(const uint16_t fileno)
 {
    eral_ListIterator_t *iter = NULL;
    file_info_t *temp = NULL;
