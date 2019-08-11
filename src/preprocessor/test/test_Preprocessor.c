@@ -24,9 +24,7 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
-#include <assert.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -39,7 +37,7 @@
 
 static void test_Define(void)
 {
-   const char *token_string  = "#define TEST_MACRO 42\n";
+   const char *token_string = "#define TEST_MACRO 42\n";
    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
                                                          strlen(token_string));
    mcc_InitialiseMacros();
@@ -67,7 +65,7 @@ static void test_Define(void)
 
 static void test_Undef(void)
 {
-   const char *token_string  = "#define TEST_MACRO 42\n#undef TEST_MACRO";
+   const char *token_string = "#define TEST_MACRO 42\n#undef TEST_MACRO";
    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
                                                          strlen(token_string));
    printf("Test Undef...");
@@ -88,175 +86,9 @@ static void test_Undef(void)
    mcc_DeleteAllMacros();
 }
 
-static void test_NestedIf(void)
-{
-   const char *token_string  = "\
-#define SOME_MACRO\n\
-#ifdef SOME_MACRO\n\
-   #ifdef SOME_OTHER_MACRO\n\
-      #define TEST_MACRO 10\n\
-   #else\n\
-      #define TEST_MACRO 42\n\
-   #endif\n\
-#endif\n";
-   const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
-                                                         strlen(token_string));
-   printf("Test nested IFDEF\n");
-   mcc_InitialiseMacros();
-   mcc_FileOpenerInitialise();
-   mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
-   mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
-
-   //should assert that we indeed got the right symbol defined.
-   mcc_Macro_t *macro = mcc_ResolveMacro("TEST_MACRO");
-   MCC_ASSERT(macro != NULL);
-   mcc_TokenListIterator_t *valueIter = mcc_TokenListGetIterator(macro->tokens);
-   mcc_Token_t *token = mcc_GetNextToken(valueIter);
-   MCC_ASSERT(strncmp(token->text, "42", 2) == 0);
-   mcc_TokenListDeleteIterator(valueIter);
-   printf("ok\n");
-
-   mcc_TokenListDelete(output);
-   mcc_TokenListDelete(tokens);
-   mcc_FileOpenerDelete();
-   unlink(file);
-   mcc_DeleteAllMacros();
-}
-
-static void test_ReallyNestedIf(void)
-{
-   const char *token_string  = "\
-#ifdef SOME_MACRO\n\
-   #ifdef SOME_OTHER_MACRO\n\
-      #define TEST_MACRO 10\n\
-   #else\n\
-      #define TEST_MACRO 42\n\
-   #endif\n\
-   #ifndef YET_ANOTHER_MACRO\n\
-      #define TEST_MACRO 54\n\
-   #endif\n\
-#endif\n";
-   const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
-                                                         strlen(token_string));
-   printf("Test really nested IFDEF\n");
-   mcc_InitialiseMacros();
-   mcc_FileOpenerInitialise();
-   mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
-
-   mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
-
-   mcc_Macro_t *macro = mcc_ResolveMacro("TEST_MACRO");
-   MCC_ASSERT(macro == NULL);
-   printf("ok\n");
-
-   mcc_TokenListDelete(output);
-   mcc_TokenListDelete(tokens);
-   mcc_FileOpenerDelete();
-   unlink(file);
-   mcc_DeleteAllMacros();
-}
-
-static void test_IfNDef(void)
-{
-   const char *token_string  = "#ifndef SOME_MACRO\n#define SOME_MACRO\n#endif\n";
-   const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
-                                                         strlen(token_string));
-   mcc_InitialiseMacros();
-   mcc_FileOpenerInitialise();
-   mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
-
-   printf("Test IFNDEF\n");
-   mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
-
-   mcc_Macro_t *macro = mcc_ResolveMacro("SOME_MACRO");
-   MCC_ASSERT(macro != NULL); // It was defined, but value should be NULL
-   printf("ok\n");
-
-   mcc_TokenListDelete(output);
-   mcc_TokenListDelete(tokens);
-   mcc_FileOpenerDelete();
-   unlink(file);
-   mcc_DeleteAllMacros();
-}
-
-static void test_IfDef(void)
-{
-   const char *token_string  = "#define SOME_MACRO 1\n#ifdef SOME_MACRO\n#define IF_MACRO 2\n#endif\n";
-   const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
-                                                         strlen(token_string));
-   mcc_InitialiseMacros();
-   mcc_FileOpenerInitialise();
-   mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
-
-   printf("Test IFDEF\n");
-   mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
-
-   mcc_Macro_t *macro = mcc_ResolveMacro("IF_MACRO");
-   MCC_ASSERT(macro != NULL);
-   printf("Test ok\n");
-
-   mcc_TokenListDelete(output);
-   mcc_TokenListDelete(tokens);
-   mcc_FileOpenerDelete();
-   unlink(file);
-   mcc_DeleteAllMacros();
-}
-
-static void test_IfDef_Else(void)
-{
-   const char *token_string  = "#ifdef SOME_MACRO\n#define IF_MACRO 1\n#else\n#define ELSE_MACRO 2\n#endif\n";
-   const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
-                                                         strlen(token_string));
-   mcc_InitialiseMacros();
-   mcc_FileOpenerInitialise();
-   mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
-
-   printf("Test IFDEF else\n");
-   mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
-
-   mcc_Macro_t *macro = mcc_ResolveMacro("IF_MACRO");
-   MCC_ASSERT(macro == NULL);
-
-   macro = mcc_ResolveMacro("ELSE_MACRO");
-   MCC_ASSERT(macro != NULL);
-   printf("ok\n");
-
-   mcc_TokenListDelete(output);
-   mcc_TokenListDelete(tokens);
-   mcc_FileOpenerDelete();
-   unlink(file);
-   mcc_DeleteAllMacros();
-}
-
-static void test_IfDef_If(void)
-{
-   const char *token_string  = "#define SOME_MACRO 3\n#ifdef SOME_MACRO\n#define IF_MACRO 2\n#else\n#define ELSE_MACRO 3\n#endif\n";
-   const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
-                                                         strlen(token_string));
-   mcc_InitialiseMacros();
-   mcc_FileOpenerInitialise();
-   mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
-
-   printf("Test IFDEF if\n");
-   mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
-
-   mcc_Macro_t *macro = mcc_ResolveMacro("ELSE_MACRO");
-   MCC_ASSERT(macro == NULL);
-
-   macro = mcc_ResolveMacro("IF_MACRO");
-   MCC_ASSERT(macro != NULL);
-   printf("ok\n");
-
-   mcc_TokenListDelete(output);
-   mcc_TokenListDelete(tokens);
-   mcc_FileOpenerDelete();
-   unlink(file);
-   mcc_DeleteAllMacros();
-}
-
 static void test_DefineFunctionMacro(void)
 {
-   const char *token_string  = "#define max(a, b) ( ((a) > (b)) ? (a) : (b) )\n";
+   const char *token_string = "#define max(a, b) ( ((a) > (b)) ? (a) : (b) )\n";
    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
                                                          strlen(token_string));
    mcc_InitialiseMacros();
@@ -288,121 +120,9 @@ static void test_DefineFunctionMacro(void)
    mcc_DeleteAllMacros();
 }
 
-void test_If(void)
-{
-   const char *token_string  = "#if (1 + 1)\n#define IF_MACRO\n#endif\n";
-   const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
-                                                         strlen(token_string));
-   mcc_InitialiseMacros();
-   mcc_FileOpenerInitialise();
-   mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
-
-   printf("Test IF if\n");
-   mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
-
-   mcc_Macro_t *macro = mcc_ResolveMacro("IF_MACRO");
-   MCC_ASSERT(macro != NULL);
-   printf("ok\n");
-
-   mcc_TokenListDelete(output);
-   mcc_TokenListDelete(tokens);
-   mcc_FileOpenerDelete();
-   unlink(file);
-   mcc_DeleteAllMacros();
-}
-
-void test_If_Else(void)
-{
-   const char *token_string  = "#if (1 - 1)\n#define IF_MACRO\n#else\n#define ELSE_MACRO\n#endif\n";
-   const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
-                                                         strlen(token_string));
-   mcc_InitialiseMacros();
-   mcc_FileOpenerInitialise();
-   mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
-
-   printf("Test IF else\n");
-   mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
-
-   mcc_Macro_t *macro = mcc_ResolveMacro("IF_MACRO");
-   MCC_ASSERT(macro == NULL);
-
-   macro = mcc_ResolveMacro("ELSE_MACRO");
-   MCC_ASSERT(macro != NULL);
-   printf("ok\n");
-
-   mcc_TokenListDelete(output);
-   mcc_TokenListDelete(tokens);
-   mcc_FileOpenerDelete();
-   unlink(file);
-   mcc_DeleteAllMacros();
-}
-
-static void test_If_ComplexMacroCondition(void)
-{
-   const char *token_string  = "\
-#define SOME_OTHER_MACRO 1\n\
-#if defined SOME_MACRO && SOME_MACRO || SOME_OTHER_MACRO\n\
- #define IF_MACRO\n\
-#else\n\
- #define ELSE_MACRO\n\
-#endif";
-   const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
-                                                         strlen(token_string));
-   mcc_InitialiseMacros();
-   mcc_FileOpenerInitialise();
-   mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
-
-   printf("Test IF Complex Macro condition\n");
-   mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
-
-   mcc_Macro_t *macro = mcc_ResolveMacro("IF_MACRO");
-   MCC_ASSERT(macro != NULL);
-
-   macro = mcc_ResolveMacro("ELSE_MACRO");
-   MCC_ASSERT(macro == NULL);
-   printf("ok\n");
-
-   mcc_TokenListDelete(output);
-   mcc_TokenListDelete(tokens);
-   mcc_FileOpenerDelete();
-   unlink(file);
-   mcc_DeleteAllMacros();
-}
-
-static void test_If_BuiltinDefines(void)
-{
-   const char *token_string  = "\
-#if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L \n\
- #define IF_MACRO\n\
-#elif 0\n\
- #define ELSE_MACRO\n\
-#endif";
-   const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
-                                                         strlen(token_string));
-   mcc_InitialiseMacros();
-   mcc_FileOpenerInitialise();
-   mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
-
-   printf("Test IF Builtin Defines\n");
-   mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
-
-   mcc_Macro_t *macro = mcc_ResolveMacro("IF_MACRO");
-   MCC_ASSERT(macro != NULL);
-
-   macro = mcc_ResolveMacro("ELSE_MACRO");
-   MCC_ASSERT(macro == NULL);
-   printf("ok\n");
-
-   mcc_TokenListDelete(output);
-   mcc_TokenListDelete(tokens);
-   mcc_FileOpenerDelete();
-   unlink(file);
-   mcc_DeleteAllMacros();
-}
-
 static void test_NoWhitespaceFunctionCall(void)
 {
-   const char *token_string  = "\
+   const char *token_string = "\
 #define __GNUC_PREREQ(a,b) a+b\n\
 #if __GNUC_PREREQ (4,3)\n\
    #define IF_MACRO\n\
@@ -428,81 +148,33 @@ static void test_NoWhitespaceFunctionCall(void)
    mcc_DeleteAllMacros();
 }
 
-static void test_BuiltinMacroIfElif(void)
+static void test_VariadicMacroFunctionDefinition(void)
 {
-   const char *token_string = "\
-#if __WORDSIZE == 32\n\
-#define IF_MACRO\n\
-#elif __WORDSIZE == 64\n\
-#define ELIF_MACRO\n\
-#else\n\
-#error Builtin Macro If Elif Test Failed\n\
-#endif";
+   const char *token_string = "#define mcc_Error(...) __VA_ARGS__\n";
    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
                                                          strlen(token_string));
    mcc_InitialiseMacros();
    mcc_FileOpenerInitialise();
    mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
+   printf("Test Variadic Macro function definition...");
 
-   printf("Test Builtin Macro If Elif...");
    mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
-
-   mcc_Macro_t *macro = mcc_ResolveMacro("IF_MACRO");
-   MCC_ASSERT(macro == NULL);
-
-   macro = mcc_ResolveMacro("ELIF_MACRO");
-   MCC_ASSERT(macro != NULL);
-
-   macro = mcc_ResolveMacro("ELSE_MACRO");
-   MCC_ASSERT(macro == NULL);
-
-   printf("ok\n");
-
+   mcc_Macro_t *macro = mcc_ResolveMacro("mcc_Error");
+   MCC_ASSERT(macro->is_variadic);
    mcc_TokenListDelete(output);
    mcc_TokenListDelete(tokens);
    mcc_FileOpenerDelete();
    unlink(file);
    mcc_DeleteAllMacros();
-}
-
-static void test_VariadicMacroFunctionDefinition(void)
-{
-    const char *token_string = "#define mcc_Error(...) __VA_ARGS__\n";
-    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
-                                                          strlen(token_string));
-    mcc_InitialiseMacros();
-    mcc_FileOpenerInitialise();
-    mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
-    printf("Test Variadic Macro function definition...");
-
-    mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
-    mcc_Macro_t *macro = mcc_ResolveMacro("mcc_Error");
-    MCC_ASSERT(macro->is_variadic);
-    mcc_TokenListDelete(output);
-    mcc_TokenListDelete(tokens);
-    mcc_FileOpenerDelete();
-    unlink(file);
-    mcc_DeleteAllMacros();
-    printf("ok\n");
+   printf("ok\n");
 }
 
 int main(int UNUSED(argc), char UNUSED(**argv))
 {
    test_Define();
    test_Undef();
-   test_IfDef();
-   test_IfDef_Else();
-   test_IfDef_If();
-   test_IfNDef();
-   test_NestedIf();
-   test_ReallyNestedIf();
    test_DefineFunctionMacro();
-   test_If();
-   test_If_Else();
-   test_If_ComplexMacroCondition();
-   test_If_BuiltinDefines();
    test_NoWhitespaceFunctionCall();
-   test_BuiltinMacroIfElif();
    test_VariadicMacroFunctionDefinition();
    return 0;
 }

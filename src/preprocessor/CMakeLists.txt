@@ -3,7 +3,8 @@ project (Mcc)
 enable_language(C)
 
 include_directories("${PROJECT_SOURCE_DIR}/.." "${PROJECT_SOURCE_DIR}/../eral")
-set(SOURCE 
+set(SOURCE
+  conditional.c
   ICE.c
   ICE.h
   macro_hash.c
@@ -11,6 +12,7 @@ set(SOURCE
   macro.c
   macro.h
   preprocessor.c
+  preprocessor_private.h
 )
 
 add_library(preproc STATIC ${SOURCE})
