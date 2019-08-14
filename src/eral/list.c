@@ -236,6 +236,7 @@ uintptr_t eral_ListReplaceCurrentData(eral_ListIterator_t *iter, eral_List_t *da
 
    free(iter->current);
    iter->current = data->tail;
+
    return previous;
 }
 
@@ -247,6 +248,11 @@ bool_t eral_ListEmpty(eral_List_t *list)
 uint32_t eral_ListGetLength(eral_List_t *list)
 {
    return list->nItems;
+}
+
+uint32_t eral_ListIteratorGetLength(eral_ListIterator_t *iter)
+{
+   return eral_ListGetLength(iter->list);
 }
 
 uintptr_t eral_ListPeekCurrentData(eral_ListIterator_t *iter)
@@ -303,23 +309,14 @@ uintptr_t eral_ListGetPrevData(eral_ListIterator_t *iter)
 
 void eral_ListConcatenate(eral_List_t *dst, eral_List_t *src)
 {
-   if (dst->tail == NULL)
+   eral_ListIterator_t *iter = eral_ListGetIterator(src);
+   uintptr_t current = eral_ListGetNextData(iter);
+   while (current != NULL_DATA)
    {
-      *dst = *src;
+      eral_ListAppendData(dst, current);
+      current = eral_ListGetNextData(iter);
    }
-   else
-   {
-      dst->tail->next = src->head;
-      if (src->head != NULL)
-      {
-         src->head->prev = dst->tail;
-      }
-      dst->tail = src->tail;
-      dst->nItems += src->nItems;
-      src->nItems = 0;
-      src->head = NULL;
-      src->tail = NULL;
-   }
+   eral_ListDeleteIterator(iter);
    eral_ListDelete(src, NULL);
 }
 

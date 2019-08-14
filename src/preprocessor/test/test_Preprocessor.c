@@ -182,12 +182,15 @@ mcc_Error(\"Hello\");";
    printf("Test Variadic Macro function use...");
 
    mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
-   MCC_ASSERT(eral_ListGetLength(output) == 2);
+   MCC_ASSERT(eral_ListGetLength(output) == 3);
    mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator(output);
    mcc_Token_t *tok = mcc_GetNextToken(iter);
    MCC_ASSERT(tok->tokenType == TOK_STR_CONST);
    tok = mcc_GetNextToken(iter);
-   MCC_ASSERT(tok->tokenType == TOK_WHITESPACE);
+   MCC_ASSERT(tok->tokenType == TOK_SYMBOL);
+   MCC_ASSERT(tok->tokenIndex == SYM_SEMI_COLON);
+   tok = mcc_GetNextToken(iter);
+   MCC_ASSERT(tok->tokenType == TOK_EOL);
 
    mcc_TokenListDeleteIterator(iter);
    mcc_TokenListDelete(output);

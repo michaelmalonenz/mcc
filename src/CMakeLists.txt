@@ -22,6 +22,7 @@ set(SOURCE_FILES
   toolChainCommands.h
 )
 add_executable(mcc ${SOURCE_FILES})
+add_compile_options(-O0)
 target_link_libraries(mcc m eral preproc)
 
 add_library(mccstatic STATIC ${SOURCE_FILES})

@@ -369,10 +369,11 @@ mcc_TokenList_t *replaceMacroTokens(mcc_Macro_t *macro, eral_List_t *parameters)
       while (functionToken != NULL)
       {
          if (param->argument == NULL &&
+             functionToken->tokenType == TOK_IDENTIFIER &&
              strncmp(functionToken->text, "__VA_ARGS__", strlen("__VA_ARGS__")) == 0)
          {
             eral_ListIterator_t *iter_copy = eral_ListCopyIterator(parametersIter);
-            mcc_MacroParameter_t *currentParam = (mcc_MacroParameter_t *)eral_ListPeekCurrentData(iter_copy);
+            mcc_MacroParameter_t *currentParam = param;
             mcc_TokenList_t *paramTokens = mcc_TokenListCreate();
             while(currentParam != NULL)
             {

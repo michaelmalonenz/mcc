@@ -306,6 +306,34 @@ void test_ReplaceCurrentData(void)
    printf("ok\n");
 }
 
+void test_ReplaceCurrentDataSingleItemList(void)
+{
+   eral_ListIterator_t *iter = NULL;
+   eral_List_t *list = eral_ListCreate();
+   int result;
+
+   printf("Testing replace current data with a single item list...");
+   eral_ListAppendData(list, 42);
+   iter = eral_ListGetIterator(list);
+   result = (int) eral_ListGetNextData(iter);
+   MCC_ASSERT(result == 42);
+
+   eral_List_t *temp = eral_ListCreate();
+   eral_ListAppendData(temp, 24);
+   result = (int) eral_ListReplaceCurrentData(iter, temp);
+   MCC_ASSERT(result == 42);
+   eral_ListDelete(temp, NULL);
+
+   result = (int) eral_ListGetNextData(iter);
+   MCC_ASSERT(result == 24);
+   MCC_ASSERT(eral_ListGetNextData(iter) == NULL_DATA);
+
+   eral_ListDeleteIterator(iter);
+   eral_ListDelete(list, NULL);
+
+   printf("ok\n");
+}
+
 static void test_Concatenate(void)
 {
    printf("Testing concatenate...");

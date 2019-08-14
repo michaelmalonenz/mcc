@@ -163,4 +163,6 @@ void eral_ListConcatenate(eral_List_t *dst, eral_List_t *src);
  */
 uintptr_t eral_ListRemoveCurrentData(eral_ListIterator_t *iter);
 
+uint32_t eral_ListIteratorGetLength(eral_ListIterator_t *iter);
+
 #endif /* _ERAL_LIST_H_ */
