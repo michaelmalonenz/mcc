@@ -91,19 +91,6 @@ void mcc_DeleteToken(uintptr_t token);
  * @param fileno The file identifier
  * @param iter   The iterator defining which collection to add the token to
  *
- * Creates a whitespace token and adds it in the current position.
- */
-void mcc_CreateAndAddWhitespaceToken(const unsigned int column,
-                                     const int lineno,
-                                     const unsigned short fileno,
-                                     mcc_TokenListIterator_t *iter);
-
-/**
- * @param column The index of the line for the first character
- * @param lineno The line number in the file
- * @param fileno The file identifier
- * @param iter   The iterator defining which collection to add the token to
- *
  * Creates an end of Line token and adds it in the current position.
  */
 void mcc_AddEndOfLineToken(const unsigned int column, const int lineno, const unsigned short fileno,

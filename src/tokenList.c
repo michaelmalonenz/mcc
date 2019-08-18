@@ -102,20 +102,6 @@ void mcc_AddEndOfLineToken(const unsigned int column, const int lineno, const un
    mcc_InsertToken(token, iter);   
 }
 
-void mcc_CreateAndAddWhitespaceToken(const unsigned int column, const int lineno,
-                                     const unsigned short fileno,
-                                     mcc_TokenListIterator_t *iter)
-{
-   const mcc_Token_t *temp = mcc_TokenListPeekCurrentToken(iter);
-   if (temp != NULL && temp->tokenType != TOK_WHITESPACE)
-   {
-      mcc_Token_t *token = mcc_CreateToken(&whitespaceText, sizeof(whitespaceText),
-                                           TOK_WHITESPACE, TOK_UNSET_INDEX, column,
-                                           lineno, fileno);
-      mcc_InsertToken(token, iter);
-   }
-}
-
 void mcc_DeleteToken(uintptr_t token)
 {
    mcc_Token_t *temp = (mcc_Token_t *) token;

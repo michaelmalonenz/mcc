@@ -47,7 +47,6 @@ bool_t eral_FileBufferEOFReached(eral_FileBuffer_t *buffer);
 
 eral_LogicalLine_t *eral_FileBufferGetNextLogicalLine(eral_FileBuffer_t *fileBuffer);
 
-int SkipWhiteSpace(eral_LogicalLine_t *line);
 void eral_ShiftLineLeftAndShrink(eral_LogicalLine_t *line, uint32_t shiftOffset, int amountToShift);
 
 const char *eral_GetFileBufferFilename(eral_FileBuffer_t *fileBuffer);

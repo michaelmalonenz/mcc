@@ -61,13 +61,31 @@ static void handle_whitespace(eral_LogicalLine_t *line,
                               eral_FileBuffer_t *fileBuffer,
                               mcc_TokenListIterator_t *iter)
 {
-   if (SkipWhiteSpace(line) > 0)
+   eral_StringBuffer_t *buffer = eral_CreateStringBuffer();
+   int lineCol = line->index + 1;
+   int numChars = 0;
+   while ((line->index < line->length) &&
+          (isNonBreakingWhiteSpace((line->string[line->index]))))
    {
-      mcc_CreateAndAddWhitespaceToken(line->index+1,
-                                      eral_GetFileBufferCurrentLineNo(fileBuffer),
-                                      eral_GetFileBufferFileNumber(fileBuffer),
-                                      iter);
+      eral_StringBufferAppendChar(buffer, line->string[line->index]);
+      line->index++;
+      numChars++;
    }
+   if (numChars > 0)
+   {
+      mcc_Token_t *token = mcc_CreateToken(
+         eral_StringBufferGetString(buffer),
+         eral_GetStringBufferLength(buffer),
+         TOK_WHITESPACE,
+         TOK_UNSET_INDEX,
+         lineCol,
+         eral_GetFileBufferCurrentLineNo(fileBuffer),
+         eral_GetFileBufferFileNumber(fileBuffer));
+      const mcc_Token_t *temp = mcc_TokenListPeekCurrentToken(iter);
+      if (temp != NULL && temp->tokenType != TOK_WHITESPACE)
+         mcc_InsertToken(token, iter);
+   }
+   eral_DeleteStringBuffer(buffer);
 }
 
 static void handle_pp_include_filename(eral_LogicalLine_t *line,

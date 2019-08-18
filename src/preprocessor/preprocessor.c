@@ -103,7 +103,8 @@ void getToken(preprocessor_t *preprocessor)
 
 void maybeGetWhiteSpaceToken(preprocessor_t *preprocessor)
 {
-   if (preprocessor->currentToken->tokenType == TOK_WHITESPACE)
+   if (preprocessor->currentToken &&
+       preprocessor->currentToken->tokenType == TOK_WHITESPACE)
    {
       getToken(preprocessor);
    }

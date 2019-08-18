@@ -190,18 +190,6 @@ eral_LogicalLine_t *eral_FileBufferGetNextLogicalLine(eral_FileBuffer_t *fileBuf
    return &fileBuffer->currentLine;
 }
 
-int SkipWhiteSpace(eral_LogicalLine_t *line)
-{
-   int numChars = 0;
-   while( (line->index + numChars < line->length) && 
-          (isNonBreakingWhiteSpace(line->string[line->index + numChars])) )
-   {
-      numChars++;
-   }
-   line->index += numChars;
-   return numChars;
-}
-
 /**
  * Shift the string left in-place by amountToShift starting at shiftOffset.
  * We don't realloc here, because it's a side effect which would break client
