@@ -44,6 +44,13 @@
 #define mcc_PrettyError(file, lineno, col, ...) fprintf(stderr, "%s:%d:%u ", file, lineno, col); \
    mcc_Error(__VA_ARGS__)
 
+#define mcc_Warning(token, format, ...) \
+   fprintf(stderr, "%s:%d:%d Warning: ",\
+      mcc_ResolveFileNameFromNumber(token->fileno),\
+      token->lineno,\
+      token->line_index+1);\
+   fprintf(stderr, format, __VA_ARGS__);
+
 #if MCC_DEBUG
 # define MCC_ASSERT(x) assert(x)
 //Obviously stole the COMPILE_TIME_ASSERT code from:

@@ -321,6 +321,7 @@ static void test_BuiltinMacroIfElif(void)
 #elif __WORDSIZE == 64\n\
 #define ELIF_MACRO\n\
 #else\n\
+#define ELSE_MACRO\n\
 #error Builtin Macro If Elif Test Failed\n\
 #endif";
     const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
@@ -350,6 +351,43 @@ static void test_BuiltinMacroIfElif(void)
     mcc_DeleteAllMacros();
 }
 
+static void test_IfElifElse(void)
+{
+    const char *token_string = "\
+#if __WORDSIZE == 64\n\
+#define IF_MACRO\n\
+#elif __WORDSIZE == 32\n\
+#define ELIF_MACRO\n\
+#else\n\
+#define ELSE_MACRO\n\
+#endif";
+    const char *file = mcc_TestUtils_DumpStringToTempFile(token_string,
+                                                          strlen(token_string));
+    mcc_InitialiseMacros();
+    mcc_FileOpenerInitialise();
+    mcc_TokenList_t *tokens = mcc_TokeniseFile(file);
+
+    printf("Test If Elif Else...");
+    mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
+
+    mcc_Macro_t *macro = mcc_ResolveMacro("IF_MACRO");
+    MCC_ASSERT(macro != NULL);
+
+    macro = mcc_ResolveMacro("ELIF_MACRO");
+    MCC_ASSERT(macro == NULL);
+
+    macro = mcc_ResolveMacro("ELSE_MACRO");
+    MCC_ASSERT(macro == NULL);
+
+    printf("ok\n");
+
+    mcc_TokenListDelete(output);
+    mcc_TokenListDelete(tokens);
+    mcc_FileOpenerDelete();
+    unlink(file);
+    mcc_DeleteAllMacros();
+}
+
 int main(void)
 {
     test_IfDef();
@@ -363,5 +401,6 @@ int main(void)
     test_If_ComplexMacroCondition();
     test_If_BuiltinDefines();
     test_BuiltinMacroIfElif();
+    test_IfElifElse();
     return EXIT_SUCCESS;
 }

@@ -191,6 +191,7 @@ void handleInclude(preprocessor_t *preprocessor)
 void handleDefine(preprocessor_t *preprocessor)
 {
    const char *macro_identifier;
+   const mcc_Token_t *identifier_tok;
    mcc_TokenList_t *tokens = mcc_TokenListCreate();
    mcc_TokenList_t *arguments = NULL;
    bool_t variadic = FALSE;
@@ -199,6 +200,7 @@ void handleDefine(preprocessor_t *preprocessor)
    getToken(preprocessor);
    mcc_ExpectTokenType(preprocessor->currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
    macro_identifier = preprocessor->currentToken->text;
+   identifier_tok = preprocessor->currentToken;
    getToken(preprocessor);
    if (preprocessor->currentToken->tokenType == TOK_SYMBOL &&
        preprocessor->currentToken->tokenIndex == SYM_OPEN_PAREN)
@@ -266,6 +268,11 @@ void handleDefine(preprocessor_t *preprocessor)
    {
       mcc_TokenListAppend(tokens, mcc_CopyToken(preprocessor->currentToken));
       getToken(preprocessor);
+   }
+   mcc_Macro_t *macro = mcc_ResolveMacro(macro_identifier);
+   if (macro != NULL)
+   {
+      mcc_Warning(identifier_tok, "Redefining Macro '%s'\n", identifier_tok->text);
    }
    mcc_DefineMacro(macro_identifier, tokens, arguments, variadic);
 }
