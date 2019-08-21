@@ -3,9 +3,6 @@ project (Mcc)
 enable_language(C)
 
 include(CTest)
-add_custom_target(test_valgrind
-    COMMAND ${CMAKE_CTEST_COMMAND} 
-        --force-new-ctest-process --test-action memcheck)
 
 include_directories("${PROJECT_SOURCE_DIR}/../src")
 include_directories("${PROJECT_SOURCE_DIR}/../src/eral")

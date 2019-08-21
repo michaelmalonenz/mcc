@@ -1,8 +1,7 @@
 cmake_minimum_required (VERSION 3.0)
-project (liberal)
 enable_language(C)
 
-include_directories("${PROJECT_SOURCE_DIR}/..")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/..")
 set(SOURCE 
   fileBuffer.c
   fileBuffer.h

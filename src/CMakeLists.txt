@@ -1,13 +1,14 @@
 cmake_minimum_required (VERSION 3.0)
-project (Mcc)
-enable_language(C)
-enable_testing()
 
 add_subdirectory(eral)
 add_subdirectory(preprocessor)
-include_directories(eral ${PROJECT_SOURCE_DIR} preprocessor)
+include_directories(
+    "${CMAKE_CURRENT_SOURCE_DIR}/eral"
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/preprocessor"
+)
 
-set(SOURCE_FILES 
+set(SOURCE_FILES
   config.h
   fileOpener.c
   mcc.c

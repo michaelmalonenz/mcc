@@ -1,14 +1,8 @@
 cmake_minimum_required (VERSION 3.0)
-project (Mcc)
-enable_language(C)
 
 include(CTest)
-include_directories("${PROJECT_SOURCE_DIR}/..")
-include_directories("${PROJECT_SOURCE_DIR}/../..")
-
-add_custom_target(test_eral_valgrind
-    COMMAND ${CMAKE_CTEST_COMMAND} 
-        --force-new-ctest-process --test-action memcheck)
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/..")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../..")
 
 add_executable(test_FileBuffer test_FileBuffer.c)
 target_link_libraries(test_FileBuffer mccstatic eral)

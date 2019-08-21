@@ -1,8 +1,8 @@
 cmake_minimum_required (VERSION 3.0)
-project (Mcc)
-enable_language(C)
 
-include_directories("${PROJECT_SOURCE_DIR}/.." "${PROJECT_SOURCE_DIR}/../eral")
+include_directories(
+    "${CMAKE_CURRENT_SOURCE_DIR}/.."
+    "${CMAKE_CURRENT_SOURCE_DIR}/../eral")
 set(SOURCE
   conditional.c
   ICE.c
