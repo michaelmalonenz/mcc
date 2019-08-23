@@ -394,8 +394,9 @@ mcc_TokenList_t *replaceMacroTokens(mcc_Macro_t *macro, eral_List_t *parameters)
             eral_ListDeleteIterator(iter_copy);
          }
          else if (functionToken->tokenType == TOK_IDENTIFIER &&
-            strcmp(functionToken->text,
-                  param->argument->text) == 0)
+                  param->argument != NULL &&
+                  strcmp(functionToken->text,
+                         param->argument->text) == 0)
          {
             mcc_TokenList_t *paramTokens = mcc_TokenListDeepCopy(param->parameterTokens);
             mcc_Token_t *result = mcc_TokenListReplaceCurrent(tokensIter, paramTokens);
@@ -517,14 +518,13 @@ static mcc_TokenList_t *handleMacroFunction(preprocessor_t *preprocessor, mcc_Ma
    int args_len = eral_ListGetLength(macro->arguments);
    if (macro->is_variadic)
    {
-      args_len--;
       if (params_len < args_len)
       {
          mcc_PrettyError(
             mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
             preprocessor->currentToken->lineno,
             preprocessor->currentToken->line_index,
-            "macro function '%s' expects at least %d argument(s), but %d were provided\n",
+            "macro function '%s' expects at least %d argument(s), but only got %d\n",
             macro->text,
             args_len,
             params_len);
@@ -536,7 +536,7 @@ static mcc_TokenList_t *handleMacroFunction(preprocessor_t *preprocessor, mcc_Ma
          mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
          preprocessor->currentToken->lineno,
          preprocessor->currentToken->line_index,
-         "macro function '%s' expects %d argument(s), but %d were provided\n",
+         "macro function '%s' expects %d argument(s), but only got %d\n",
          macro->text,
          args_len,
          params_len);
