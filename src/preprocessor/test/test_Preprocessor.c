@@ -201,6 +201,33 @@ mcc_Error(\"Hello\");";
    printf("ok\n");
 }
 
+static void test_StrangeDefinitionFeaturesH(void)
+{
+   const char *token_string = "\
+#ifndef\t_FEATURES_H\n\
+#define\t_FEATURES_H\t1\n\
+#endif";
+   printf("Testing macros with tabs...");
+   mcc_FileOpenerInitialise();
+   mcc_InitialiseMacros();
+   mcc_TokenList_t *tokens;
+   const char *file = mcc_TestUtils_DumpStringToTempFile(
+      token_string,
+      strlen(token_string));
+
+   tokens = mcc_TokeniseFile(file);
+   mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
+
+   mcc_TokenListDelete(tokens);
+   MCC_ASSERT(mcc_IsMacroDefined("_FEATURES_H"));
+
+   unlink(file);
+   mcc_TokenListDelete(output);
+   mcc_FileOpenerDelete();
+   mcc_DeleteAllMacros();
+   printf("ok\n");
+}
+
 int main(int UNUSED(argc), char UNUSED(**argv))
 {
    test_Define();
@@ -209,5 +236,6 @@ int main(int UNUSED(argc), char UNUSED(**argv))
    test_NoWhitespaceFunctionCall();
    test_VariadicMacroFunctionDefinition();
    test_VariadicMacroFunctionUse();
+   test_StrangeDefinitionFeaturesH();
    return 0;
 }

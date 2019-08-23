@@ -127,6 +127,10 @@ static void conditionalInnerImpl(
    getToken(preprocessor);
    while (TRUE)
    {
+      if (preprocessor->currentToken == NULL)
+      {
+         mcc_Error("Unexpected End Of File\n");
+      }
       if (preprocessor->currentToken->tokenType == TOK_PP_DIRECTIVE &&
           preprocessor->currentToken->tokenIndex == PP_ENDIF)
       {
@@ -161,13 +165,13 @@ static void conditionalInnerImpl(
       }
       else if (processMacro && !handled)
       {
+         MCC_ASSERT(!ignore);
          if (preprocessor->currentToken->tokenType == TOK_PP_DIRECTIVE)
          {
             handlePreprocessorDirective(preprocessor);
          }
          else
          {
-            MCC_ASSERT(!ignore);
             emitToken(preprocessor);
          }
       }

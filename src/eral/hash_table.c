@@ -35,7 +35,7 @@
 
 struct hash_table_node {
     uintptr_t data;
-    const void *key;
+    void *key;
     uint32_t key_len;
     struct hash_table_node *next;
 };
@@ -81,6 +81,15 @@ eral_HashTable_t *eral_HashTableCreateSize(uint32_t size)
     return result;
 }
 
+void destroy_node(struct hash_table_node *node)
+{
+    if (node->key != NULL)
+    {
+        free(node->key);
+    }
+    free(node);
+}
+
 void eral_HashTableDelete(eral_HashTable_t *table, eral_HashNodeDestructor_fn destructor)
 {
     uint32_t i;
@@ -97,7 +106,7 @@ void eral_HashTableDelete(eral_HashTable_t *table, eral_HashNodeDestructor_fn de
                 {
                     destructor(current->data);
                 }
-                free(current);
+                destroy_node(current);
                 current = next;
             }
             table->table[i] = NULL;
@@ -111,8 +120,9 @@ void eral_HashTableInsert(eral_HashTable_t *table, const void *key, uint16_t key
 {
     uint32_t index = elf_hash(key, key_len, table->size);
     struct hash_table_node *node = (struct hash_table_node *) malloc(sizeof(struct hash_table_node));
+    node->key = malloc(key_len);
     node->data = data;
-    node->key = key;
+    memcpy(node->key, key, key_len);
     node->key_len = key_len;
     node->next = NULL;
     if (table->table[index] == NULL)
@@ -167,7 +177,7 @@ uintptr_t eral_HashTableRemove(eral_HashTable_t *table, const void *key, uint16_
             {
                 previous->next = current->next;
             }
-            free(current);
+            destroy_node(current);
             return result;
         }   
         previous = current;

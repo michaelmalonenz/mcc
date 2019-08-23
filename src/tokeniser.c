@@ -73,17 +73,19 @@ static void handle_whitespace(eral_LogicalLine_t *line,
    }
    if (numChars > 0)
    {
-      mcc_Token_t *token = mcc_CreateToken(
-         eral_StringBufferGetString(buffer),
-         eral_GetStringBufferLength(buffer),
-         TOK_WHITESPACE,
-         TOK_UNSET_INDEX,
-         lineCol,
-         eral_GetFileBufferCurrentLineNo(fileBuffer),
-         eral_GetFileBufferFileNumber(fileBuffer));
       const mcc_Token_t *temp = mcc_TokenListPeekCurrentToken(iter);
       if (temp != NULL && temp->tokenType != TOK_WHITESPACE)
+      {
+         mcc_Token_t *token = mcc_CreateToken(
+            eral_StringBufferGetString(buffer),
+            eral_GetStringBufferLength(buffer),
+            TOK_WHITESPACE,
+            TOK_UNSET_INDEX,
+            lineCol,
+            eral_GetFileBufferCurrentLineNo(fileBuffer),
+            eral_GetFileBufferFileNumber(fileBuffer));
          mcc_InsertToken(token, iter);
+      }
    }
    eral_DeleteStringBuffer(buffer);
 }
