@@ -480,29 +480,27 @@ static mcc_TokenList_t *handleMacroFunction(preprocessor_t *preprocessor, mcc_Ma
             argumentsComplete = param->argument == NULL;
          }
          maybeGetWhiteSpaceToken(preprocessor);
-         if (preprocessor->currentToken->tokenType == TOK_SYMBOL &&
-             preprocessor->currentToken->tokenIndex == SYM_OPEN_PAREN)
+         while (!(preprocessor->currentToken->tokenType == TOK_OPERATOR &&
+                  preprocessor->currentToken->tokenIndex == OP_COMMA) &&
+                  !(preprocessor->currentToken->tokenType == TOK_SYMBOL &&
+                  preprocessor->currentToken->tokenIndex == SYM_CLOSE_PAREN))
          {
+            if (preprocessor->currentToken->tokenType == TOK_SYMBOL &&
+                  preprocessor->currentToken->tokenIndex == SYM_OPEN_PAREN)
+            {
+               mcc_TokenListAppend(param->parameterTokens, mcc_CopyToken(preprocessor->currentToken));
+               getToken(preprocessor);
+               while (!(preprocessor->currentToken->tokenType == TOK_SYMBOL &&
+                        preprocessor->currentToken->tokenIndex == SYM_CLOSE_PAREN))
+               {
+                  mcc_TokenListAppend(param->parameterTokens, mcc_CopyToken(preprocessor->currentToken));
+                  getToken(preprocessor);
+                  MCC_ASSERT(preprocessor->currentToken != NULL);
+               }
+            }
+            mcc_TokenListAppend(param->parameterTokens, mcc_CopyToken(preprocessor->currentToken));
             getToken(preprocessor);
-            while (!(preprocessor->currentToken->tokenType == TOK_SYMBOL &&
-                     preprocessor->currentToken->tokenIndex == SYM_CLOSE_PAREN))
-            {
-               mcc_TokenListAppend(param->parameterTokens, mcc_CopyToken(preprocessor->currentToken));
-               getToken(preprocessor);
-               MCC_ASSERT(preprocessor->currentToken != NULL);
-            }
-         }
-         else
-         {
-            while (!(preprocessor->currentToken->tokenType == TOK_OPERATOR &&
-                     preprocessor->currentToken->tokenIndex == OP_COMMA) &&
-                   !(preprocessor->currentToken->tokenType == TOK_SYMBOL &&
-                     preprocessor->currentToken->tokenIndex == SYM_CLOSE_PAREN))
-            {
-               mcc_TokenListAppend(param->parameterTokens, mcc_CopyToken(preprocessor->currentToken));
-               getToken(preprocessor);
-               MCC_ASSERT(preprocessor->currentToken != NULL);
-            }
+            MCC_ASSERT(preprocessor->currentToken != NULL);
          }
          if (preprocessor->currentToken->tokenType == TOK_OPERATOR &&
              preprocessor->currentToken->tokenIndex == OP_COMMA)
@@ -536,7 +534,7 @@ static mcc_TokenList_t *handleMacroFunction(preprocessor_t *preprocessor, mcc_Ma
          mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
          preprocessor->currentToken->lineno,
          preprocessor->currentToken->line_index,
-         "macro function '%s' expects %d argument(s), but only got %d\n",
+         "macro function '%s' expects %d argument(s), but got %d\n",
          macro->text,
          args_len,
          params_len);
