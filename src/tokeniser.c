@@ -36,6 +36,7 @@
 #include "tokens.h"
 #include "tokenList.h"
 
+static bool_t insideMultiLineComment = FALSE;
 
 static void eral_TokeniseLine(eral_LogicalLine_t *line,
                              eral_FileBuffer_t *fileBuffer,
@@ -362,11 +363,14 @@ mcc_TokenList_t *mcc_TokeniseFile(const char *inFilename)
       {
          eral_TokeniseLine(logicalLine, fileBuffer, iter);
       }
-      mcc_AddEndOfLineToken(
-         logicalLine->index+1,
-         eral_GetFileBufferCurrentLineNo(fileBuffer),
-         eral_GetFileBufferFileNumber(fileBuffer),
-         iter);
+      if (!insideMultiLineComment)
+      {
+         mcc_AddEndOfLineToken(
+            logicalLine->index+1,
+            eral_GetFileBufferCurrentLineNo(fileBuffer),
+            eral_GetFileBufferFileNumber(fileBuffer),
+            iter);
+      }
    }
    eral_DeleteFileBuffer(fileBuffer);
    mcc_TokenListDeleteIterator(iter);
@@ -381,7 +385,6 @@ static void eral_TokeniseLine(eral_LogicalLine_t *line,
    MCC_OPERATOR current_operator = OP_NONE;
    MCC_SYMBOL current_symbol = SYM_NONE;
    mcc_Token_t *token = NULL;
-   static bool_t insideMultiLineComment = FALSE;
 
    if (!insideMultiLineComment)
    {

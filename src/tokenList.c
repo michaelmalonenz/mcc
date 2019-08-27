@@ -193,11 +193,56 @@ mcc_Token_t *mcc_TokenListRemoveCurrent(mcc_TokenListIterator_t *iter)
    return (mcc_Token_t *) eral_ListRemoveCurrentData((eral_ListIterator_t *)iter);
 }
 
+char *escape_string(const char *input)
+{
+   eral_StringBuffer_t *buffer = eral_CreateStringBuffer();
+   int i;
+   int len = strlen(input);
+   for (i = 0; i < len; i++)
+   {
+      switch (input[i])
+      {
+         case '\a':
+            eral_StringBufferAppendString(buffer, "\\a");
+            break;
+         case '\b':
+            eral_StringBufferAppendString(buffer, "\\b");
+            break;
+         case '\t':
+            eral_StringBufferAppendString(buffer, "\\t");
+            break;
+         case '\n':
+            eral_StringBufferAppendString(buffer, "\\n");
+            break;
+         case '\v':
+            eral_StringBufferAppendString(buffer, "\\v");
+            break;
+         case '\f':
+            eral_StringBufferAppendString(buffer, "\\f");
+            break;
+         case '\r':
+            eral_StringBufferAppendString(buffer, "\\r");
+            break;
+         case '\\':
+            eral_StringBufferAppendString(buffer, "\\\\");
+            break;
+         case '"':
+            eral_StringBufferAppendString(buffer, "\\\"");
+            break;
+         default:
+            eral_StringBufferAppendChar(buffer, input[i]);
+            break;
+      }
+   }
+   return eral_DestroyBufferNotString(buffer);
+}
+
 void mcc_WriteTokensToOutputFile(mcc_TokenList_t *tokens)
 {
    FILE *outf = fopen(mcc_global_options.outputFilename, "w+");
    mcc_TokenListIterator_t *iter = NULL;
    mcc_Token_t *tok = NULL;
+   char *escaped = NULL;
    if (outf == NULL)
    {
       mcc_Error("Couldn't open output file '%s' for writing\n", 
@@ -216,11 +261,19 @@ void mcc_WriteTokensToOutputFile(mcc_TokenList_t *tokens)
          case TOK_KEYWORD:
          case TOK_SYMBOL:
          case TOK_OPERATOR:
-         case TOK_STR_CONST:
-         case TOK_CHAR_CONST:
          case TOK_NUMBER:
          case TOK_WHITESPACE:
             fprintf(outf, "%s", tok->text);
+            break;
+         case TOK_STR_CONST:
+            escaped = escape_string(tok->text);
+            fprintf(outf, "\"%s\"", escaped);
+            free(escaped);
+            break;
+         case TOK_CHAR_CONST:
+            escaped = escape_string(tok->text);
+            fprintf(outf, "'%s'", escaped);
+            free(escaped);
             break;
          case TOK_SYS_FILE_INC:
             fprintf(outf, "<%s>", tok->text);
