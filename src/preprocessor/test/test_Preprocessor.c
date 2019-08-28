@@ -252,6 +252,40 @@ max(other(x, y), b, c, d, \"e (hi!) \", f);";
    printf("ok\n");
 }
 
+static void test_ActualInfiniteLoopCode(void)
+{
+   const char *token_string = "\
+#define mcc_Error(...) fprintf(stderr, __VA_ARGS__); exit(EXIT_FAILURE)\n\
+#define mcc_PrettyError(file, lineno, col, ...) fprintf(stderr, \"%s:%d:%u \", file, lineno, col); \
+   mcc_Error(__VA_ARGS__)\n\
+   mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),\n\
+                      token->lineno,\n\
+                      token->line_index,\n\
+                      \"Expected %s, but got %s (%s)\\n\",\n\
+                      expected,\n\
+                      token_types[token->tokenType],\n\
+                      token->text);";
+
+   printf("Testing infinite loop macro expansion...");
+   mcc_FileOpenerInitialise();
+   mcc_InitialiseMacros();
+   mcc_TokenList_t *tokens;
+   const char *file = mcc_TestUtils_DumpStringToTempFile(
+      token_string,
+      strlen(token_string));
+
+   tokens = mcc_TokeniseFile(file);
+   mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
+
+   mcc_TokenListDelete(tokens);
+
+   unlink(file);
+   mcc_TokenListDelete(output);
+   mcc_FileOpenerDelete();
+   mcc_DeleteAllMacros();
+   printf("ok\n");
+}
+
 int main(int UNUSED(argc), char UNUSED(**argv))
 {
    test_Define();
@@ -262,5 +296,6 @@ int main(int UNUSED(argc), char UNUSED(**argv))
    test_VariadicMacroFunctionUse();
    test_StrangeDefinitionFeaturesH();
    test_MacrosWithFunctionCallsAsArgs();
+   test_ActualInfiniteLoopCode();
    return 0;
 }

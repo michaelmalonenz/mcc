@@ -403,6 +403,16 @@ mcc_TokenList_t *replaceMacroTokens(mcc_Macro_t *macro, eral_List_t *parameters)
             mcc_DeleteToken((uintptr_t) result);
             eral_ListDelete(paramTokens, NULL);
          }
+         else if (functionToken->tokenType == TOK_IDENTIFIER)
+         {
+            mcc_Macro_t *func = mcc_ResolveMacro(functionToken->text);
+            if (func && func->is_function)
+            {
+               printf("Found function '%s' inside '%s'\n",
+                  func->text, macro->text);
+               MCC_ASSERT(FALSE);
+            }
+         }
          functionToken = mcc_GetNextToken(tokensIter);
       }
       mcc_TokenListDeleteIterator(tokensIter);
