@@ -108,6 +108,8 @@ eral_ListIterator_t *eral_ListCopyIterator(eral_ListIterator_t *iter);
  */
 void eral_ListInsertDataAtCurrentPosition(eral_ListIterator_t *iter, uintptr_t data);
 
+void eral_ListInsertBeforeCurrent(eral_ListIterator_t *iter, eral_List_t *data);
+ 
 /**
  * Remove the current data and return it.  Insert the list (data) in place of the old
  * current data.

@@ -138,6 +138,8 @@ eral_List_t *mcc_TokenListDeepCopy(mcc_TokenList_t *list);
 mcc_Token_t *mcc_TokenListReplaceCurrent(mcc_TokenListIterator_t *iter,
                                                    mcc_TokenList_t *list);
 
+void mcc_TokenListInsertBeforeCurrent(mcc_TokenListIterator_t *iter, mcc_TokenList_t *data);
+
 mcc_TokenListIterator_t *mcc_TokenListCopyIterator(mcc_TokenListIterator_t *iter);
 void mcc_TokenListDeleteIterator(mcc_TokenListIterator_t *iter);
 mcc_Token_t *mcc_GetNextToken(mcc_TokenListIterator_t *iter);

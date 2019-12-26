@@ -193,6 +193,11 @@ mcc_Token_t *mcc_TokenListRemoveCurrent(mcc_TokenListIterator_t *iter)
    return (mcc_Token_t *) eral_ListRemoveCurrentData((eral_ListIterator_t *)iter);
 }
 
+void mcc_TokenListInsertBeforeCurrent(mcc_TokenListIterator_t *iter, mcc_TokenList_t *data)
+{
+   eral_ListInsertBeforeCurrent((eral_ListIterator_t *) iter, (eral_List_t *)data);
+}
+
 char *escape_string(const char *input)
 {
    eral_StringBuffer_t *buffer = eral_CreateStringBuffer();
