@@ -234,7 +234,7 @@ static void handleIfInner(preprocessor_t *preprocessor, bool_t ignore)
 static bool_t handleElIfInner(preprocessor_t *preprocessor, bool_t ignore)
 {
    mcc_TokenList_t *list = parseConditionalExpression(preprocessor, ignore);
-   bool_t result;
+   bool_t result = FALSE;
    if (!ignore)
    {
       mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator(list);
