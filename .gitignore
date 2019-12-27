@@ -3,3 +3,4 @@ bin/mcc
 bin/
 mcc.log
 .vscode/
+build/
