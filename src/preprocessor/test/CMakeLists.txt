@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.0)
 
 include(CTest)
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/.."
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../.."
                     "${CMAKE_CURRENT_SOURCE_DIR}/../../../test")
 
 add_executable(test_Conditionals test_Conditionals.c)

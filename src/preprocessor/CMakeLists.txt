@@ -1,8 +1,5 @@
 cmake_minimum_required (VERSION 3.0)
 
-include_directories(
-    "${CMAKE_CURRENT_SOURCE_DIR}/.."
-    "${CMAKE_CURRENT_SOURCE_DIR}/../eral")
 set(SOURCE
   conditional.c
   ICE.c
@@ -17,4 +14,9 @@ set(SOURCE
 
 add_library(preproc STATIC ${SOURCE})
 target_link_libraries(preproc eral)
+target_include_directories(preproc
+  PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}"
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/.."
+)
+
 add_subdirectory(test)

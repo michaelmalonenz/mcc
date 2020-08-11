@@ -1,7 +1,6 @@
 cmake_minimum_required (VERSION 3.0)
 enable_language(C)
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/..")
 set(SOURCE 
   fileBuffer.c
   fileBuffer.h
@@ -16,5 +15,8 @@ set(SOURCE
 )
 
 add_library(eral STATIC ${SOURCE})
-
+target_include_directories(eral
+  PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}"
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/.."
+)
 add_subdirectory(test)

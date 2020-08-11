@@ -4,9 +4,8 @@ enable_language(C)
 
 include(CTest)
 
-include_directories("${PROJECT_SOURCE_DIR}/../src")
-include_directories("${PROJECT_SOURCE_DIR}/../src/eral")
 add_library(testutils TestUtils.c TestUtils.h)
+target_link_libraries(testutils mccstatic)
 
 add_executable(test_Options test_Options.c)
 target_link_libraries(test_Options mccstatic eral)
