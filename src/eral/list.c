@@ -366,4 +366,5 @@ void eral_ListInsertBeforeCurrent(eral_ListIterator_t *iter, eral_List_t *data)
         eral_ListInsertDataAtCurrentPosition(iter, current);
         current = eral_ListGetNextData(data_iter);
     }
+    (void)eral_ListGetNextData(iter);
 }
