@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.0)
 
-add_compile_options(-O0 -Wextra -Werror -Wall)
+add_compile_options(-O0 -Wextra -Werror -Wall -g -ggdb3 -Wno-unused-command-line-argument)
 
 add_subdirectory(eral)
 add_subdirectory(preprocessor)
