@@ -143,6 +143,10 @@ static  mcc_Token_t *evaluate_operands(
       {
           return create_number_token(tree, get_number(l_operand) == get_number(r_operand));
       }
+      case OP_NOT_EQUAL:
+      {
+          return create_number_token(tree, get_number(l_operand) != get_number(r_operand));
+      }
       break;
       default:
       {
