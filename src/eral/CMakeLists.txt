@@ -19,4 +19,7 @@ target_include_directories(eral
   PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}"
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/.."
 )
-add_subdirectory(test)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  add_subdirectory(test)
+endif()

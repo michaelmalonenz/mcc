@@ -19,4 +19,6 @@ target_include_directories(preproc
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/.."
 )
 
-add_subdirectory(test)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  add_subdirectory(test)
+endif()
