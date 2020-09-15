@@ -6,6 +6,7 @@ include(CTest)
 
 add_library(testutils TestUtils.c TestUtils.h)
 target_link_libraries(testutils mccstatic)
+target_include_directories(testutils PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_executable(test_Options test_Options.c)
 target_link_libraries(test_Options mccstatic eral)

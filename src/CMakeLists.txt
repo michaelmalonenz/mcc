@@ -4,9 +4,6 @@ add_compile_options(-O0 -Wextra -Werror -Wall -g -ggdb3 -Wno-unused-command-line
 
 add_subdirectory(eral)
 add_subdirectory(preprocessor)
-include_directories(
-    "${CMAKE_CURRENT_SOURCE_DIR}"
-)
 
 set(SOURCE_FILES
   config.h

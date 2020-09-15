@@ -3,8 +3,15 @@ project (Mcc)
 enable_language(C)
 enable_testing()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g -ggdb3 -Wall -Wextra -Werror --coverage -fprofile-arcs -ftest-coverage -flto")
-set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} --coverage")
+set(CMAKE_C_FLAGS_DEBUG_INIT "-O0 -g -ggdb3 -fprofile-arcs -ftest-coverage")
+set(CMAKE_C_FLAGS_RELEASE_INIT "-O2")
+set(CMAKE_C_FLAGS "-Wall -Wextra -Werror -flto -Wno-unused-command-line-argument")
+
+if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fuse-ld=lld")
+endif()
+
+set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-fprofile-arcs -ftest-coverage")
 add_subdirectory(src)
 
 set(MEMORYCHECK_COMMAND_OPTIONS "--track-origins=yes --leak-check=full --errors-for-leak-kinds=all --error-exitcode=1 --log-fd=2")

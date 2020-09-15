@@ -1,7 +1,6 @@
 cmake_minimum_required (VERSION 3.0)
 
 include(CTest)
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../..")
 
 add_executable(test_FileBuffer test_FileBuffer.c)
 target_link_libraries(test_FileBuffer mccstatic eral)
