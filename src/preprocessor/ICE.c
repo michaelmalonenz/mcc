@@ -276,16 +276,7 @@ static mcc_ASTNode_t *ast_node_create(const mcc_Token_t *data)
 
 static void GetNonWhitespaceToken(mcc_AST_t *tree)
 {
-    mcc_Token_t *token = mcc_GetNextToken(tree->iterator);
-    if (token == NULL) {
-        tree->currentToken = NULL;
-        return;
-    }
-    if (token->tokenType == TOK_WHITESPACE)
-    {
-        token = mcc_GetNextToken(tree->iterator);
-    }
-    tree->currentToken = token;
+    tree->currentToken = mcc_TokenListGetNonWhitespaceToken(tree->iterator);
 }
 
 static mcc_ASTNode_t *parseFactor(mcc_AST_t *tree)

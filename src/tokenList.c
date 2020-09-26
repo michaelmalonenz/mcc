@@ -296,6 +296,19 @@ void mcc_WriteTokensToOutputFile(mcc_TokenList_t *tokens)
    fclose(outf);
 }
 
+mcc_Token_t *mcc_TokenListGetNonWhitespaceToken(mcc_TokenListIterator_t *iter)
+{
+   mcc_Token_t *token = mcc_GetNextToken(iter);
+   if (token == NULL) {
+      return NULL;
+   }
+   if (token->tokenType == TOK_WHITESPACE)
+   {
+      token = mcc_GetNextToken(iter);
+   }
+   return token;
+}
+
 #if MCC_DEBUG
 void mcc_DebugPrintToken(const mcc_Token_t *token)
 {

@@ -45,14 +45,13 @@ void mcc_DebugPrintTokenList(mcc_TokenListIterator_t *iter);
 #endif
 
 /**
+ * @fn mcc_CreateToken
+ *
  * @param text      The physical text of the token as in the source file
- *
  * @param text_len  The length of the physical text
- *
  * @param type      The type of token to create
- *
  * @param lineno    The current line number of the file where the token was found
- * 
+ *
  * Allocates the memory for the token and returns it to the caller.  The
  * caller then becomes responsible for freeing the memory.  Calling
  * `mcc_TokenListDeleteStandalone` is sufficient - it is assumed the token
@@ -64,14 +63,17 @@ mcc_Token_t *mcc_CreateToken(const char *text, size_t text_len,
                              const int lineno, const unsigned short fileno);
 
 /**
+ * @fn mcc_CopyToken
+ *
  * @param token     The token to copy
- * 
+ *
  * @returns a freshly allocated token that contains the content of the original
  * NOTE: does not copy the tokenIndex because I'm lazy.
  */
 mcc_Token_t *mcc_CopyToken(const mcc_Token_t *token);
 
 /**
+ * @fn mcc_CreateNumberToken
  * @param number   The number for the token
  * @param column   The 1-based index of the line of text where this token is located
  * @param lineno   The 1-based line number in the file where this token is located
@@ -81,11 +83,15 @@ mcc_Token_t *mcc_CreateNumberToken(mcc_Number_t *number,
    const unsigned int column, const int lineno, const unsigned short fileno);
 
 /**
+ * @fn mcc_DeleteToken
+ *
  * @param token - the token to delete
  */
 void mcc_DeleteToken(uintptr_t token);
 
 /**
+ * @fn mcc_AddEndOfLineToken
+ *
  * @param column The index of the line for the first character
  * @param lineno The line number in the file
  * @param fileno The file identifier
@@ -96,27 +102,56 @@ void mcc_DeleteToken(uintptr_t token);
 void mcc_AddEndOfLineToken(const unsigned int column, const int lineno, const unsigned short fileno,
                            mcc_TokenListIterator_t *iter);
 
+/**
+ * @fn mcc_InsertToken
+ */
 void mcc_InsertToken(mcc_Token_t *token, mcc_TokenListIterator_t *iter);
+
+/**
+ * @fn mcc_TokenListPeekCurrentToken
+ */
 const mcc_Token_t *mcc_TokenListPeekCurrentToken(mcc_TokenListIterator_t *iter);
+
+/**
+ * @fn mcc_TokenListPeekNextToken
+ */
 const mcc_Token_t *mcc_TokenListPeekNextToken(mcc_TokenListIterator_t *iter);
 
 /**
+ * @fn mcc_PeekPreviousNonWhitespaceToken
+ *
  * Starting at the head of the list, work backwards until we find
  * a token that isn't a whitespace token (should be first or second).
  */
 const mcc_Token_t *mcc_PeekPreviousNonWhitespaceToken(mcc_TokenListIterator_t *iter);
 
-
+/**
+ * @fn mcc_TokenListCreate
+ *
+ * @brief Allocates the base memory for a Token List
+ */
 mcc_TokenList_t *mcc_TokenListCreate(void);
+
+/**
+ * @fn mcc_TokenListDelete
+ *
+ * @brief Frees the memory associated with the Token List
+ */
 void mcc_TokenListDelete(mcc_TokenList_t *list);
+
+/**
+ * @fn mcc_TokenListGetIterator
+ */
 mcc_TokenListIterator_t *mcc_TokenListGetIterator(mcc_TokenList_t *list);
 
 /**
- * Add a token to the end of a list.
+ * @fn mcc_TokenListAppend
+ *
+ * @brief Add a token to the end of a list.
  * Instead of requiring an interator to insert at a particular position,
  * just append to the end of the list.  No one needs to deal with an iterator's
  * memory that way.
- * 
+ *
  * @param list The list to append to
  * @param token The token to append to the list
  * */
@@ -144,6 +179,14 @@ mcc_TokenListIterator_t *mcc_TokenListCopyIterator(mcc_TokenListIterator_t *iter
 void mcc_TokenListDeleteIterator(mcc_TokenListIterator_t *iter);
 mcc_Token_t *mcc_GetNextToken(mcc_TokenListIterator_t *iter);
 mcc_Token_t *mcc_GetPreviousToken(mcc_TokenListIterator_t *iter);
+
+/**
+ * @fn mcc_TokenListGetNonWhitespaceToken
+ *
+ * @brief Get the next token that isn't a whitespace token
+ * @returns the next non-whitespace token or NULL
+ */
+mcc_Token_t *mcc_TokenListGetNonWhitespaceToken(mcc_TokenListIterator_t *iter);
 
 void mcc_WriteTokensToOutputFile(mcc_TokenList_t *tokens);
 
