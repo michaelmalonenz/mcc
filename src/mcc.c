@@ -30,6 +30,7 @@
 #include "tokenList.h"
 #include "toolChainCommands.h"
 #include "preprocessor.h"
+#include "parser.h"
 #include "options.h"
 #include "macro.h"
 
@@ -38,7 +39,7 @@ int main(int argc, char **argv)
    mcc_TokenList_t *tokens;
    eral_ListIterator_t *fileIter;
    char *currentFile;
-   
+
    if (argc <= 1)
    {
       mcc_Error("No input files\n");
@@ -51,23 +52,25 @@ int main(int argc, char **argv)
    mcc_InitialiseMacros();
 
    fileIter = mcc_OptionsFileListGetIterator();
-   currentFile = (char *) eral_ListGetNextData(fileIter);
+   currentFile = (char *)eral_ListGetNextData(fileIter);
    while (currentFile != NULL)
    {
       fprintf(stderr, "Tokenising %s...\n", currentFile);
       tokens = mcc_TokeniseFile(currentFile);
       fprintf(stderr, "Preprocessing %s...\n", currentFile);
-      eral_List_t *output = mcc_PreprocessTokens(tokens);
-      if (mcc_global_options.stages == PREPROCESS)
+      mcc_TokenList_t *output = mcc_PreprocessTokens(tokens);
+      if (mcc_global_options.stages & PREPROCESS)
       {
          fprintf(stderr, "Writing tokens to file %s...\n",
-            mcc_global_options.outputFilename);
+                 mcc_global_options.outputFilename);
          mcc_WriteTokensToOutputFile(output);
       }
+      mcc_AST_t *ast = mcc_parse_tokens(output);
+      mcc_delete_ast(ast);
       mcc_TokenListDelete(output);
       mcc_TokenListDelete(tokens);
       mcc_DeleteAllMacros();
-      currentFile = (char *) eral_ListGetNextData(fileIter);
+      currentFile = (char *)eral_ListGetNextData(fileIter);
    }
 
    mcc_FileOpenerDelete();
@@ -75,4 +78,4 @@ int main(int argc, char **argv)
    mcc_TearDownOptions();
 
    return EXIT_SUCCESS;
-} 
+}

@@ -26,4 +26,11 @@ typedef struct
  */
 mcc_AST_t *mcc_parse_tokens(mcc_TokenList_t *tokens);
 
+/**
+ * @fn mcc_delete_ast
+ *
+ * @brief free the memory associated with the AST
+ */
+void mcc_delete_ast(mcc_AST_t *tree);
+
 #endif

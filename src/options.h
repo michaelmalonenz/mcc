@@ -32,15 +32,19 @@
 #include "mcc.h"
 #include "liberal.h"
 
-enum { PREPROCESS = 1,
-       COMPILE    = (1 << 1),
-       LINK       = (1 << 2)};
+enum
+{
+  PREPROCESS = 1,
+  COMPILE = (1 << 1),
+  LINK = (1 << 2)
+};
 
-typedef struct {
-   uint32_t stages;
-   eral_List_t *filenames;
-   const char *outputFilename;
-}mcc_Options_t;
+typedef struct
+{
+  uint32_t stages;
+  eral_List_t *filenames;
+  const char *outputFilename;
+} mcc_Options_t;
 
 extern mcc_Options_t mcc_global_options;
 
@@ -52,8 +56,7 @@ eral_ListIterator_t *mcc_OptionsFileListGetIterator(void);
  * A method mainly for unit testing.  It destroys the dynamic memory associated
  * with the option parameters, which in the real world, need to be in use for
  * the lifetime of the program.
- */ 
+ */
 void mcc_TearDownOptions(void);
 
 #endif /* _MCC_OPTIONS_H_ */
-

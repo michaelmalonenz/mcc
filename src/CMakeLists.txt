@@ -20,7 +20,7 @@ set(SOURCE_FILES
   toolChainCommands.h
 )
 add_library(mccstatic STATIC ${SOURCE_FILES})
-target_link_libraries(mccstatic m eral preproc)
+target_link_libraries(mccstatic m eral preproc parser)
 target_include_directories(mccstatic PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_executable(mcc mcc.c)
