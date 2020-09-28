@@ -44,6 +44,12 @@
 #define mcc_PrettyError(file, lineno, col, ...) fprintf(stderr, "%s:%d:%u ", file, lineno, col); \
    mcc_Error(__VA_ARGS__)
 
+#define mcc_PrettyErrorToken(token, ...) \
+   mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),\
+      token->lineno,\
+      token->line_index+1,\
+      __VA_ARGS__)
+
 #define mcc_Warning(token, format, ...) \
    fprintf(stderr, "%s:%d:%d Warning: ",\
       mcc_ResolveFileNameFromNumber(token->fileno),\

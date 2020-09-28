@@ -1,10 +1,16 @@
 #include <string.h>
 #include "parser.h"
 #include "parser_shared.h"
+#include "declarations.h"
 
-static mcc_ASTNode_t *parse_translation_unit(const mcc_AST_t *tree)
+bool mcc_compare_token(const mcc_Token_t *token, TOKEN_TYPE type, int index)
 {
-    return ast_node_create(tree->currentToken);
+    return (token && token->tokenType == type && token->tokenIndex == index);
+}
+
+void GetNonWhitespaceToken(mcc_AST_t *tree)
+{
+    tree->currentToken = mcc_TokenListGetNonWhitespaceToken(tree->iterator);
 }
 
 static void delete_ast_node_tree(mcc_ASTNode_t *root)
