@@ -1,5 +1,6 @@
 #include "declarations.h"
 #include "parser_shared.h"
+#include "statements.h"
 
 /**
  * <translation-unit> ::= {<external-declaration>}*
@@ -32,9 +33,15 @@ mcc_ASTNode_t *parse_external_declaration(mcc_AST_t *tree)
 /**
  *  <declaration> ::=  {<declaration-specifier>}+ {<init-declarator>}* ;
  */
-mcc_ASTNode_t *parse_declaration(mcc_AST_t UNUSED(*tree))
+mcc_ASTNode_t *parse_declaration(mcc_AST_t *tree)
 {
-    return NULL;
+    mcc_ASTNode_t *specifier_node = parse_declaration_specifier(tree);
+    if (specifier_node == NULL)
+        mcc_PrettyErrorToken(
+            tree->currentToken,
+            "Expected a declaration, got '%s'",
+            tree->currentToken ? tree->currentToken->text : "EOF");
+    return specifier_node;
 }
 
 /**
@@ -54,7 +61,16 @@ mcc_ASTNode_t *parse_function_definition(mcc_AST_t *tree)
     if (declarator_node != NULL)
     {
         declarator_node->left = specifier_node;
-        // What do, smart man?
+        mcc_ASTNode_t *declaration_node = parse_declaration(tree);
+        while (declaration_node != NULL)
+        {
+            declaration_node->middle = parse_declaration(tree);
+            if (declaration_node->middle == NULL)
+                break;
+            declaration_node = declaration_node->middle;
+        }
+        declarator_node->middle = declaration_node;
+        declarator_node->right = parse_compound_statement(tree);
     }
     return declarator_node;
 }
@@ -108,13 +124,31 @@ mcc_ASTNode_t *parse_direct_declarator(mcc_AST_t *tree)
 mcc_ASTNode_t *parse_declaration_specifier(mcc_AST_t *tree)
 {
     mcc_ASTNode_t *node = parse_storage_class_specifier(tree);
-    while (node != NULL)
+    if (node == NULL)
     {
-        node->middle = parse_type_specifier(tree);
-        if (node->middle == NULL)
-            break;
-        node = node->middle;
+        node = parse_type_specifier(tree);
     }
+    if (node == NULL)
+    {
+        node = parse_type_qualifier(tree);
+    }
+    return node;
+}
+
+/**
+ * <type-qualifier> ::= const
+ *                    | volatile
+ */
+mcc_ASTNode_t *parse_type_qualifier(mcc_AST_t *tree)
+{
+    mcc_ASTNode_t *node = NULL;
+    if (mcc_compare_token(tree->currentToken, TOK_KEYWORD, KEY_CONST) ||
+        mcc_compare_token(tree->currentToken, TOK_KEYWORD, KEY_VOLATILE))
+    {
+        node = ast_node_create(tree->currentToken);
+        GetNonWhitespaceToken(tree);
+    }
+
     return node;
 }
 
