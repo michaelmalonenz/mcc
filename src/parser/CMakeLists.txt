@@ -3,6 +3,8 @@ cmake_minimum_required (VERSION 3.0)
 set(SOURCES
     parser.c
     declarations.c
+    expressions.c
+    statements.c
 )
 
 add_library(parser STATIC "${SOURCES}")

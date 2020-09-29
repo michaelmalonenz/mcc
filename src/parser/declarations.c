@@ -25,6 +25,21 @@ mcc_ASTNode_t *parse_function_definition(mcc_AST_t *tree)
     return node;
 }
 
+mcc_ASTNode_t *parse_declarator(mcc_AST_t *tree)
+{
+    return parse_direct_declarator(tree);
+}
+
+mcc_ASTNode_t *parse_direct_declarator(mcc_AST_t *tree)
+{
+    mcc_ASTNode_t *node = NULL;
+    if (mcc_compare_token(tree->currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX))
+    {
+        node = ast_node_create(tree->currentToken);
+    }
+    return node;
+}
+
 mcc_ASTNode_t *parse_declaration_specifier(mcc_AST_t *tree)
 {
     mcc_ASTNode_t *node = parse_storage_class_specifier(tree);
