@@ -15,18 +15,11 @@ void GetNonWhitespaceToken(mcc_AST_t *tree)
 
 static void delete_ast_node_tree(mcc_ASTNode_t *root)
 {
-    if (root->left)
-    {
-        delete_ast_node_tree(root->left);
-    }
-    if (root->middle)
-    {
-        delete_ast_node_tree(root->middle);
-    }
-    if (root->right)
-    {
-        delete_ast_node_tree(root->right);
-    }
+    if (root == NULL)
+        return;
+    delete_ast_node_tree(root->left);
+    delete_ast_node_tree(root->middle);
+    delete_ast_node_tree(root->right);
     free(root);
 }
 
