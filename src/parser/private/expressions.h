@@ -20,5 +20,8 @@ mcc_ASTNode_t *parse_postfix_expression(mcc_AST_t *tree);
 mcc_ASTNode_t *parse_primary_expression(mcc_AST_t *tree);
 mcc_ASTNode_t *parse_expression(mcc_AST_t *tree);
 mcc_ASTNode_t *parse_assignment_expression(mcc_AST_t *tree);
+mcc_ASTNode_t *parse_constant(mcc_AST_t UNUSED(*tree));
+mcc_ASTNode_t *parse_assignment_operator(mcc_AST_t UNUSED(*tree));
+mcc_ASTNode_t *parse_unary_operator(mcc_AST_t UNUSED(*tree));
 
 #endif
