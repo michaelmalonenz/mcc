@@ -10,7 +10,7 @@ a better way to add new options
 
 Preprocessor:
 Replace macros when defining macros
-support function macros - variadic function macros
+support function macros - variadic function macros (fix the implementation)
 Need to handle the # operator - add to the function rescan
 Need to handle #pragma (and figure out what to do with it)
 
