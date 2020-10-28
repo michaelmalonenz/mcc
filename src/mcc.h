@@ -58,9 +58,6 @@
 
 #if MCC_DEBUG
 # define MCC_ASSERT(x) assert(x)
-//Obviously stole the COMPILE_TIME_ASSERT code from:
-//http://www.jaggersoft.com/pubs/CVu11_3.html
-# define MCC_COMPILE_TIME_ASSERT(pred) switch(0){case 0:case pred:;} 
 #else
 # define MCC_ASSERT(x)
 #endif
