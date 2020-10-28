@@ -94,6 +94,11 @@ void emitToken(preprocessor_t *preprocessor)
    }
 }
 
+void getNonWhiteSpaceToken(preprocessor_t *preprocessor)
+{
+   preprocessor->currentToken = mcc_TokenListGetNonWhitespaceToken(preprocessor->tokenListIter);
+}
+
 void getToken(preprocessor_t *preprocessor)
 {
    preprocessor->currentToken = mcc_GetNextToken(preprocessor->tokenListIter);

@@ -1,5 +1,6 @@
 #include "macro_expansion.h"
 #include <string.h>
+#include <stdbool.h>
 
 mcc_TokenList_t *expandMacroTokens(mcc_Macro_t *macro)
 {
@@ -15,41 +16,46 @@ mcc_TokenList_t *expandMacroTokens(mcc_Macro_t *macro)
     return result;
 }
 
-static mcc_TokenList_t *replaceMacroTokensForFunction(mcc_Macro_t *macro, eral_List_t *parameters)
+
+// FIXME - I was doing the in-place acrobatics because multiple params
+// mean that not every token is replaced each time, so you end up with
+// a list with too many tokens (numParams * tokenCount), each partially
+// replaced.
+static mcc_TokenList_t *getReplacedMacroFunctionTokens(mcc_Macro_t *macro, eral_List_t *parameters)
 {
-    mcc_TokenList_t *functionTokens = mcc_TokenListDeepCopy(macro->tokens);
+    mcc_TokenList_t *result = mcc_TokenListCreate();
     eral_ListIterator_t *parametersIter = eral_ListGetIterator(parameters);
     mcc_MacroParameter_t *param = (mcc_MacroParameter_t *)eral_ListGetNextData(parametersIter);
     while (param != NULL)
     {
-        mcc_TokenListIterator_t *tokensIter = mcc_TokenListGetIterator(functionTokens);
+        mcc_TokenListIterator_t *tokensIter = mcc_TokenListGetIterator(macro->tokens);
         mcc_Token_t *functionToken = mcc_GetNextToken(tokensIter);
         while (functionToken != NULL)
         {
+            bool token_handled = false;
             if (param->argument == NULL && functionToken->tokenType == TOK_IDENTIFIER &&
-                strncmp(functionToken->text, "__VA_ARGS__", strlen("__VA_ARGS__")) == 0)
+                strcmp(functionToken->text, "__VA_ARGS__") == 0)
             {
                 eral_ListIterator_t *iter_copy = eral_ListCopyIterator(parametersIter);
                 mcc_MacroParameter_t *currentParam = param;
-                mcc_TokenList_t *paramTokens = mcc_TokenListCreate();
                 while (currentParam != NULL)
                 {
-                    mcc_TokenListConcatenate(paramTokens,
+                    mcc_TokenListConcatenate(result,
                                              mcc_TokenListDeepCopy(currentParam->parameterTokens));
                     currentParam = (mcc_MacroParameter_t *)eral_ListGetNextData(iter_copy);
                 }
-                mcc_Token_t *result = mcc_TokenListReplaceCurrent(tokensIter, paramTokens);
-                mcc_DeleteToken((uintptr_t)result);
-                eral_ListDelete(paramTokens, NULL);
                 eral_ListDeleteIterator(iter_copy);
-            } else if (functionToken->tokenType == TOK_IDENTIFIER && param->argument != NULL &&
-                       strcmp(functionToken->text, param->argument->text) == 0)
+                token_handled = true;
+            }
+            else if (functionToken->tokenType == TOK_IDENTIFIER && param->argument != NULL &&
+                     strcmp(functionToken->text, param->argument->text) == 0)
             {
+                printf("Found macro identifier\n");
                 mcc_TokenList_t *paramTokens = mcc_TokenListDeepCopy(param->parameterTokens);
-                mcc_Token_t *result = mcc_TokenListReplaceCurrent(tokensIter, paramTokens);
-                mcc_DeleteToken((uintptr_t)result);
-                eral_ListDelete(paramTokens, NULL);
-            } else if (functionToken->tokenType == TOK_IDENTIFIER)
+                mcc_TokenListConcatenate(result, paramTokens);
+                token_handled = true;
+            }
+            else if (functionToken->tokenType == TOK_IDENTIFIER)
             {
                 mcc_Macro_t *func = mcc_ResolveMacro(functionToken->text);
                 if (func && func->is_function)
@@ -61,7 +67,12 @@ static mcc_TokenList_t *replaceMacroTokensForFunction(mcc_Macro_t *macro, eral_L
                     // func);
                     // mcc_TokenListInsertBeforeCurrent(tokensIter,
                     // funcTokens);
+                    token_handled = true;
                 }
+            }
+            if (!token_handled)
+            {
+                mcc_TokenListAppend(result, mcc_CopyToken(functionToken));
             }
             functionToken = mcc_GetNextToken(tokensIter);
         }
@@ -69,7 +80,7 @@ static mcc_TokenList_t *replaceMacroTokensForFunction(mcc_Macro_t *macro, eral_L
         param = (mcc_MacroParameter_t *)eral_ListGetNextData(parametersIter);
     }
     mcc_TokenListDeleteIterator(parametersIter);
-    return functionTokens;
+    return result;
 }
 
 static void rescanMacroFunctionForActions(mcc_TokenList_t *tokens)
@@ -186,14 +197,15 @@ mcc_TokenList_t *expandMacroFunctionTokens(preprocessor_t *preprocessor, mcc_Mac
                             "%d\n",
                             macro->text, args_len, params_len);
         }
-    } else if (params_len != args_len)
+    }
+    else if (params_len != args_len)
     {
         mcc_PrettyError(mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
                         preprocessor->currentToken->lineno, preprocessor->currentToken->line_index,
                         "macro function '%s' expects %d argument(s), but got %d\n", macro->text,
                         args_len, params_len);
     }
-    mcc_TokenList_t *result = replaceMacroTokensForFunction(macro, parameters);
+    mcc_TokenList_t *result = getReplacedMacroFunctionTokens(macro, parameters);
     eral_ListDelete(parameters, mcc_MacroParameterDelete);
     rescanMacroFunctionForActions(result);
     return result;

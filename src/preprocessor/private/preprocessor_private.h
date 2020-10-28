@@ -34,6 +34,8 @@ typedef struct preprocessor {
    mcc_TokenList_t *output;
 } preprocessor_t;
 
+void getNonWhiteSpaceToken(preprocessor_t *preprocessor);
+
 void getToken(preprocessor_t *preprocessor);
 
 void maybeGetWhiteSpaceToken(preprocessor_t *preprocessor);
