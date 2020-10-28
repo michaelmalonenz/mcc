@@ -36,7 +36,7 @@
 #include "tokens.h"
 #include "tokenList.h"
 
-static bool_t insideMultiLineComment = FALSE;
+static bool insideMultiLineComment = false;
 
 static void eral_TokeniseLine(eral_LogicalLine_t *line,
                              eral_FileBuffer_t *fileBuffer,
@@ -190,7 +190,7 @@ static void handle_string_char_const(eral_LogicalLine_t *line,
    }
    else
    {
-      MCC_ASSERT(FALSE);
+      MCC_ASSERT(false);
    }   
 
    //move the line past the initial delimiter
@@ -399,7 +399,7 @@ static void eral_TokeniseLine(eral_LogicalLine_t *line,
          //If this is the first line/opening part of the comment, handle it.
          if (!insideMultiLineComment)
          {
-            insideMultiLineComment = TRUE;
+            insideMultiLineComment = true;
             line->index += 2;
          }
          while(line->index < line->length)
@@ -408,7 +408,7 @@ static void eral_TokeniseLine(eral_LogicalLine_t *line,
                 (line->string[line->index] == '*' && line->string[line->index+1] == '/'))
             {
                line->index += 2;
-               insideMultiLineComment = FALSE;
+               insideMultiLineComment = false;
                break;
             }
             else
@@ -517,10 +517,10 @@ static void eral_TokeniseLine(eral_LogicalLine_t *line,
       }
       else if (isNumber(line->string[line->index]))
       {
-         bool_t isUnsigned = FALSE;
-         bool_t isLong = FALSE;
-         bool_t isDouble = FALSE;
-         bool_t hadSuffix = FALSE;
+         bool isUnsigned = false;
+         bool isLong = false;
+         bool isDouble = false;
+         bool hadSuffix = false;
          int numLen = 1;
          while (isNumber(line->string[line->index + numLen]) &&
                  line->index + numLen < line->length)
@@ -537,13 +537,13 @@ static void eral_TokeniseLine(eral_LogicalLine_t *line,
          }
          if (toupper(line->string[line->index + numLen]) == 'U')
          {
-            isUnsigned = TRUE;
-            hadSuffix = TRUE;
+            isUnsigned = true;
+            hadSuffix = true;
          }
          else if (toupper(line->string[line->index + numLen]) == 'L')
          {
-            isLong = TRUE;
-            hadSuffix = TRUE;
+            isLong = true;
+            hadSuffix = true;
          }
          else if (line->string[line->index + numLen] == '.')
          {
@@ -555,8 +555,8 @@ static void eral_TokeniseLine(eral_LogicalLine_t *line,
             if (toupper(line->string[line->index + numLen]) == 'F' ||
                 toupper(line->string[line->index + numLen]) == 'D')
             {
-               isDouble = TRUE;
-               hadSuffix = TRUE;
+               isDouble = true;
+               hadSuffix = true;
             }
          }
          

@@ -205,7 +205,7 @@ const mcc_Token_t *evaluatePostOrder(mcc_AST_t *tree, mcc_ASTNode_t *node)
                 lhs = evaluatePostOrder(tree, node->left);
                 if (!get_number(lhs))
                 {
-                    result = create_number_token(tree, FALSE);
+                    result = create_number_token(tree, false);
                 }
                 else
                 {
@@ -219,7 +219,7 @@ const mcc_Token_t *evaluatePostOrder(mcc_AST_t *tree, mcc_ASTNode_t *node)
                 lhs = evaluatePostOrder(tree, node->left);
                 if (get_number(lhs))
                 {
-                    result = create_number_token(tree, TRUE);
+                    result = create_number_token(tree, true);
                 }
                 else
                 {

@@ -61,6 +61,22 @@ typedef enum TYPE { TOK_PP_DIRECTIVE, TOK_IDENTIFIER, TOK_KEYWORD, TOK_SYMBOL,
                     NUM_TOK_TYPES, TOK_NONE } TOKEN_TYPE;
 extern const char *token_types[NUM_TOK_TYPES];
 
+typedef enum mcc_NumberType { UNSIGNED_INT, SIGNED_INT, FLOAT, DOUBLE, NUMBER_OF_NUMBER_TYPES } mcc_NumberType_t;
+
+typedef union mcc_NumberContainer
+{
+   int32_t integer_s;
+   uint32_t integer_u;
+   float float_s;
+   double float_d;
+} mcc_NumberContainer_t;
+
+typedef struct mcc_Number
+{
+   mcc_NumberContainer_t number;
+   mcc_NumberType_t numberType;
+} mcc_Number_t;
+
 typedef struct token {
    char *text;
    TOKEN_TYPE tokenType;

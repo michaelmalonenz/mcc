@@ -64,7 +64,7 @@ uintptr_t eral_StackPeek(const eral_Stack_t *stack)
    return eral_ListPeekTailData(stack->list);
 }
 
-bool_t eral_StackEmpty(const eral_Stack_t *stack)
+bool eral_StackEmpty(const eral_Stack_t *stack)
 {
    return eral_ListEmpty(stack->list);
 }

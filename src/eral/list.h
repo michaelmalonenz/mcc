@@ -27,6 +27,7 @@
 #ifndef _ERAL_LIST_H_
 #define _ERAL_LIST_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <limits.h>
 
@@ -68,7 +69,7 @@ uintptr_t eral_ListPeekTailData(eral_List_t *list);
 /**
  * Returns True if the list has no items in it, otherwise false
  */
-bool_t eral_ListEmpty(eral_List_t *list);
+bool eral_ListEmpty(eral_List_t *list);
 
 uint32_t eral_ListGetLength(eral_List_t *list);
 

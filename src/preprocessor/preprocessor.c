@@ -197,7 +197,7 @@ void handleDefine(preprocessor_t *preprocessor)
    const mcc_Token_t *identifier_tok;
    mcc_TokenList_t *tokens = mcc_TokenListCreate();
    mcc_TokenList_t *arguments = NULL;
-   bool_t variadic = FALSE;
+   bool variadic = false;
    getToken(preprocessor);
    mcc_ExpectTokenType(preprocessor->currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
    getToken(preprocessor);
@@ -238,13 +238,13 @@ void handleDefine(preprocessor_t *preprocessor)
          else if (preprocessor->currentToken->tokenType == TOK_OPERATOR &&
                   preprocessor->currentToken->tokenIndex == OP_VARIADIC_ARGS)
          {
-            variadic = TRUE;
+            variadic = true;
             maybeGetWhiteSpaceToken(preprocessor);
          }
          else
          {
             mcc_DebugPrintToken(preprocessor->currentToken);
-            MCC_ASSERT(FALSE);
+            MCC_ASSERT(false);
          }
          getToken(preprocessor);
          if (variadic)
@@ -334,7 +334,7 @@ void handleStringify(preprocessor_t *preprocessor)
 //What shall I do with #pragmas???
 void handlePragma(preprocessor_t UNUSED(*preprocessor))
 {
-   MCC_ASSERT(FALSE);
+   MCC_ASSERT(false);
 }
 
 void handleWarning(preprocessor_t *preprocessor)

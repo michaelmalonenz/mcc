@@ -33,7 +33,6 @@
 #include <limits.h>
 #include <assert.h>
 #include <ctype.h>
-#include <stdint.h>
 
 #include "config.h"
 
@@ -64,33 +63,6 @@
 # define MCC_COMPILE_TIME_ASSERT(pred) switch(0){case 0:case pred:;} 
 #else
 # define MCC_ASSERT(x)
-#endif
-
-typedef _Bool bool_t;
-
-typedef enum mcc_NumberType { UNSIGNED_INT, SIGNED_INT, FLOAT, DOUBLE, NUMBER_OF_NUMBER_TYPES } mcc_NumberType_t;
-
-typedef union mcc_NumberContainer
-{
-   int32_t integer_s;
-   uint32_t integer_u;
-   float float_s;
-   double float_d;
-} mcc_NumberContainer_t;
-
-typedef struct mcc_Number
-{
-   mcc_NumberContainer_t number;
-   mcc_NumberType_t numberType;
-} mcc_Number_t;
-
-
-#ifndef TRUE
-#define TRUE ((bool_t) 1)
-#endif
-
-#ifndef FALSE
-#define FALSE ((bool_t) 0)
 #endif
 
 #ifndef UNUSED

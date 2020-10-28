@@ -61,7 +61,7 @@ static mcc_TokenList_t *getReplacedMacroFunctionTokens(mcc_Macro_t *macro, eral_
                 if (func && func->is_function)
                 {
                     printf("Found function '%s' inside '%s'\n", func->text, macro->text);
-                    MCC_ASSERT(FALSE);
+                    MCC_ASSERT(false);
                     // mcc_TokenList_t *funcTokens =
                     // handleRecursiveMacroFunction(tokensIter,
                     // func);
@@ -131,7 +131,7 @@ mcc_TokenList_t *expandMacroFunctionTokens(preprocessor_t *preprocessor, mcc_Mac
     eral_List_t *parameters = eral_ListCreate();
     getToken(preprocessor);
     maybeGetWhiteSpaceToken(preprocessor);
-    bool_t argumentsComplete = FALSE;
+    bool argumentsComplete = false;
     if (preprocessor->currentToken && !(preprocessor->currentToken->tokenType == TOK_SYMBOL &&
                                         preprocessor->currentToken->tokenIndex == SYM_CLOSE_PAREN))
     {

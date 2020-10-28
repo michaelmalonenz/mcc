@@ -243,7 +243,7 @@ uintptr_t eral_ListReplaceCurrentData(eral_ListIterator_t *iter, eral_List_t *da
     return previous;
 }
 
-bool_t eral_ListEmpty(eral_List_t *list)
+bool eral_ListEmpty(eral_List_t *list)
 {
     return list->nItems == 0;
 }

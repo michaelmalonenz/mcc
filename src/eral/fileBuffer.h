@@ -27,6 +27,7 @@
 #ifndef ERAL_FILE_BUFFER_H
 #define ERAL_FILE_BUFFER_H
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
 #include "mcc.h"
@@ -43,7 +44,7 @@ eral_FileBuffer_t *eral_CreateFileBuffer(const char *file);
 
 void eral_DeleteFileBuffer(eral_FileBuffer_t* buffer);
 
-bool_t eral_FileBufferEOFReached(eral_FileBuffer_t *buffer);
+bool eral_FileBufferEOFReached(eral_FileBuffer_t *buffer);
 
 eral_LogicalLine_t *eral_FileBufferGetNextLogicalLine(eral_FileBuffer_t *fileBuffer);
 

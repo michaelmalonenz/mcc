@@ -41,13 +41,13 @@ static void mcc_DefineMacroAsNumber(const char *ident, int value)
         .number = {.integer_s = value},
         .numberType = SIGNED_INT};
     mcc_TokenListAppend(tokens, mcc_CreateNumberToken(&number, 0, 0, 255));
-    mcc_DefineMacro(ident, tokens, NULL, FALSE);
+    mcc_DefineMacro(ident, tokens, NULL, false);
 }
 
 void mcc_InitialiseMacros(void)
 {
     macro_table = eral_HashTableCreateSize(8192);
-    mcc_DefineMacro("__STDC__", NULL, NULL, FALSE);
+    mcc_DefineMacro("__STDC__", NULL, NULL, false);
     mcc_DefineMacroAsNumber("__x86_64__", 1);
     mcc_DefineMacroAsNumber("__LP64__", 1);
     mcc_DefineMacroAsNumber("__WORDSIZE", 64);
@@ -69,7 +69,7 @@ void mcc_DeleteAllMacros(void)
     macro_table = NULL;
 }
 
-void mcc_DefineMacro(const char *text, mcc_TokenList_t *value, mcc_TokenList_t *arguments, bool_t variadic)
+void mcc_DefineMacro(const char *text, mcc_TokenList_t *value, mcc_TokenList_t *arguments, bool variadic)
 {
     eral_HashTableInsert(macro_table, text, strlen(text), (uintptr_t) create_macro(text, value, arguments, variadic));
 }

@@ -30,14 +30,14 @@
 #include "ICE.h"
 #include "macro.h"
 
-static void conditionalInnerImpl(preprocessor_t *preprocessor, bool_t initialConditionTrue, bool_t ignore);
-static void handleIfDefInner(preprocessor_t *preprocessor, bool_t ignore);
-static void handleIfNDefInner(preprocessor_t *preprocessor, bool_t ignore);
-static void handleIfInner(preprocessor_t *preprocessor, bool_t ignore);
-static bool_t handleElIfInner(preprocessor_t *preprocessor, bool_t ignore);
+static void conditionalInnerImpl(preprocessor_t *preprocessor, bool initialConditionTrue, bool ignore);
+static void handleIfDefInner(preprocessor_t *preprocessor, bool ignore);
+static void handleIfNDefInner(preprocessor_t *preprocessor, bool ignore);
+static void handleIfInner(preprocessor_t *preprocessor, bool ignore);
+static bool handleElIfInner(preprocessor_t *preprocessor, bool ignore);
 
 
-static eral_List_t *parseConditionalExpression(preprocessor_t *preprocessor, bool_t ignore)
+static eral_List_t *parseConditionalExpression(preprocessor_t *preprocessor, bool ignore)
 {
    mcc_TokenList_t *list = mcc_TokenListCreate();
    getToken(preprocessor);
@@ -53,18 +53,18 @@ static eral_List_t *parseConditionalExpression(preprocessor_t *preprocessor, boo
          if (strncmp(preprocessor->currentToken->text,
              "defined", strlen(preprocessor->currentToken->text)) == 0)
          {
-            bool_t expectClosingParen = FALSE;
+            bool expectClosingParen = false;
             getToken(preprocessor);
             maybeGetWhiteSpaceToken(preprocessor);
             if (preprocessor->currentToken->tokenType == TOK_SYMBOL &&
                 preprocessor->currentToken->tokenIndex == SYM_OPEN_PAREN)
             {
-               expectClosingParen = TRUE;
+               expectClosingParen = true;
                getToken(preprocessor);
                maybeGetWhiteSpaceToken(preprocessor);
             }
             mcc_ExpectTokenType(preprocessor->currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX);
-            bool_t defined = mcc_IsMacroDefined(preprocessor->currentToken->text);
+            bool defined = mcc_IsMacroDefined(preprocessor->currentToken->text);
             mcc_Number_t number;
             number.number.integer_s = (int) defined;
             number.numberType = SIGNED_INT;
@@ -119,13 +119,13 @@ static eral_List_t *parseConditionalExpression(preprocessor_t *preprocessor, boo
 
 static void conditionalInnerImpl(
    preprocessor_t *preprocessor,
-   bool_t initialConditionTrue,
-   bool_t ignore)
+   bool initialConditionTrue,
+   bool ignore)
 {
-   bool_t processMacro = initialConditionTrue && !ignore;
-   bool_t handled = FALSE;
+   bool processMacro = initialConditionTrue && !ignore;
+   bool handled = false;
    getToken(preprocessor);
-   while (TRUE)
+   while (true)
    {
       if (preprocessor->currentToken == NULL)
       {
@@ -182,9 +182,9 @@ static void conditionalInnerImpl(
 
 void handleIfdef(preprocessor_t *preprocessor)
 {
-   handleIfDefInner(preprocessor, FALSE);
+   handleIfDefInner(preprocessor, false);
 }
-static void handleIfDefInner(preprocessor_t *preprocessor, bool_t ignore)
+static void handleIfDefInner(preprocessor_t *preprocessor, bool ignore)
 {
    getToken(preprocessor);
    mcc_ExpectTokenType(preprocessor->currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
@@ -195,9 +195,9 @@ static void handleIfDefInner(preprocessor_t *preprocessor, bool_t ignore)
 
 void handleIfndef(preprocessor_t *preprocessor)
 {
-   handleIfNDefInner(preprocessor, FALSE);
+   handleIfNDefInner(preprocessor, false);
 }
-static void handleIfNDefInner(preprocessor_t *preprocessor, bool_t ignore)
+static void handleIfNDefInner(preprocessor_t *preprocessor, bool ignore)
 {
    getToken(preprocessor);
    mcc_ExpectTokenType(preprocessor->currentToken, TOK_WHITESPACE, TOK_UNSET_INDEX);
@@ -208,9 +208,9 @@ static void handleIfNDefInner(preprocessor_t *preprocessor, bool_t ignore)
 
 void handleIf(preprocessor_t *preprocessor)
 {
-   handleIfInner(preprocessor, FALSE);
+   handleIfInner(preprocessor, false);
 }
-static void handleIfInner(preprocessor_t *preprocessor, bool_t ignore)
+static void handleIfInner(preprocessor_t *preprocessor, bool ignore)
 {
    mcc_TokenList_t *list = parseConditionalExpression(preprocessor, ignore);
    if (!ignore)
@@ -226,15 +226,15 @@ static void handleIfInner(preprocessor_t *preprocessor, bool_t ignore)
    }
    else
    {
-      conditionalInnerImpl(preprocessor, FALSE, ignore);
+      conditionalInnerImpl(preprocessor, false, ignore);
    }
    mcc_TokenListDelete(list);
 }
 
-static bool_t handleElIfInner(preprocessor_t *preprocessor, bool_t ignore)
+static bool handleElIfInner(preprocessor_t *preprocessor, bool ignore)
 {
    mcc_TokenList_t *list = parseConditionalExpression(preprocessor, ignore);
-   bool_t result = FALSE;
+   bool result = false;
    if (!ignore)
    {
       mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator(list);

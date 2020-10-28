@@ -81,7 +81,7 @@ const char *number_types[NUMBER_OF_NUMBER_TYPES] = {
    "double precision float"
 };
 
-static bool_t initialised;
+static bool initialised;
 
 static inline void init_tokens(void)
 {
@@ -106,12 +106,12 @@ static inline void init_tokens(void)
       operator_strlens[i] = strlen(operators[i]);
    }
 
-   initialised = TRUE;
+   initialised = true;
 }
 
 static int get_token_impl(eral_LogicalLine_t *line, int num_tokens,
                           const char **token_list, size_t *strlens_list,
-                          bool_t requires_non_word_after)
+                          bool requires_non_word_after)
 {
    int i;
    if (!initialised)
@@ -143,7 +143,7 @@ PREPROC_DIRECTIVE mcc_GetPreprocessorDirective(eral_LogicalLine_t *line)
    int pp_dir;
 
    pp_dir = get_token_impl(line, NUM_PREPROCESSOR_DIRECTIVES, 
-                           preprocessor_directives, pp_strlens, FALSE);
+                           preprocessor_directives, pp_strlens, false);
 
    if (pp_dir != -1)
    {
@@ -159,7 +159,7 @@ MCC_SYMBOL mcc_GetSymbol(eral_LogicalLine_t *line)
 {
    int sym;
 
-   sym = get_token_impl(line, NUM_SYMBOLS, symbols, symbol_strlens, FALSE);
+   sym = get_token_impl(line, NUM_SYMBOLS, symbols, symbol_strlens, false);
 
    if (sym != -1)
    {
@@ -176,7 +176,7 @@ MCC_OPERATOR mcc_GetOperator(eral_LogicalLine_t *line)
 {
    int op;
 
-   op = get_token_impl(line, NUM_OPERATORS, operators, operator_strlens, FALSE);
+   op = get_token_impl(line, NUM_OPERATORS, operators, operator_strlens, false);
 
    if (op != -1)
    {
@@ -192,7 +192,7 @@ MCC_KEYWORD mcc_GetKeyword(eral_LogicalLine_t *line)
 {
    int key;
 
-   key = get_token_impl(line, NUM_KEYWORDS, keywords, keyword_strlens, TRUE);
+   key = get_token_impl(line, NUM_KEYWORDS, keywords, keyword_strlens, true);
 
    if (key != -1)
    {

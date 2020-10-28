@@ -63,7 +63,7 @@ void delete_macro(mcc_Macro_t *macro)
 // would yield the same result as YET_ANOTHER_MACRO, which is bad!
 //
 // To make life better, I also need to evaluate constant expressions here
-mcc_Macro_t *create_macro(const char *text, mcc_TokenList_t *value, mcc_TokenList_t *arguments, bool_t variadic)
+mcc_Macro_t *create_macro(const char *text, mcc_TokenList_t *value, mcc_TokenList_t *arguments, bool variadic)
 {
    mcc_Macro_t *result = (mcc_Macro_t *) malloc(sizeof(mcc_Macro_t));
    result->text = (char *) malloc(sizeof(char) * (strlen(text) + 1));
@@ -72,13 +72,13 @@ mcc_Macro_t *create_macro(const char *text, mcc_TokenList_t *value, mcc_TokenLis
    strncpy(result->text, text, strlen(text) + 1);
    result->tokens = value;
    result->arguments = arguments;
-   result->is_function = (bool_t)(arguments != NULL);
+   result->is_function = (bool)(arguments != NULL);
    result->is_variadic = variadic;
    result->next = NULL;
    return result;
 }
 
-bool_t mcc_IsMacroDefined(const char *text)
+bool mcc_IsMacroDefined(const char *text)
 {
    return (mcc_ResolveMacro(text) != NULL);
 }

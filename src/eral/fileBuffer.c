@@ -114,15 +114,15 @@ static void readFileChunk(eral_FileBuffer_t *fileBuffer)
    fileBuffer->bufferIndex = 0;
 }
 
-bool_t eral_FileBufferEOFReached(eral_FileBuffer_t *buffer)
+bool eral_FileBufferEOFReached(eral_FileBuffer_t *buffer)
 {
-   return (bool_t) (feof(buffer->file) && buffer->charsRead == 0);
+   return (bool) (feof(buffer->file) && buffer->charsRead == 0);
 }
 
 eral_LogicalLine_t *eral_FileBufferGetNextLogicalLine(eral_FileBuffer_t *fileBuffer)
 {
    eral_StringBuffer_t *lineBuffer = eral_CreateStringBuffer();
-   bool_t lineIsRead = FALSE;
+   bool lineIsRead = false;
    if (fileBuffer->currentLine.string != NULL)
    {
       free(fileBuffer->currentLine.string);
@@ -165,7 +165,7 @@ eral_LogicalLine_t *eral_FileBufferGetNextLogicalLine(eral_FileBuffer_t *fileBuf
             else
             {
                eral_StringBufferAppendChar(lineBuffer, '\0');
-               lineIsRead = TRUE;
+               lineIsRead = true;
             }
             //This might seem weird, but the construction here will allow us to handle any
             //of the 3 different line ending types without handling more than a single line

@@ -140,7 +140,7 @@ char *mcc_FindLocalInclude(const char *filename)
    {
       size_t dirLen = strlen(currentDir);
       size_t filenameLen = strlen(filename);
-      bool_t needsTrailingSlash = currentDir[dirLen-1] != '/';
+      bool needsTrailingSlash = currentDir[dirLen-1] != '/';
       size_t total = dirLen + filenameLen + 1;
       int fd;
       if (needsTrailingSlash)

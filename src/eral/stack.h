@@ -40,7 +40,7 @@ uintptr_t eral_StackPop(const eral_Stack_t *stack);
 
 uintptr_t eral_StackPeek(const eral_Stack_t *stack);
 
-bool_t eral_StackEmpty(const eral_Stack_t *stack);
+bool eral_StackEmpty(const eral_Stack_t *stack);
 
 uint32_t eral_StackNumItems(const eral_Stack_t *stack);
 
