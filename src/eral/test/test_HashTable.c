@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "mcc.h"
 #include "liberal.h"
 #include "hash_table.h"
 

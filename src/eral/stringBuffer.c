@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "mcc.h"
+#include "liberal.h"
 #include "stringBuffer.h"
 
 #define MCC_INITIAL_STRING_BUFFER_LENGTH 30

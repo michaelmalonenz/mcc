@@ -29,6 +29,7 @@
 #include <stdlib.h>
 
 #include "mcc.h"
+#include "liberal.h"
 #include "TestUtils.h"
 #include "toolChainCommands.h"
 #include "tokenList.h"

@@ -21,8 +21,8 @@
 #include <stdint.h>
 #include <unistd.h>
 
-#define MCC_DEBUG 1
 #include "mcc.h"
+#include "liberal.h"
 #include "tokens.h"
 #include "tokenList.h"
 #include "toolChainCommands.h"

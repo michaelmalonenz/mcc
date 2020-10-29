@@ -54,16 +54,6 @@
       token->line_index+1);\
    fprintf(stderr, format, __VA_ARGS__);
 
-#if MCC_DEBUG
-# define MCC_ASSERT(x) assert(x)
-#else
-# define MCC_ASSERT(x)
-#endif
-
-#ifndef UNUSED
-#define UNUSED(x) x __attribute__ ((unused))
-#endif
-
 /* If the two are equal, just return one or the other */
 #define max(a, b) ( ((a) > (b)) ? (a) : (b) )
 #define min(a, b) ( ((a) < (b)) ? (a) : (b) )

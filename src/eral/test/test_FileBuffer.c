@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "mcc.h"
+#include "liberal.h"
 #include "fileBuffer.h"
 
 #define FILE_CONTENTS "\

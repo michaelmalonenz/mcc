@@ -18,8 +18,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MCC_DEBUG 1
 #include "mcc.h"
+#include "liberal.h"
 #include "options.h"
 
 char *options[] = {__FILE__, "-o", "outputFilename", "--ignore"};

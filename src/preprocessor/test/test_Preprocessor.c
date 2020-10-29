@@ -30,6 +30,7 @@
 #include <stdbool.h>
 
 #include "mcc.h"
+#include "liberal.h"
 #include "TestUtils.h"
 #include "tokenList.h"
 #include "toolChainCommands.h"

@@ -21,7 +21,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#define MCC_DEBUG 1
+#include "liberal.h"
 #include "mcc.h"
 #include "macro.h"
 #include "tokenList.h"

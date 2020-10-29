@@ -29,6 +29,7 @@
 #include <unistd.h>
 
 #include "mcc.h"
+#include "liberal.h"
 #include "preprocessor.h"
 #include "toolChainCommands.h"
 #include "tokenList.h"

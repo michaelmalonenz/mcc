@@ -27,7 +27,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "mcc.h"
 #include "liberal.h"
 #include "stack.h"
 

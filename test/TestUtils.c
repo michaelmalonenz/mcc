@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 
 #include "mcc.h"
+#include "liberal.h"
 
 char tmp_filename[L_tmpnam];
 

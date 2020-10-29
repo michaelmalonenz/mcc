@@ -17,7 +17,6 @@
 **/
 #include <stdio.h>
 
-#include "mcc.h"
 #include "liberal.h"
 #include "list.h"
 
