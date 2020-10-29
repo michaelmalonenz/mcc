@@ -61,7 +61,6 @@ static mcc_TokenList_t *getReplacedMacroFunctionTokens(mcc_Macro_t *macro, eral_
                 if (func && func->is_function)
                 {
                     printf("Found function '%s' inside '%s'\n", func->text, macro->text);
-                    MCC_ASSERT(false);
                     // mcc_TokenList_t *funcTokens =
                     // handleRecursiveMacroFunction(tokensIter,
                     // func);

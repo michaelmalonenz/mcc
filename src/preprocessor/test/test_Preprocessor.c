@@ -298,7 +298,6 @@ int main(int UNUSED(argc), char UNUSED(**argv))
    test_VariadicMacroFunctionUse();
    test_StrangeDefinitionFeaturesH();
    test_MacrosWithFunctionCallsAsArgs();
-   if (false)
-      test_ActualInfiniteLoopCode();
+   test_ActualInfiniteLoopCode();
    return 0;
 }
