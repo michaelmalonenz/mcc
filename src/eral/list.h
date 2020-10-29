@@ -112,12 +112,6 @@ void eral_ListInsertDataAtCurrentPosition(eral_ListIterator_t *iter, uintptr_t d
 void eral_ListInsertBeforeCurrent(eral_ListIterator_t *iter, eral_List_t *data);
  
 /**
- * Remove the current data and return it.  Insert the list (data) in place of the old
- * current data.
- */
-uintptr_t eral_ListReplaceCurrentData(eral_ListIterator_t *iter, eral_List_t *data);
-
-/**
  * This shows what data the iterator is currently pointing at.
  * It has no side-effects on the iterator and callers *must not*
  * free the memory associated with the data returned.

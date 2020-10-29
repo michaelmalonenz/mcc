@@ -41,6 +41,7 @@ typedef eral_List_t mcc_TokenList_t;
 #if MCC_DEBUG
 void mcc_DebugPrintToken(const mcc_Token_t *token);
 void mcc_DebugPrintTokenList(mcc_TokenListIterator_t *iter);
+void mcc_DebugPrintWholeTokenList(mcc_TokenList_t *list);
 #endif
 
 /**
@@ -164,13 +165,6 @@ void mcc_TokenListAppend(mcc_TokenList_t *list, mcc_Token_t *token);
  * @param list - The list to copy
  */
 eral_List_t *mcc_TokenListDeepCopy(mcc_TokenList_t *list);
-
-/**
- * Replace the current token as defined by the iterator with the given
- * list of data.  Return existing current.
- */
-mcc_Token_t *mcc_TokenListReplaceCurrent(mcc_TokenListIterator_t *iter,
-                                                   mcc_TokenList_t *list);
 
 void mcc_TokenListInsertBeforeCurrent(mcc_TokenListIterator_t *iter, mcc_TokenList_t *data);
 

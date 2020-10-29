@@ -16,19 +16,20 @@ mcc_TokenList_t *expandMacroTokens(mcc_Macro_t *macro)
     return result;
 }
 
-
-// FIXME - I was doing the in-place acrobatics because multiple params
-// mean that not every token is replaced each time, so you end up with
-// a list with too many tokens (numParams * tokenCount), each partially
-// replaced.
 static mcc_TokenList_t *getReplacedMacroFunctionTokens(mcc_Macro_t *macro, eral_List_t *parameters)
 {
-    mcc_TokenList_t *result = mcc_TokenListCreate();
     eral_ListIterator_t *parametersIter = eral_ListGetIterator(parameters);
     mcc_MacroParameter_t *param = (mcc_MacroParameter_t *)eral_ListGetNextData(parametersIter);
+    mcc_TokenList_t *working_tokens = mcc_TokenListDeepCopy(macro->tokens);
+    if (param == NULL)
+    {
+        mcc_TokenListDeleteIterator(parametersIter);
+        return working_tokens;
+    }
+    mcc_TokenList_t *result = mcc_TokenListCreate();
     while (param != NULL)
     {
-        mcc_TokenListIterator_t *tokensIter = mcc_TokenListGetIterator(macro->tokens);
+        mcc_TokenListIterator_t *tokensIter = mcc_TokenListGetIterator(working_tokens);
         mcc_Token_t *functionToken = mcc_GetNextToken(tokensIter);
         while (functionToken != NULL)
         {
@@ -50,7 +51,6 @@ static mcc_TokenList_t *getReplacedMacroFunctionTokens(mcc_Macro_t *macro, eral_
             else if (functionToken->tokenType == TOK_IDENTIFIER && param->argument != NULL &&
                      strcmp(functionToken->text, param->argument->text) == 0)
             {
-                printf("Found macro identifier\n");
                 mcc_TokenList_t *paramTokens = mcc_TokenListDeepCopy(param->parameterTokens);
                 mcc_TokenListConcatenate(result, paramTokens);
                 token_handled = true;
@@ -65,8 +65,6 @@ static mcc_TokenList_t *getReplacedMacroFunctionTokens(mcc_Macro_t *macro, eral_
                     // mcc_TokenList_t *funcTokens =
                     // handleRecursiveMacroFunction(tokensIter,
                     // func);
-                    // mcc_TokenListInsertBeforeCurrent(tokensIter,
-                    // funcTokens);
                     token_handled = true;
                 }
             }
@@ -78,6 +76,12 @@ static mcc_TokenList_t *getReplacedMacroFunctionTokens(mcc_Macro_t *macro, eral_
         }
         mcc_TokenListDeleteIterator(tokensIter);
         param = (mcc_MacroParameter_t *)eral_ListGetNextData(parametersIter);
+        mcc_TokenListDelete(working_tokens);
+        if (param != NULL)
+        {
+            working_tokens = result;
+            result = mcc_TokenListCreate();
+        }
     }
     mcc_TokenListDeleteIterator(parametersIter);
     return result;

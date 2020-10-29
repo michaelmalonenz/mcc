@@ -213,36 +213,6 @@ void eral_ListInsertDataAtCurrentPosition(eral_ListIterator_t *iter, uintptr_t d
     iter->list->nItems++;
 }
 
-uintptr_t eral_ListReplaceCurrentData(eral_ListIterator_t *iter, eral_List_t *data)
-{
-    MCC_ASSERT(iter->current != NULL);
-    uintptr_t previous = iter->current->data;
-    data->tail->next = iter->current->next;
-    if (iter->current->next != NULL)
-        iter->current->next->prev = data->tail;
-
-    data->head->prev = iter->current->prev;
-    if (iter->current->prev != NULL)
-        iter->current->prev->next = data->head;
-
-    if (iter->current == iter->list->head)
-        iter->list->head = data->head;
-
-    if (iter->current == iter->list->tail)
-        iter->list->tail = data->tail;
-
-    iter->list->nItems += data->nItems - 1;
-
-    data->head = NULL;
-    data->tail = NULL;
-    data->nItems = 0;
-
-    free(iter->current);
-    iter->current = data->tail;
-
-    return previous;
-}
-
 bool eral_ListEmpty(eral_List_t *list)
 {
     return list->nItems == 0;
@@ -351,20 +321,4 @@ uintptr_t eral_ListRemoveCurrentData(eral_ListIterator_t *iter)
     uintptr_t result = (uintptr_t)current->data;
     free(current);
     return (uintptr_t)result;
-}
-
-void eral_ListInsertBeforeCurrent(eral_ListIterator_t *iter, eral_List_t *data)
-{
-    if (eral_ListPeekCurrentData(iter) != NULL_DATA)
-    {
-        (void)eral_ListGetPrevData(iter);
-    }
-    eral_ListIterator_t *data_iter = eral_ListGetIterator(data);
-    uintptr_t current = eral_ListGetNextData(data_iter);
-    while (current != NULL_DATA)
-    {
-        eral_ListInsertDataAtCurrentPosition(iter, current);
-        current = eral_ListGetNextData(data_iter);
-    }
-    (void)eral_ListGetNextData(iter);
 }

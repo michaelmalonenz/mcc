@@ -113,13 +113,6 @@ void mcc_InsertToken(mcc_Token_t *token, mcc_TokenListIterator_t *iter)
    eral_ListInsertDataAtCurrentPosition((eral_ListIterator_t *) iter, (uintptr_t) token);
 }
 
-mcc_Token_t *mcc_TokenListReplaceCurrent(
-   mcc_TokenListIterator_t *iter, mcc_TokenList_t *list)
-{
-   return (mcc_Token_t *)eral_ListReplaceCurrentData(
-      (eral_ListIterator_t *)iter, (eral_List_t *)list);
-}
-
 const mcc_Token_t *mcc_TokenListPeekCurrentToken(mcc_TokenListIterator_t *iter)
 {
    return (const mcc_Token_t *) eral_ListPeekCurrentData((eral_ListIterator_t *) iter);
@@ -190,11 +183,6 @@ void mcc_TokenListConcatenate(mcc_TokenList_t *dst, mcc_TokenList_t *src)
 mcc_Token_t *mcc_TokenListRemoveCurrent(mcc_TokenListIterator_t *iter)
 {
    return (mcc_Token_t *) eral_ListRemoveCurrentData((eral_ListIterator_t *)iter);
-}
-
-void mcc_TokenListInsertBeforeCurrent(mcc_TokenListIterator_t *iter, mcc_TokenList_t *data)
-{
-   eral_ListInsertBeforeCurrent((eral_ListIterator_t *) iter, (eral_List_t *)data);
 }
 
 char *escape_string(const char *input)
@@ -338,5 +326,12 @@ void mcc_DebugPrintTokenList(mcc_TokenListIterator_t *iter)
    }
    printf("----- End Token List -----\n");
    mcc_TokenListDeleteIterator(copy);
+}
+
+void mcc_DebugPrintWholeTokenList(mcc_TokenList_t *list)
+{
+   mcc_TokenListIterator_t *iter = mcc_TokenListGetIterator(list);
+   mcc_DebugPrintTokenList(iter);
+   mcc_TokenListDeleteIterator(iter);
 }
 #endif

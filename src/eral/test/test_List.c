@@ -254,83 +254,6 @@ static void test_InsertionIteratingBackwards(void)
    printf("*** Finished backwards insertion test ***\n\n");
 }
 
-void test_ReplaceCurrentData(void)
-{
-   int i;
-   eral_ListIterator_t *iter = NULL;
-   eral_List_t *list = eral_ListCreate();
-   int result;
-
-   printf("Testing replace current data...");
-   for (i = 0; i < NUM_BASIC_TEST_ITEMS; i++)
-   {
-      eral_ListAppendData(list, basic_test_data[i]);
-   }
-
-   iter = eral_ListGetIterator(list);
-   for (i = 0; i < NUM_BASIC_TEST_ITEMS/2; i++)
-   {
-      result = (int) eral_ListGetNextData(iter);
-   }
-   MCC_ASSERT(result == 5);
-
-   eral_List_t *temp = eral_ListCreate();
-   eral_ListAppendData(temp, 42);
-   result = (int) eral_ListReplaceCurrentData(iter, temp);
-   MCC_ASSERT(result == 5);
-   eral_ListDelete(temp, NULL);
-
-   eral_ListDeleteIterator(iter);
-
-   iter = eral_ListGetIterator(list);
-   for (i = 0; i < NUM_BASIC_TEST_ITEMS; i++)
-   {
-      result = (int) eral_ListGetNextData(iter);
-      if (basic_test_data[i] != 5)
-      {
-         printf("Expected: %d, Actual: %d\n", basic_test_data[i], result);
-         MCC_ASSERT(result == basic_test_data[i]);
-      }
-      else
-      {
-         printf("Expected: 42, Actual: %d\n", result);
-         MCC_ASSERT(result == 42);
-      }
-   }
-   eral_ListDeleteIterator(iter);
-   eral_ListDelete(list, NULL);
-
-   printf("ok\n");
-}
-
-void test_ReplaceCurrentDataSingleItemList(void)
-{
-   eral_ListIterator_t *iter = NULL;
-   eral_List_t *list = eral_ListCreate();
-   int result;
-
-   printf("Testing replace current data with a single item list...");
-   eral_ListAppendData(list, 42);
-   iter = eral_ListGetIterator(list);
-   result = (int) eral_ListGetNextData(iter);
-   MCC_ASSERT(result == 42);
-
-   eral_List_t *temp = eral_ListCreate();
-   eral_ListAppendData(temp, 24);
-   result = (int) eral_ListReplaceCurrentData(iter, temp);
-   MCC_ASSERT(result == 42);
-   eral_ListDelete(temp, NULL);
-
-   result = (int) eral_ListGetNextData(iter);
-   MCC_ASSERT(result == 24);
-   MCC_ASSERT(eral_ListGetNextData(iter) == NULL_DATA);
-
-   eral_ListDeleteIterator(iter);
-   eral_ListDelete(list, NULL);
-
-   printf("ok\n");
-}
-
 static void test_Concatenate(void)
 {
    printf("Testing concatenate...");
@@ -390,7 +313,6 @@ int main(void)
    test_InsertionWithIterator();
    test_CopyingIterator();
    test_InsertionIteratingBackwards();
-   test_ReplaceCurrentData();
    test_Concatenate();
    test_RemoveCurrentData();
 

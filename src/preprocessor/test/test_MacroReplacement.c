@@ -86,6 +86,8 @@ static void test_Implementation(void)
             token = mcc_GetNextToken(outputIter);
             if (token->tokenType != expected_token_types[i][j])
             {
+                printf("\n");
+                mcc_DebugPrintWholeTokenList(output);
                 printf("Expected token type at index [%d][%d]: %s\n",
                         i, j, token_types[expected_token_types[i][j]]);
                 mcc_DebugPrintToken(token);
