@@ -53,9 +53,7 @@ void mcc_InitialiseMacros(void)
     mcc_DefineMacroAsNumber("__WORDSIZE", 64);
     mcc_DefineMacroAsNumber("__WCHAR_MAX__", 0x7fffffff);
     mcc_DefineMacroAsNumber("__WCHAR_MIN__", -0x7fffffff - 1);
-#if MCC_C99_COMPATIBLE
     mcc_DefineMacroAsNumber("__STDC_VERSION__", 199901L);
-#endif
 }
 
 static void delete_macro_pointer(uintptr_t macro)

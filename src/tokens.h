@@ -96,10 +96,8 @@ typedef enum key_index { KEY_AUTO, KEY_BREAK, KEY_CASE, KEY_CHAR, KEY_CONST,
                          KEY_SHORT, KEY_SIGNED, KEY_SIZEOF, KEY_STATIC,
                          KEY_STRUCT, KEY_SWITCH, KEY_TYPEDEF, KEY_UNION,
                          KEY_UNSIGNED, KEY_VOID, KEY_VOLATILE, KEY_WHILE,
-#if MCC_C99_COMPATIBLE
                          KEY_BOOL, KEY_COMPLEX, KEY_IMAGINARY, KEY_INLINE,
                          KEY_RESTRICT, 
-#endif
                          NUM_KEYWORDS, KEY_NONE } MCC_KEYWORD;
 
 extern const char *keywords[NUM_KEYWORDS];

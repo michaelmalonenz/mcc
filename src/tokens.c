@@ -56,10 +56,8 @@ const char *keywords[NUM_KEYWORDS] = { "auto", "break", "case", "char", "const",
                                        "static", "struct", "switch", "typedef",
                                        "union", "unsigned", "void", "volatile",
                                        "while"
-#if MCC_C99_COMPATIBLE
                                        ,"_Bool", "_Complex", "_Imaginary",
                                        "inline", "restrict"
-#endif
 };
 
 size_t keyword_strlens[NUM_KEYWORDS];
