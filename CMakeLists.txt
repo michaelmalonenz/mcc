@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 3.0)
 project (Mcc)
+include(CTest)
 enable_language(C)
 enable_testing()
 
@@ -21,9 +22,14 @@ endif()
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-fprofile-arcs -ftest-coverage")
 add_subdirectory(src)
 
-find_program( MEMORYCHECK_COMMAND valgrind )
 set(MEMORYCHECK_COMMAND_OPTIONS "--track-origins=yes --leak-check=full --errors-for-leak-kinds=all --error-exitcode=1 --log-fd=2")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_subdirectory(test)
 endif()
+
+add_custom_target(test_memcheck
+    COMMAND ${CMAKE_CTEST_COMMAND} 
+        --force-new-ctest-process --test-action memcheck
+    COMMAND cat "${CMAKE_BINARY_DIR}/Testing/Temporary/MemoryChecker.*.log"
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")

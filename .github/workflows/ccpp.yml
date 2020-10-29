@@ -14,7 +14,6 @@ jobs:
         mkdir $GITHUB_WORKSPACE/build
         cd $GITHUB_WORKSPACE/build
         cmake ../
-        sudo apt install -y valgrind
     - name: build
       run: |
         cd $GITHUB_WORKSPACE/build
@@ -23,4 +22,3 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE/build
         make test
-        ctest -D ExperimentalMemCheck
