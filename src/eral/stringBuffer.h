@@ -28,7 +28,6 @@
 #define ERAL_STRING_BUFFER_H
 
 #include <stdlib.h>
-#include "config.h"
 
 typedef struct StringBuffer eral_StringBuffer_t;
 

@@ -28,7 +28,6 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "config.h"
 #include "options.h"
 #include "tokens.h"
 #include "tokenList.h"

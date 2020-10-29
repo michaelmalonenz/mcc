@@ -27,7 +27,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MCC_DEBUG 1
 #include "mcc.h"
 #include "fileBuffer.h"
 

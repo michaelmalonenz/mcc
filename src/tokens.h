@@ -51,7 +51,6 @@
      DEF(TOK_ASM2, "__asm")
      DEF(TOK_ASM3, "__asm__")
 */
-#include "config.h"
 #include "mcc.h"
 #include "liberal.h"
 

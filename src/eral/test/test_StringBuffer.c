@@ -17,7 +17,6 @@
 **/
 #include <string.h>
 
-#define MCC_DEBUG 1
 #include "mcc.h"
 #include "stringBuffer.h"
 

@@ -7,7 +7,6 @@ add_subdirectory(preprocessor)
 add_subdirectory(parser)
 
 set(SOURCE_FILES
-  config.h
   fileOpener.c
   mcc.h
   options.c

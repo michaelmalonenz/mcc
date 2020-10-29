@@ -34,8 +34,6 @@
 #include <assert.h>
 #include <ctype.h>
 
-#include "config.h"
-
 #define MCC_MAX_INPUT_FILES USHRT_MAX
 
 #define mcc_Error(...) fprintf(stderr, __VA_ARGS__); exit(EXIT_FAILURE)

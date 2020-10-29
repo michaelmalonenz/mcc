@@ -22,7 +22,6 @@
 #include <unistd.h>
 
 #define MCC_DEBUG 1
-#include "config.h"
 #include "mcc.h"
 #include "tokens.h"
 #include "tokenList.h"

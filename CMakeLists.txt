@@ -3,8 +3,8 @@ project (Mcc)
 enable_language(C)
 enable_testing()
 
-set(CMAKE_C_FLAGS_DEBUG_INIT "-O0 -g -ggdb3 -fprofile-arcs -ftest-coverage")
-set(CMAKE_C_FLAGS_RELEASE_INIT "-O2")
+set(CMAKE_C_FLAGS_DEBUG "-O0 -g -ggdb3 -fprofile-arcs -ftest-coverage -DMCC_DEBUG=1")
+set(CMAKE_C_FLAGS_RELEASE "-O2 -DMCC_DEBUG=0")
 set(CMAKE_C_FLAGS "-Wall -Wextra -Werror -flto -Wno-unused-command-line-argument")
 
 if (NOT CMAKE_BUILD_TYPE)

@@ -19,7 +19,6 @@
 #include <string.h>
 
 #define MCC_DEBUG 1
-#include "config.h"
 #include "mcc.h"
 #include "options.h"
 

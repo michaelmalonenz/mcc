@@ -28,7 +28,6 @@
 #define MCC_MACRO_H
 
 #include "liberal.h"
-#include "config.h"
 #include "tokenList.h"
 
 typedef struct macro {

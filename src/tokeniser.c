@@ -30,7 +30,6 @@
 #include <ctype.h>
 #include <math.h>
 
-#include "config.h"
 #include "mcc.h"
 #include "liberal.h"
 #include "tokens.h"

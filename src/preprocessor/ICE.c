@@ -174,10 +174,12 @@ const mcc_Token_t *evaluatePostOrder(mcc_AST_t *tree, mcc_ASTNode_t *node)
         const mcc_Token_t *result = NULL;
         const mcc_Token_t *lhs = NULL;
         const mcc_Token_t *rhs = NULL;
+#if MCC_DBUG
         if (node->data->tokenType != TOK_OPERATOR)
         {
             mcc_DebugPrintToken(node->data);
         }
+#endif
         MCC_ASSERT(node->data->tokenType == TOK_OPERATOR);
         switch(node->data->tokenIndex)
         {
@@ -317,7 +319,9 @@ static mcc_ASTNode_t *parseFactor(mcc_AST_t *tree)
         GetNonWhitespaceToken(tree);
         return result;
     }
+#if MCC_DBUG
     mcc_DebugPrintToken(tree->currentToken);
+#endif
     ICE_Error(tree,
         "Unknown token in arithmetic expression '%s'\n",
         tree->currentToken->text);

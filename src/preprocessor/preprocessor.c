@@ -28,7 +28,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "mcc.h"
 #include "liberal.h"
 #include "preprocessor_private.h"
@@ -241,11 +240,13 @@ void handleDefine(preprocessor_t *preprocessor)
             variadic = true;
             maybeGetWhiteSpaceToken(preprocessor);
          }
+#if MCC_DEBUG
          else
          {
             mcc_DebugPrintToken(preprocessor->currentToken);
             MCC_ASSERT(false);
          }
+#endif
          getToken(preprocessor);
          if (variadic)
          {

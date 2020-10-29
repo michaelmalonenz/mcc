@@ -27,7 +27,6 @@
 #ifndef _MCC_TOKEN_LIST_H_
 #define _MCC_TOKEN_LIST_H_
 
-#include "config.h"
 #include "mcc.h"
 #include "liberal.h"
 #include "tokens.h"
