@@ -158,8 +158,7 @@ isWordChar(strlens_list[i]);\n";
 int main(int UNUSED(argc), char UNUSED(**argv))
 {
     test_Implementation();
-    if (false)
-        test_SemiRecursiveMacroFunction();
+    test_SemiRecursiveMacroFunction();
     test_MultipleLongListReplacement();
     return 0;
 }

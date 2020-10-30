@@ -181,6 +181,14 @@ mcc_Token_t *mcc_GetPreviousToken(mcc_TokenListIterator_t *iter);
  */
 mcc_Token_t *mcc_TokenListGetNonWhitespaceToken(mcc_TokenListIterator_t *iter);
 
+/**
+ * @fn mcc_TokenListMaybeGetTokenIfWhitespace
+ *
+ * @brief If the current toke is whitespace, then get the next token
+ * @returns the current token if not whitespace, the next token or NULL
+ */
+mcc_Token_t *mcc_TokenListMaybeGetTokenIfWhitespace(mcc_TokenListIterator_t *iter);
+
 void mcc_WriteTokensToOutputFile(mcc_TokenList_t *tokens);
 
 void mcc_TokenListConcatenate(mcc_TokenList_t *dst, mcc_TokenList_t *src);

@@ -2,15 +2,11 @@ Misc:
 write a ruby script to replace all tri-graphs in c code OR
 add in a compile-time switched ability to handle tri-graphs (so I can eventually claim full c99 compliance)
 options
-See if I can unit test for an assertion being hit (hopefully without the complcated jmpbuf thingy at work)
-
-Config:
-Start adding some more options and potentially make (with some macro magic?)
-a better way to add new options
+Change the error to a more sane thing, marking the failure, then synchronising and carrying on,
+instead of exiting completely
 
 Preprocessor:
 Replace macros when defining macros
-support function macros - variadic function macros (fix the implementation)
 Need to handle the # operator - add to the function rescan
 Need to handle #pragma (and figure out what to do with it)
 

@@ -1,6 +1,11 @@
 #include "macro_expansion.h"
-#include <string.h>
 #include <stdbool.h>
+#include <string.h>
+
+static mcc_TokenList_t *interpretMacroFunctionCall(mcc_TokenListIterator_t *tokens,
+                                                   mcc_Macro_t *macro);
+static mcc_TokenList_t *getReplacedMacroFunctionTokens(mcc_Macro_t *macro, eral_List_t *parameters);
+static void rescanMacroFunctionForActions(mcc_TokenList_t *tokens);
 
 mcc_TokenList_t *expandMacroTokens(mcc_Macro_t *macro)
 {
@@ -13,6 +18,96 @@ mcc_TokenList_t *expandMacroTokens(mcc_Macro_t *macro)
         macroToken = mcc_GetNextToken(iter);
     }
     mcc_TokenListDeleteIterator(iter);
+    return result;
+}
+
+static mcc_TokenList_t *interpretMacroFunctionCall(mcc_TokenListIterator_t *tokens,
+                                                   mcc_Macro_t *macro)
+{
+    mcc_Token_t *functionToken = (mcc_Token_t *) mcc_TokenListPeekCurrentToken(tokens);
+    mcc_Token_t *currentToken = mcc_TokenListGetNonWhitespaceToken(tokens);
+    if (!currentToken ||
+        !(currentToken->tokenType == TOK_SYMBOL && currentToken->tokenIndex == SYM_OPEN_PAREN))
+    {
+        mcc_TokenList_t *non_function_token = mcc_TokenListCreate();
+        mcc_TokenListAppend(non_function_token, mcc_CopyToken(functionToken));
+        if (currentToken)
+        {
+            mcc_TokenListAppend(non_function_token, mcc_CopyToken(currentToken));
+        }
+        return non_function_token;
+    }
+    eral_List_t *parameters = eral_ListCreate();
+    currentToken = mcc_TokenListGetNonWhitespaceToken(tokens);
+    bool argumentsComplete = false;
+    if (currentToken &&
+        !(currentToken->tokenType == TOK_SYMBOL && currentToken->tokenIndex == SYM_CLOSE_PAREN))
+    {
+        mcc_TokenListIterator_t *argumentsIter = mcc_TokenListGetIterator(macro->arguments);
+        while (
+            !(currentToken->tokenType == TOK_SYMBOL && currentToken->tokenIndex == SYM_CLOSE_PAREN))
+        {
+            mcc_MacroParameter_t *param = mcc_MacroParameterCreate();
+            if (argumentsComplete)
+                param->argument = NULL;
+            else
+            {
+                param->argument = mcc_GetNextToken(argumentsIter);
+                argumentsComplete = param->argument == NULL;
+            }
+            currentToken = mcc_TokenListMaybeGetTokenIfWhitespace(tokens);
+            while (!(currentToken->tokenType == TOK_OPERATOR &&
+                     currentToken->tokenIndex == OP_COMMA) &&
+                   !(currentToken->tokenType == TOK_SYMBOL &&
+                     currentToken->tokenIndex == SYM_CLOSE_PAREN))
+            {
+                if (currentToken->tokenType == TOK_SYMBOL &&
+                    currentToken->tokenIndex == SYM_OPEN_PAREN)
+                {
+                    mcc_TokenListAppend(param->parameterTokens, mcc_CopyToken(currentToken));
+                    currentToken = mcc_GetNextToken(tokens);
+                    while (!(currentToken->tokenType == TOK_SYMBOL &&
+                             currentToken->tokenIndex == SYM_CLOSE_PAREN))
+                    {
+                        mcc_TokenListAppend(param->parameterTokens, mcc_CopyToken(currentToken));
+                        currentToken = mcc_GetNextToken(tokens);
+                        MCC_ASSERT(currentToken != NULL);
+                    }
+                }
+                mcc_TokenListAppend(param->parameterTokens, mcc_CopyToken(currentToken));
+                currentToken = mcc_GetNextToken(tokens);
+                MCC_ASSERT(currentToken != NULL);
+            }
+            if (currentToken->tokenType == TOK_OPERATOR && currentToken->tokenIndex == OP_COMMA)
+            {
+                currentToken = mcc_GetNextToken(tokens);
+            }
+            eral_ListAppendData(parameters, (uintptr_t)param);
+            currentToken = mcc_TokenListMaybeGetTokenIfWhitespace(tokens);
+        }
+        mcc_TokenListDeleteIterator(argumentsIter);
+    }
+    int params_len = eral_ListGetLength(parameters);
+    int args_len = eral_ListGetLength(macro->arguments);
+    if (macro->is_variadic)
+    {
+        if (params_len < args_len)
+        {
+            mcc_PrettyErrorToken(currentToken,
+                                 "macro function '%s' expects at least "
+                                 "%d argument(s), but only got %d\n",
+                                 macro->text, args_len, params_len);
+        }
+    }
+    else if (params_len != args_len)
+    {
+        mcc_PrettyErrorToken(currentToken,
+                             "macro function '%s' expects %d argument(s), but got %d\n",
+                             macro->text, args_len, params_len);
+    }
+    mcc_TokenList_t *result = getReplacedMacroFunctionTokens(macro, parameters);
+    eral_ListDelete(parameters, mcc_MacroParameterDelete);
+    rescanMacroFunctionForActions(result);
     return result;
 }
 
@@ -60,10 +155,8 @@ static mcc_TokenList_t *getReplacedMacroFunctionTokens(mcc_Macro_t *macro, eral_
                 mcc_Macro_t *func = mcc_ResolveMacro(functionToken->text);
                 if (func && func->is_function)
                 {
-                    printf("Found function '%s' inside '%s'\n", func->text, macro->text);
-                    // mcc_TokenList_t *funcTokens =
-                    // handleRecursiveMacroFunction(tokensIter,
-                    // func);
+                    mcc_TokenList_t *funcTokens = interpretMacroFunctionCall(tokensIter, func);
+                    mcc_TokenListConcatenate(result, funcTokens);
                     token_handled = true;
                 }
             }
@@ -128,88 +221,7 @@ static void rescanMacroFunctionForActions(mcc_TokenList_t *tokens)
 
 mcc_TokenList_t *expandMacroFunctionTokens(preprocessor_t *preprocessor, mcc_Macro_t *macro)
 {
-    getToken(preprocessor);
-    maybeGetWhiteSpaceToken(preprocessor);
-    mcc_ExpectTokenType(preprocessor->currentToken, TOK_SYMBOL, SYM_OPEN_PAREN);
-    eral_List_t *parameters = eral_ListCreate();
-    getToken(preprocessor);
-    maybeGetWhiteSpaceToken(preprocessor);
-    bool argumentsComplete = false;
-    if (preprocessor->currentToken && !(preprocessor->currentToken->tokenType == TOK_SYMBOL &&
-                                        preprocessor->currentToken->tokenIndex == SYM_CLOSE_PAREN))
-    {
-        mcc_TokenListIterator_t *argumentsIter = mcc_TokenListGetIterator(macro->arguments);
-        while (!(preprocessor->currentToken->tokenType == TOK_SYMBOL &&
-                 preprocessor->currentToken->tokenIndex == SYM_CLOSE_PAREN))
-        {
-            mcc_MacroParameter_t *param = mcc_MacroParameterCreate();
-            if (argumentsComplete)
-                param->argument = NULL;
-            else
-            {
-                param->argument = mcc_GetNextToken(argumentsIter);
-                argumentsComplete = param->argument == NULL;
-            }
-            maybeGetWhiteSpaceToken(preprocessor);
-            while (!(preprocessor->currentToken->tokenType == TOK_OPERATOR &&
-                     preprocessor->currentToken->tokenIndex == OP_COMMA) &&
-                   !(preprocessor->currentToken->tokenType == TOK_SYMBOL &&
-                     preprocessor->currentToken->tokenIndex == SYM_CLOSE_PAREN))
-            {
-                if (preprocessor->currentToken->tokenType == TOK_SYMBOL &&
-                    preprocessor->currentToken->tokenIndex == SYM_OPEN_PAREN)
-                {
-                    mcc_TokenListAppend(param->parameterTokens,
-                                        mcc_CopyToken(preprocessor->currentToken));
-                    getToken(preprocessor);
-                    while (!(preprocessor->currentToken->tokenType == TOK_SYMBOL &&
-                             preprocessor->currentToken->tokenIndex == SYM_CLOSE_PAREN))
-                    {
-                        mcc_TokenListAppend(param->parameterTokens,
-                                            mcc_CopyToken(preprocessor->currentToken));
-                        getToken(preprocessor);
-                        MCC_ASSERT(preprocessor->currentToken != NULL);
-                    }
-                }
-                mcc_TokenListAppend(param->parameterTokens,
-                                    mcc_CopyToken(preprocessor->currentToken));
-                getToken(preprocessor);
-                MCC_ASSERT(preprocessor->currentToken != NULL);
-            }
-            if (preprocessor->currentToken->tokenType == TOK_OPERATOR &&
-                preprocessor->currentToken->tokenIndex == OP_COMMA)
-            {
-                getToken(preprocessor);
-            }
-            eral_ListAppendData(parameters, (uintptr_t)param);
-            maybeGetWhiteSpaceToken(preprocessor);
-        }
-        mcc_TokenListDeleteIterator(argumentsIter);
-    }
-    int params_len = eral_ListGetLength(parameters);
-    int args_len = eral_ListGetLength(macro->arguments);
-    if (macro->is_variadic)
-    {
-        if (params_len < args_len)
-        {
-            mcc_PrettyError(mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
-                            preprocessor->currentToken->lineno,
-                            preprocessor->currentToken->line_index,
-                            "macro function '%s' expects at least "
-                            "%d argument(s), but only got "
-                            "%d\n",
-                            macro->text, args_len, params_len);
-        }
-    }
-    else if (params_len != args_len)
-    {
-        mcc_PrettyError(mcc_ResolveFileNameFromNumber(preprocessor->currentToken->fileno),
-                        preprocessor->currentToken->lineno, preprocessor->currentToken->line_index,
-                        "macro function '%s' expects %d argument(s), but got %d\n", macro->text,
-                        args_len, params_len);
-    }
-    mcc_TokenList_t *result = getReplacedMacroFunctionTokens(macro, parameters);
-    eral_ListDelete(parameters, mcc_MacroParameterDelete);
-    rescanMacroFunctionForActions(result);
+    mcc_TokenList_t *result = interpretMacroFunctionCall(preprocessor->tokenListIter, macro);
+    preprocessor->currentToken = mcc_TokenListPeekCurrentToken(preprocessor->tokenListIter);
     return result;
 }

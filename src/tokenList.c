@@ -296,6 +296,16 @@ mcc_Token_t *mcc_TokenListGetNonWhitespaceToken(mcc_TokenListIterator_t *iter)
    return token;
 }
 
+mcc_Token_t *mcc_TokenListMaybeGetTokenIfWhitespace(mcc_TokenListIterator_t *iter)
+{
+   mcc_Token_t *token = (mcc_Token_t *) mcc_TokenListPeekCurrentToken(iter);
+   if (token && token->tokenType == TOK_WHITESPACE)
+   {
+      token = mcc_GetNextToken(iter);
+   }
+   return token;
+}
+
 #if MCC_DEBUG
 void mcc_DebugPrintToken(const mcc_Token_t *token)
 {

@@ -234,13 +234,11 @@ void mcc_ExpectTokenType(const mcc_Token_t *token, TOKEN_TYPE tokenType, int ind
    }
    if (token->tokenType != tokenType)
    {
-      mcc_PrettyError(mcc_ResolveFileNameFromNumber(token->fileno),
-                      token->lineno,
-                      token->line_index,
-                      "Expected %s, but got %s (%s)\n",
-                      expected,
-                      token_types[token->tokenType],
-                      token->text);
+      mcc_PrettyErrorToken(token,
+                           "Expected %s, but got %s (%s)\n",
+                           expected,
+                           token_types[token->tokenType],
+                           token->text);
    }
 }
 
