@@ -4,6 +4,9 @@ add in a compile-time switched ability to handle tri-graphs (so I can eventually
 options
 Change the error to a more sane thing, marking the failure, then synchronising and carrying on,
 instead of exiting completely
+Refactor the file operations to be less complicated and appending.  Probably read the whole file using the seek
+trick to figure out the space required.  That should allow me to pass a string to the preprocessor,
+instead of a file?  #includes become tricky.
 
 Preprocessor:
 Replace macros when defining macros

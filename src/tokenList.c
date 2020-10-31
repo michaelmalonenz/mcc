@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "options.h"
 #include "tokens.h"
@@ -280,6 +281,8 @@ void mcc_WriteTokensToOutputFile(mcc_TokenList_t *tokens)
       }
       tok = mcc_GetNextToken(iter);
    }
+   fflush(outf);
+   fsync(fileno(outf));
    fclose(outf);
 }
 
