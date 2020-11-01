@@ -1,6 +1,8 @@
 #include "declarations.h"
 #include "parser_shared.h"
 #include "statements.h"
+#include "structs.h"
+#include "enums.h"
 
 /**
  * <translation-unit> ::= {<external-declaration>}*
@@ -207,12 +209,29 @@ mcc_ASTNode_t *parse_type_specifier(mcc_AST_t *tree)
         GetNonWhitespaceToken(tree);
         return result;
     }
-    else
-    {
-        mcc_PrettyErrorToken(tree->currentToken, "Expected type specifier");
-    }
-    // | <struct-or-union-specifier>
-    // | <enum-specifier>
-    // | <typedef-name>
+    result = parse_struct_or_union_specifier(tree);
+    if (result != NULL)
+        return result;
+
+    result = parse_enum_specifier(tree);
+    if (result != NULL)
+        return result;
+
+    result = parse_typedef_name(tree);
+
     return result;
+}
+
+/**
+ * <typedef-name> ::= <identifier>
+ */
+mcc_ASTNode_t *parse_typedef_name(mcc_AST_t *tree)
+{
+    mcc_ASTNode_t *node = NULL;
+    if (mcc_compare_token(tree->currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX))
+    {
+        node = ast_node_create(tree->currentToken);
+        GetNonWhitespaceToken(tree);
+    }
+    return node;
 }

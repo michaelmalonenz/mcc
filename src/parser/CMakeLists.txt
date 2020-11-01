@@ -5,6 +5,8 @@ set(SOURCES
     declarations.c
     expressions.c
     statements.c
+    structs.c
+    enums.c
 )
 
 add_library(parser STATIC "${SOURCES}")
