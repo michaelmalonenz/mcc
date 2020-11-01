@@ -1,11 +1,12 @@
 #include "expressions.h"
+#include "parser_shared.h"
 
 /**
  * <constant-expression> ::= <conditional-expression>
  */
-mcc_ASTNode_t *parse_constant_expression(mcc_AST_t UNUSED(*tree))
+mcc_ASTNode_t *parse_constant_expression(mcc_AST_t *tree)
 {
-    return NULL;
+    return parse_conditional_expression(tree);
 }
 
 /**
@@ -206,7 +207,24 @@ mcc_ASTNode_t *parse_assignment_expression(mcc_AST_t UNUSED(*tree))
  */
 mcc_ASTNode_t *parse_assignment_operator(mcc_AST_t UNUSED(*tree))
 {
-    return NULL;
+    mcc_ASTNode_t *node = NULL;
+    if (mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_EQUALS_ASSIGN) ||
+        mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_TIMES_EQUALS) ||
+        mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_DIVIDE_EQUALS) ||
+        mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_MOD_EQUALS) ||
+        mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_PLUS_EQUALS) ||
+        mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_MINUS_EQUALS) ||
+        mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_L_SHIFT_EQUALS) ||
+        mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_R_SHIFT_EQUALS) ||
+        mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_BITWISE_AND_EQUALS) ||
+        mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_BITWISE_EXCL_OR_EQUALS) ||
+        mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_BITWISE_INCL_OR_EQUALS))
+    {
+        node = ast_node_create(tree->currentToken);
+        GetNonWhitespaceToken(tree);
+    }
+
+    return node;
 }
 
 /**
@@ -219,5 +237,17 @@ mcc_ASTNode_t *parse_assignment_operator(mcc_AST_t UNUSED(*tree))
  */
 mcc_ASTNode_t *parse_unary_operator(mcc_AST_t UNUSED(*tree))
 {
-    return NULL;
+    mcc_ASTNode_t *node = NULL;
+    if (mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_ADDRESS_OF) ||
+        mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_DEREFERENCE) ||
+        mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_ADD) ||
+        mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_MINUS) ||
+        mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_NEGATE) ||
+        mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_NOT))
+    {
+        node = ast_node_create(tree->currentToken);
+        GetNonWhitespaceToken(tree);
+    }
+
+    return node;
 }

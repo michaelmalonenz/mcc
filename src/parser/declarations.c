@@ -96,6 +96,7 @@ mcc_ASTNode_t *parse_direct_declarator(mcc_AST_t *tree)
     if (mcc_compare_token(tree->currentToken, TOK_IDENTIFIER, TOK_UNSET_INDEX))
     {
         node = ast_node_create(tree->currentToken);
+        GetNonWhitespaceToken(tree);
     }
     else if (mcc_compare_token(tree->currentToken, TOK_SYMBOL, SYM_OPEN_PAREN))
     {
