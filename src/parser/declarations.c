@@ -235,3 +235,22 @@ mcc_ASTNode_t *parse_typedef_name(mcc_AST_t *tree)
     }
     return node;
 }
+
+/**
+ * <pointer> ::= * {<type-qualifier>}* {<pointer>}?
+ */
+mcc_ASTNode_t *parse_pointer(mcc_AST_t UNUSED(*tree))
+{
+    mcc_ASTNode_t *node = NULL;
+    if (mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_DEREFERENCE))
+    {
+        GetNonWhitespaceToken(tree);
+        mcc_ASTNode_t *type_qual_node = parse_type_qualifier(tree);
+        while (type_qual_node != NULL)
+        {
+            type_qual_node = parse_type_qualifier(tree);
+        }
+    }
+
+    return node;
+}
