@@ -1,10 +1,9 @@
-#include <stdlib.h>
-#include <string.h>
 #include "ICE.h"
 #include "liberal.h"
+#include <stdlib.h>
+#include <string.h>
 
-typedef struct ASTNode
-{
+typedef struct ASTNode {
     struct ASTNode *left;
     struct ASTNode *middle;
     struct ASTNode *right;
@@ -32,139 +31,122 @@ static mcc_ASTNode_t *parseTerm(mcc_AST_t *tree);
 
 #define get_number(x) x->number.number.integer_s
 
-#define ICE_Error(tree, ...) \
-    mcc_PrettyError(mcc_ResolveFileNameFromNumber(tree->currentToken->fileno), \
-        tree->currentToken->lineno, \
-        tree->currentToken->line_index, \
-        __VA_ARGS__)
-
-
 static mcc_Token_t *create_number_token(mcc_AST_t *tree, int number)
 {
-    mcc_Number_t num = {
-        .number = { .integer_s = number },
-        .numberType = SIGNED_INT
-    };
+    mcc_Number_t num = {.number = {.integer_s = number}, .numberType = SIGNED_INT};
     mcc_Token_t *result = mcc_CreateNumberToken(&num, 0, 0, 0);
-    eral_ListAppendData(tree->numbers_to_delete, (uintptr_t) result);
+    eral_ListAppendData(tree->numbers_to_delete, (uintptr_t)result);
     return result;
 }
 
-static const mcc_Token_t *evaluate_unary_operands(
-    mcc_AST_t *tree, const mcc_Token_t *operand, const mcc_Token_t *operator)
+static const mcc_Token_t *evaluate_unary_operands(mcc_AST_t *tree, const mcc_Token_t *operand,
+                                                  const mcc_Token_t *operator)
 {
-   MCC_ASSERT(operator->tokenType == TOK_OPERATOR);
+    MCC_ASSERT(operator->tokenType == TOK_OPERATOR);
 
-   switch (operator->tokenIndex)
-   {
-      case OP_NOT:
-      {
-         return create_number_token(tree, !get_number(operand));
-      }
-      break;
-      default:
-      {
-         mcc_PrettyError(mcc_ResolveFileNameFromNumber(operator->fileno),
-                         operator->lineno,
-                         operator->line_index,
+    switch (operator->tokenIndex)
+    {
+        case OP_NOT:
+        {
+            return create_number_token(tree, !get_number(operand));
+        }
+        break;
+        default:
+        {
+         mcc_PrettyErrorToken(operator,
                          "Unimplemented Unary Operator in arithmetic statement: %s\n",
                          operators[operator->tokenIndex]);
-      }
-   }
-   return NULL;
+        }
+    }
+    return NULL;
 }
 
-static  mcc_Token_t *evaluate_operands(
-    mcc_AST_t *tree,
-    const mcc_Token_t *l_operand,
-    const mcc_Token_t *r_operand,
-    const mcc_Token_t *operator)
+static mcc_Token_t *evaluate_operands(mcc_AST_t *tree, const mcc_Token_t *l_operand,
+                                      const mcc_Token_t *r_operand, const mcc_Token_t *operator)
 {
-   MCC_ASSERT(operator->tokenType == TOK_OPERATOR);
+    MCC_ASSERT(operator->tokenType == TOK_OPERATOR);
 
-   switch (operator->tokenIndex)
-   {
-      case OP_ADD:
-      {
-        return create_number_token(tree, get_number(l_operand) + get_number(r_operand));
-      }
-      break;
-      case OP_MINUS:
-      {
-        return create_number_token(tree, get_number(l_operand) - get_number(r_operand));
-      }
-      break;
-      case OP_DIVIDE:
-      {
-          return create_number_token(tree, get_number(l_operand) / get_number(r_operand));
-      }
-      break;
-      case OP_MULTIPLY:
-      {
-          return create_number_token(tree, get_number(l_operand) * get_number(r_operand));
-      }
-      break;
-      case OP_BITWISE_EXCL_OR:
-      {
-          return create_number_token(tree, get_number(l_operand) ^ get_number(r_operand));
-      }
-      break;
-      case OP_LOGICAL_AND:
-      {
-          return create_number_token(tree, get_number(l_operand) && get_number(r_operand));
-      }
-      break;
-      case OP_LOGICAL_INCL_OR:
-      {
-          return create_number_token(tree, get_number(l_operand) || get_number(r_operand));
-      }
-      break;
-      case OP_GREATER_THAN:
-      {
-          return create_number_token(tree, get_number(l_operand) > get_number(r_operand));
-      }
-      break;
-      case OP_GREATER_EQUAL:
-      {
-          return create_number_token(tree, get_number(l_operand) >= get_number(r_operand));
-      }
-      break;
-      case OP_LESS_THAN:
-      {
-          return create_number_token(tree, get_number(l_operand) < get_number(r_operand));
-      }
-      break;
-      case OP_LESS_EQUAL:
-      {
-          return create_number_token(tree, get_number(l_operand) <= get_number(r_operand));
-      }
-      break;
-      case OP_COMPARE_TO:
-      {
-          return create_number_token(tree, get_number(l_operand) == get_number(r_operand));
-      }
-      case OP_NOT_EQUAL:
-      {
-          return create_number_token(tree, get_number(l_operand) != get_number(r_operand));
-      }
-      break;
-      default:
-      {
-         mcc_PrettyError(mcc_ResolveFileNameFromNumber(operator->fileno),
-                         operator->lineno,
-                         operator->line_index,
+    switch (operator->tokenIndex)
+    {
+        case OP_ADD:
+        {
+            return create_number_token(tree, get_number(l_operand) + get_number(r_operand));
+        }
+        break;
+        case OP_MINUS:
+        {
+            return create_number_token(tree, get_number(l_operand) - get_number(r_operand));
+        }
+        break;
+        case OP_DIVIDE:
+        {
+            return create_number_token(tree, get_number(l_operand) / get_number(r_operand));
+        }
+        break;
+        case OP_MULTIPLY:
+        {
+            return create_number_token(tree, get_number(l_operand) * get_number(r_operand));
+        }
+        break;
+        case OP_BITWISE_EXCL_OR:
+        {
+            return create_number_token(tree, get_number(l_operand) ^ get_number(r_operand));
+        }
+        break;
+        case OP_LOGICAL_AND:
+        {
+            return create_number_token(tree, get_number(l_operand) && get_number(r_operand));
+        }
+        break;
+        case OP_LOGICAL_INCL_OR:
+        {
+            return create_number_token(tree, get_number(l_operand) || get_number(r_operand));
+        }
+        break;
+        case OP_GREATER_THAN:
+        {
+            return create_number_token(tree, get_number(l_operand) > get_number(r_operand));
+        }
+        break;
+        case OP_GREATER_EQUAL:
+        {
+            return create_number_token(tree, get_number(l_operand) >= get_number(r_operand));
+        }
+        break;
+        case OP_LESS_THAN:
+        {
+            return create_number_token(tree, get_number(l_operand) < get_number(r_operand));
+        }
+        break;
+        case OP_LESS_EQUAL:
+        {
+            return create_number_token(tree, get_number(l_operand) <= get_number(r_operand));
+        }
+        break;
+        case OP_COMPARE_TO:
+        {
+            return create_number_token(tree, get_number(l_operand) == get_number(r_operand));
+        }
+        case OP_NOT_EQUAL:
+        {
+            return create_number_token(tree, get_number(l_operand) != get_number(r_operand));
+        }
+        break;
+        default:
+        {
+         mcc_PrettyErrorToken(
+                         operator,
                          "Unimplemented Operator in arithmetic statement: %s\n",
                          operators[operator->tokenIndex]);
-      }
-   }
+        }
+    }
 
-   return NULL;
+    return NULL;
 }
 
 const mcc_Token_t *evaluatePostOrder(mcc_AST_t *tree, mcc_ASTNode_t *node)
 {
-    if (node->data->tokenType == TOK_NUMBER ||
-        node->data->tokenType == TOK_IDENTIFIER ||
+    if (node->data->tokenType == TOK_NUMBER || node->data->tokenType == TOK_IDENTIFIER ||
         node->data->tokenType == TOK_CHAR_CONST)
     {
         return node->data;
@@ -181,7 +163,7 @@ const mcc_Token_t *evaluatePostOrder(mcc_AST_t *tree, mcc_ASTNode_t *node)
         }
 #endif
         MCC_ASSERT(node->data->tokenType == TOK_OPERATOR);
-        switch(node->data->tokenIndex)
+        switch (node->data->tokenIndex)
         {
             case OP_NOT:
             {
@@ -234,12 +216,8 @@ const mcc_Token_t *evaluatePostOrder(mcc_AST_t *tree, mcc_ASTNode_t *node)
             {
                 if (!node->right || !node->left)
                 {
-                    mcc_PrettyError(
-                        mcc_ResolveFileNameFromNumber(node->data->fileno),
-                        node->data->lineno,
-                        node->data->line_index,
-                        "Wrong number of operands for operator %s\n",
-                        node->data->text);
+                    mcc_PrettyErrorToken(node->data, "Wrong number of operands for operator %s\n",
+                                         node->data->text);
                 }
                 rhs = evaluatePostOrder(tree, node->right);
                 lhs = evaluatePostOrder(tree, node->left);
@@ -288,8 +266,7 @@ static mcc_ASTNode_t *parseFactor(mcc_AST_t *tree)
     {
         mcc_Error("Unexpected end of expression\n");
     }
-    if (tree->currentToken->tokenType == TOK_OPERATOR &&
-        tree->currentToken->tokenIndex == OP_NOT)
+    if (tree->currentToken->tokenType == TOK_OPERATOR && tree->currentToken->tokenIndex == OP_NOT)
     {
         result = ast_node_create(tree->currentToken);
         GetNonWhitespaceToken(tree);
@@ -312,9 +289,9 @@ static mcc_ASTNode_t *parseFactor(mcc_AST_t *tree)
         if (tree->currentToken->tokenType != TOK_SYMBOL &&
             tree->currentToken->tokenIndex != SYM_CLOSE_PAREN)
         {
-            ICE_Error(tree,
-                "Unmatched parentheses! Expected ')' but got '%s'\n",
-                tree->currentToken->text);
+            mcc_PrettyErrorToken(tree->currentToken,
+                                 "Unmatched parentheses! Expected ')' but got '%s'\n",
+                                 tree->currentToken->text);
         }
         GetNonWhitespaceToken(tree);
         return result;
@@ -322,19 +299,17 @@ static mcc_ASTNode_t *parseFactor(mcc_AST_t *tree)
 #if MCC_DBUG
     mcc_DebugPrintToken(tree->currentToken);
 #endif
-    ICE_Error(tree,
-        "Unknown token in arithmetic expression '%s'\n",
-        tree->currentToken->text);
+    mcc_PrettyErrorToken(tree->currentToken, "Unknown token in arithmetic expression '%s'\n",
+                         tree->currentToken->text);
     return NULL;
 }
 
 static mcc_ASTNode_t *parseTerm(mcc_AST_t *tree)
 {
     mcc_ASTNode_t *node = parseFactor(tree);
-    while (tree->currentToken &&
-        tree->currentToken->tokenType == TOK_OPERATOR &&
-        (tree->currentToken->tokenIndex == OP_MULTIPLY ||
-         tree->currentToken->tokenIndex == OP_DIVIDE))
+    while (tree->currentToken && tree->currentToken->tokenType == TOK_OPERATOR &&
+           (tree->currentToken->tokenIndex == OP_MULTIPLY ||
+            tree->currentToken->tokenIndex == OP_DIVIDE))
     {
         mcc_ASTNode_t *op_node = ast_node_create(tree->currentToken);
         GetNonWhitespaceToken(tree);
@@ -349,10 +324,8 @@ static mcc_ASTNode_t *parseTerm(mcc_AST_t *tree)
 static mcc_ASTNode_t *parseExpression(mcc_AST_t *tree)
 {
     mcc_ASTNode_t *node = parseTerm(tree);
-    while (tree->currentToken &&
-        tree->currentToken->tokenType == TOK_OPERATOR &&
-        (tree->currentToken->tokenIndex == OP_ADD ||
-         tree->currentToken->tokenIndex == OP_MINUS))
+    while (tree->currentToken && tree->currentToken->tokenType == TOK_OPERATOR &&
+           (tree->currentToken->tokenIndex == OP_ADD || tree->currentToken->tokenIndex == OP_MINUS))
     {
         mcc_ASTNode_t *op_node = ast_node_create(tree->currentToken);
         GetNonWhitespaceToken(tree);
@@ -367,10 +340,9 @@ static mcc_ASTNode_t *parseExpression(mcc_AST_t *tree)
 static mcc_ASTNode_t *parseStrictComparisonExpression(mcc_AST_t *tree)
 {
     mcc_ASTNode_t *node = parseExpression(tree);
-    while (tree->currentToken &&
-        tree->currentToken->tokenType == TOK_OPERATOR &&
-        (tree->currentToken->tokenIndex == OP_LESS_THAN ||
-         tree->currentToken->tokenIndex == OP_GREATER_THAN))
+    while (tree->currentToken && tree->currentToken->tokenType == TOK_OPERATOR &&
+           (tree->currentToken->tokenIndex == OP_LESS_THAN ||
+            tree->currentToken->tokenIndex == OP_GREATER_THAN))
     {
         mcc_ASTNode_t *op_node = ast_node_create(tree->currentToken);
         GetNonWhitespaceToken(tree);
@@ -385,11 +357,10 @@ static mcc_ASTNode_t *parseStrictComparisonExpression(mcc_AST_t *tree)
 static mcc_ASTNode_t *parseComparisonExpression(mcc_AST_t *tree)
 {
     mcc_ASTNode_t *node = parseStrictComparisonExpression(tree);
-    while (tree->currentToken &&
-        tree->currentToken->tokenType == TOK_OPERATOR &&
-        (tree->currentToken->tokenIndex == OP_LESS_EQUAL ||
-         tree->currentToken->tokenIndex == OP_GREATER_EQUAL ||
-         tree->currentToken->tokenIndex == OP_COMPARE_TO))
+    while (tree->currentToken && tree->currentToken->tokenType == TOK_OPERATOR &&
+           (tree->currentToken->tokenIndex == OP_LESS_EQUAL ||
+            tree->currentToken->tokenIndex == OP_GREATER_EQUAL ||
+            tree->currentToken->tokenIndex == OP_COMPARE_TO))
     {
         mcc_ASTNode_t *op_node = ast_node_create(tree->currentToken);
         GetNonWhitespaceToken(tree);
@@ -404,8 +375,7 @@ static mcc_ASTNode_t *parseComparisonExpression(mcc_AST_t *tree)
 static mcc_ASTNode_t *parseNotEqualExpression(mcc_AST_t *tree)
 {
     mcc_ASTNode_t *node = parseComparisonExpression(tree);
-    while (tree->currentToken && 
-           tree->currentToken->tokenType == TOK_OPERATOR &&
+    while (tree->currentToken && tree->currentToken->tokenType == TOK_OPERATOR &&
            tree->currentToken->tokenIndex == OP_NOT_EQUAL)
     {
         mcc_ASTNode_t *op_node = ast_node_create(tree->currentToken);
@@ -421,11 +391,10 @@ static mcc_ASTNode_t *parseNotEqualExpression(mcc_AST_t *tree)
 static mcc_ASTNode_t *parseBitwiseExpression(mcc_AST_t *tree)
 {
     mcc_ASTNode_t *node = parseNotEqualExpression(tree);
-    while (tree->currentToken &&
-        tree->currentToken->tokenType == TOK_OPERATOR &&
-        (tree->currentToken->tokenIndex == OP_BITWISE_AND ||
-         tree->currentToken->tokenIndex == OP_BITWISE_EXCL_OR ||
-         tree->currentToken->tokenIndex == OP_BITWISE_INCL_OR))
+    while (tree->currentToken && tree->currentToken->tokenType == TOK_OPERATOR &&
+           (tree->currentToken->tokenIndex == OP_BITWISE_AND ||
+            tree->currentToken->tokenIndex == OP_BITWISE_EXCL_OR ||
+            tree->currentToken->tokenIndex == OP_BITWISE_INCL_OR))
     {
         mcc_ASTNode_t *op_node = ast_node_create(tree->currentToken);
         GetNonWhitespaceToken(tree);
@@ -440,9 +409,8 @@ static mcc_ASTNode_t *parseBitwiseExpression(mcc_AST_t *tree)
 static mcc_ASTNode_t *parseLogicalAndExpression(mcc_AST_t *tree)
 {
     mcc_ASTNode_t *node = parseBitwiseExpression(tree);
-    while (tree->currentToken &&
-        tree->currentToken->tokenType == TOK_OPERATOR &&
-        tree->currentToken->tokenIndex == OP_LOGICAL_AND)
+    while (tree->currentToken && tree->currentToken->tokenType == TOK_OPERATOR &&
+           tree->currentToken->tokenIndex == OP_LOGICAL_AND)
     {
         mcc_ASTNode_t *op_node = ast_node_create(tree->currentToken);
         GetNonWhitespaceToken(tree);
@@ -457,9 +425,8 @@ static mcc_ASTNode_t *parseLogicalAndExpression(mcc_AST_t *tree)
 static mcc_ASTNode_t *parseLogicalOrExpression(mcc_AST_t *tree)
 {
     mcc_ASTNode_t *node = parseLogicalAndExpression(tree);
-    while (tree->currentToken &&
-        tree->currentToken->tokenType == TOK_OPERATOR &&
-        tree->currentToken->tokenIndex == OP_LOGICAL_INCL_OR)
+    while (tree->currentToken && tree->currentToken->tokenType == TOK_OPERATOR &&
+           tree->currentToken->tokenIndex == OP_LOGICAL_INCL_OR)
     {
         mcc_ASTNode_t *op_node = ast_node_create(tree->currentToken);
         GetNonWhitespaceToken(tree);
@@ -474,8 +441,7 @@ static mcc_ASTNode_t *parseLogicalOrExpression(mcc_AST_t *tree)
 static mcc_ASTNode_t *parseConditionalExpression(mcc_AST_t *tree)
 {
     mcc_ASTNode_t *node = parseLogicalOrExpression(tree);
-    while (tree->currentToken &&
-           tree->currentToken->tokenType == TOK_OPERATOR &&
+    while (tree->currentToken && tree->currentToken->tokenType == TOK_OPERATOR &&
            tree->currentToken->tokenIndex == OP_TERNARY_IF)
     {
         mcc_ASTNode_t *op_node = ast_node_create(tree->currentToken);
@@ -485,7 +451,8 @@ static mcc_ASTNode_t *parseConditionalExpression(mcc_AST_t *tree)
         if (tree->currentToken->tokenType != TOK_OPERATOR &&
             tree->currentToken->tokenIndex != OP_TERNARY_ELSE)
         {
-            ICE_Error(tree, "Expected ':' after '?' instead of '%s'\n", tree->currentToken->text);
+            mcc_PrettyErrorToken(tree->currentToken, "Expected ':' after '?' instead of '%s'\n",
+                                 tree->currentToken->text);
         }
         GetNonWhitespaceToken(tree);
         op_node->right = parseConditionalExpression(tree);
@@ -498,8 +465,7 @@ static mcc_ASTNode_t *parseConditionalExpression(mcc_AST_t *tree)
 static mcc_ASTNode_t *parseCommaExpression(mcc_AST_t *tree)
 {
     mcc_ASTNode_t *node = parseConditionalExpression(tree);
-    if (tree->currentToken &&
-        tree->currentToken->tokenType == TOK_OPERATOR &&
+    if (tree->currentToken && tree->currentToken->tokenType == TOK_OPERATOR &&
         tree->currentToken->tokenIndex == OP_COMMA)
     {
         GetNonWhitespaceToken(tree);
@@ -509,7 +475,7 @@ static mcc_ASTNode_t *parseCommaExpression(mcc_AST_t *tree)
 
 static mcc_AST_t *create_syntax_tree(mcc_TokenListIterator_t *iter)
 {
-    mcc_AST_t *result = (mcc_AST_t *) malloc(sizeof(mcc_AST_t));
+    mcc_AST_t *result = (mcc_AST_t *)malloc(sizeof(mcc_AST_t));
     result->numbers_to_delete = eral_ListCreate();
     result->root = NULL;
     result->currentToken = NULL;
@@ -521,7 +487,7 @@ void mcc_DeleteAST(mcc_AST_t *tree)
 {
     eral_ListIterator_t *number_iter = eral_ListGetIterator(tree->numbers_to_delete);
     uintptr_t death_row = eral_ListGetNextData(number_iter);
-    while(death_row != NULL_DATA)
+    while (death_row != NULL_DATA)
     {
         mcc_DeleteToken(death_row);
         death_row = eral_ListGetNextData(number_iter);
