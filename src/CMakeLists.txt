@@ -4,6 +4,7 @@ add_compile_options(-O0 -Wextra -Werror -Wall -g -ggdb3 -Wno-unused-command-line
 
 add_subdirectory(eral)
 add_subdirectory(preprocessor)
+add_subdirectory(emitter)
 add_subdirectory(parser)
 
 set(SOURCE_FILES
