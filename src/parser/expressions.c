@@ -13,7 +13,30 @@ mcc_ASTNode_t *parse_constant_expression(mcc_AST_t *tree)
  * <conditional-expression> ::= <logical-or-expression>
  *                            | <logical-or-expression> ? <expression> : <conditional-expression>
  */
-mcc_ASTNode_t *parse_conditional_expression(mcc_AST_t UNUSED(*tree)) { return NULL; }
+mcc_ASTNode_t *parse_conditional_expression(mcc_AST_t *tree)
+{
+    mcc_ASTNode_t *node = parse_logical_or_expression(tree);
+    if (node != NULL && mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_TERNARY_IF))
+    {
+        node->left = parse_expression(tree);
+        if (node->left == NULL)
+        {
+            mcc_PrettyErrorToken(tree->currentToken, "Expected an expression\n");
+        }
+        if (!mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_TERNARY_ELSE))
+        {
+            mcc_PrettyErrorToken(tree->currentToken, "Expected ':' but got '%s'\n",
+                                 tree->currentToken ? tree->currentToken->text : "EOF");
+        }
+        GetNonWhitespaceToken(tree);
+        node->right = parse_conditional_expression(tree);
+        if (node->right == NULL)
+        {
+            mcc_PrettyErrorToken(tree->currentToken, "Expected an expression\n");
+        }
+    }
+    return node;
+}
 
 /**
  * <logical-or-expression> ::= <logical-and-expression>
@@ -130,7 +153,29 @@ mcc_ASTNode_t *parse_constant(mcc_AST_t UNUSED(*tree)) { return NULL; }
  * <expression> ::= <assignment-expression>
  *                | <expression> , <assignment-expression>
  */
-mcc_ASTNode_t *parse_expression(mcc_AST_t UNUSED(*tree)) { return NULL; }
+mcc_ASTNode_t *parse_expression(mcc_AST_t *tree)
+{
+    mcc_ASTNode_t *node = parse_assignment_expression(tree);
+    if (node == NULL)
+    {
+        node = parse_expression(tree);
+        if (node != NULL)
+        {
+            if (!mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_COMMA))
+            {
+                mcc_PrettyErrorToken(tree->currentToken, "Expected comma ',', but got '%s'\n",
+                                     tree->currentToken ? tree->currentToken->text : "EOF");
+            }
+            GetNonWhitespaceToken(tree);
+            node->middle = parse_assignment_expression(tree);
+            if (node->middle == NULL)
+            {
+                mcc_PrettyErrorToken(tree->currentToken, "Expected an expression\n");
+            }
+        }
+    }
+    return node;
+}
 
 /**
  * <assignment-expression> ::= <conditional-expression>
