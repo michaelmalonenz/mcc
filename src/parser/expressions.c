@@ -42,7 +42,24 @@ mcc_ASTNode_t *parse_conditional_expression(mcc_AST_t *tree)
  * <logical-or-expression> ::= <logical-and-expression>
  *                           | <logical-or-expression> || <logical-and-expression>
  */
-mcc_ASTNode_t *parse_logical_or_expression(mcc_AST_t UNUSED(*tree)) { return NULL; }
+mcc_ASTNode_t *parse_logical_or_expression(mcc_AST_t *tree)
+{
+    mcc_ASTNode_t *node = parse_logical_and_expression(tree);
+    if (node == NULL)
+    {
+        node = parse_logical_or_expression(tree);
+        if (node != NULL)
+        {
+            mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_LOGICAL_INCL_OR);
+            mcc_ASTNode_t *or_node = ast_node_create(tree->currentToken);
+            GetNonWhitespaceToken(tree);
+            or_node->left = node;
+            or_node->right = parse_logical_and_expression(tree);
+            node = or_node;
+        }
+    }
+    return node;
+}
 
 /**
  * <logical-and-expression> ::= <inclusive-or-expression>
