@@ -7,6 +7,7 @@ set(SOURCES
     statements.c
     structs.c
     enums.c
+    constants.c
 )
 
 add_library(parser STATIC "${SOURCES}")

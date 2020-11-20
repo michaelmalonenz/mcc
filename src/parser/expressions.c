@@ -1,3 +1,4 @@
+#include "constants.h"
 #include "expressions.h"
 #include "parser_shared.h"
 
@@ -50,7 +51,11 @@ mcc_ASTNode_t *parse_logical_or_expression(mcc_AST_t *tree)
         node = parse_logical_or_expression(tree);
         if (node != NULL)
         {
-            mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_LOGICAL_INCL_OR);
+            if (!mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_LOGICAL_INCL_OR))
+            {
+                mcc_PrettyErrorToken(tree->currentToken, "Expected '||' but got '%s'\n",
+                                     tree->currentToken ? tree->currentToken->text : "EOF");
+            }
             mcc_ASTNode_t *or_node = ast_node_create(tree->currentToken);
             GetNonWhitespaceToken(tree);
             or_node->left = node;
@@ -65,7 +70,28 @@ mcc_ASTNode_t *parse_logical_or_expression(mcc_AST_t *tree)
  * <logical-and-expression> ::= <inclusive-or-expression>
  *                            | <logical-and-expression> && <inclusive-or-expression>
  */
-mcc_ASTNode_t *parse_logical_and_expression(mcc_AST_t UNUSED(*tree)) { return NULL; }
+mcc_ASTNode_t *parse_logical_and_expression(mcc_AST_t *tree)
+{
+    mcc_ASTNode_t *node = parse_inclusive_or_expression(tree);
+    if (node == NULL)
+    {
+        node = parse_logical_and_expression(tree);
+        if (node != NULL)
+        {
+            if (!mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_LOGICAL_AND))
+            {
+                mcc_PrettyErrorToken(tree->currentToken, "Expected '&&' but got '%s'\n",
+                                     tree->currentToken ? tree->currentToken->text : "EOF");
+            }
+            mcc_ASTNode_t *and_node = ast_node_create(tree->currentToken);
+            GetNonWhitespaceToken(tree);
+            and_node->left = node;
+            and_node->right = parse_inclusive_or_expression(tree);
+            node = and_node;
+        }
+    }
+    return node;
+}
 
 /**
  * <inclusive-or-expression> ::= <exclusive-or-expression>
@@ -164,7 +190,24 @@ mcc_ASTNode_t *parse_primary_expression(mcc_AST_t UNUSED(*tree)) { return NULL; 
  *              | <floating-constant>
  *              | <enumeration-constant>
  */
-mcc_ASTNode_t *parse_constant(mcc_AST_t UNUSED(*tree)) { return NULL; }
+mcc_ASTNode_t *parse_constant(mcc_AST_t *tree)
+{
+    mcc_ASTNode_t *node = parse_integer_constant(tree);
+    if (node != NULL)
+        return node;
+
+    node = parse_character_constant(tree);
+    if (node != NULL)
+        return node;
+
+    node = parse_floating_constant(tree);
+    if (node != NULL)
+        return node;
+
+    node = parse_enumeration_constant(tree);
+
+    return node;
+}
 
 /**
  * <expression> ::= <assignment-expression>
