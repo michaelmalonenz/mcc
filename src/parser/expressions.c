@@ -1,5 +1,5 @@
-#include "constants.h"
 #include "expressions.h"
+#include "constants.h"
 #include "parser_shared.h"
 
 /**
@@ -97,19 +97,82 @@ mcc_ASTNode_t *parse_logical_and_expression(mcc_AST_t *tree)
  * <inclusive-or-expression> ::= <exclusive-or-expression>
  *                             | <inclusive-or-expression> | <exclusive-or-expression>
  */
-mcc_ASTNode_t *parse_inclusive_or_expression(mcc_AST_t UNUSED(*tree)) { return NULL; }
+mcc_ASTNode_t *parse_inclusive_or_expression(mcc_AST_t *tree)
+{
+    mcc_ASTNode_t *node = parse_exclusive_or_expression(tree);
+    if (node == NULL)
+    {
+        node = parse_inclusive_or_expression(tree);
+        if (node != NULL)
+        {
+            if (!mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_BITWISE_INCL_OR))
+            {
+                mcc_PrettyErrorToken(tree->currentToken, "Expected '|' but got '%s'\n",
+                                     tree->currentToken ? tree->currentToken->text : "EOF");
+            }
+            mcc_ASTNode_t *and_node = ast_node_create(tree->currentToken);
+            GetNonWhitespaceToken(tree);
+            and_node->left = node;
+            and_node->right = parse_exclusive_or_expression(tree);
+            node = and_node;
+        }
+    }
+    return node;
+}
 
 /**
  * <exclusive-or-expression> ::= <and-expression>
  *                             | <exclusive-or-expression> ^ <and-expression>
  */
-mcc_ASTNode_t *parse_exclusive_or_expression(mcc_AST_t UNUSED(*tree)) { return NULL; }
+mcc_ASTNode_t *parse_exclusive_or_expression(mcc_AST_t *tree)
+{
+    mcc_ASTNode_t *node = parse_and_expression(tree);
+    if (node == NULL)
+    {
+        node = parse_exclusive_or_expression(tree);
+        if (node != NULL)
+        {
+            if (!mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_BITWISE_EXCL_OR))
+            {
+                mcc_PrettyErrorToken(tree->currentToken, "Expected '^' but got '%s'\n",
+                                     tree->currentToken ? tree->currentToken->text : "EOF");
+            }
+            mcc_ASTNode_t *and_node = ast_node_create(tree->currentToken);
+            GetNonWhitespaceToken(tree);
+            and_node->left = node;
+            and_node->right = parse_and_expression(tree);
+            node = and_node;
+        }
+    }
+    return node;
+}
 
 /**
  * <and-expression> ::= <equality-expression>
  *                    | <and-expression> & <equality-expression>
  */
-mcc_ASTNode_t *parse_and_expression(mcc_AST_t UNUSED(*tree)) { return NULL; }
+mcc_ASTNode_t *parse_and_expression(mcc_AST_t *tree)
+{
+    mcc_ASTNode_t *node = parse_equality_expression(tree);
+    if (node == NULL)
+    {
+        node = parse_and_expression(tree);
+        if (node != NULL)
+        {
+            if (!mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_BITWISE_AND))
+            {
+                mcc_PrettyErrorToken(tree->currentToken, "Expected '&' but got '%s'\n",
+                                     tree->currentToken ? tree->currentToken->text : "EOF");
+            }
+            mcc_ASTNode_t *and_node = ast_node_create(tree->currentToken);
+            GetNonWhitespaceToken(tree);
+            and_node->left = node;
+            and_node->right = parse_equality_expression(tree);
+            node = and_node;
+        }
+    }
+    return node;
+}
 
 /**
  * <equality-expression> ::= <relational-expression>
@@ -193,16 +256,13 @@ mcc_ASTNode_t *parse_primary_expression(mcc_AST_t UNUSED(*tree)) { return NULL; 
 mcc_ASTNode_t *parse_constant(mcc_AST_t *tree)
 {
     mcc_ASTNode_t *node = parse_integer_constant(tree);
-    if (node != NULL)
-        return node;
+    if (node != NULL) return node;
 
     node = parse_character_constant(tree);
-    if (node != NULL)
-        return node;
+    if (node != NULL) return node;
 
     node = parse_floating_constant(tree);
-    if (node != NULL)
-        return node;
+    if (node != NULL) return node;
 
     node = parse_enumeration_constant(tree);
 
