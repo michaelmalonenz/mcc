@@ -33,3 +33,7 @@ add_custom_target(test_memcheck
         --force-new-ctest-process --test-action memcheck
     COMMAND cat "${CMAKE_BINARY_DIR}/Testing/Temporary/MemoryChecker.*.log"
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+
+add_custom_target(dogfood
+    COMMAND ${CMAKE_BINARY_DIR}/src/mcc -o tokenList.o tokenList.c -I${CMAKE_CURRENT_SOURCE_DIR}/src -I${CMAKE_CURRENT_SOURCE_DIR}/src/eral
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src")
