@@ -179,7 +179,30 @@ mcc_ASTNode_t *parse_and_expression(mcc_AST_t *tree)
  *                         | <equality-expression> == <relational-expression>
  *                         | <equality-expression> != <relational-expression>
  */
-mcc_ASTNode_t *parse_equality_expression(mcc_AST_t UNUSED(*tree)) { return NULL; }
+mcc_ASTNode_t *parse_equality_expression(mcc_AST_t *tree)
+{
+    mcc_ASTNode_t *node = parse_relational_expression(tree);
+    if (node == NULL)
+    {
+        node = parse_equality_expression(tree);
+        if (node != NULL)
+        {
+            if (!mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_COMPARE_TO) &&
+                !mcc_compare_token(tree->currentToken, TOK_OPERATOR, OP_NOT_EQUAL))
+            {
+                mcc_PrettyErrorToken(tree->currentToken,
+                                     "Expected equality expression, but got '%s'\n",
+                                     tree->currentToken ? tree->currentToken->text : "EOF");
+            }
+            mcc_ASTNode_t *op_node = ast_node_create(tree->currentToken);
+            GetNonWhitespaceToken(tree);
+            op_node->left = node;
+            node = op_node;
+            op_node->right = parse_relational_expression(tree);
+        }
+    }
+    return node;
+}
 
 /**
  * <relational-expression> ::= <shift-expression>
